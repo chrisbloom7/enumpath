@@ -14,6 +14,5 @@ RSpec.configure do |config|
 
   config.before(:suite) do
     Enumpath.logger.logger = ::Logger.new('/dev/null')
-    # Enumpath.verbose = true
   end
 end
