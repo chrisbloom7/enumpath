@@ -3,9 +3,9 @@
 RSpec.describe Enumpath::Results do
   let(:result_type) { :value }
   let(:subject) { Enumpath::Results.new(result_type: result_type) }
-  let(:current_path) { %w(story heroes 1) }
+  let(:resolved_path) { %w(story heroes 1) }
   let(:enum) { { name: 'Frodo' } }
-  let(:store) { subject.store(current_path, enum) }
+  let(:store) { subject.store(resolved_path, enum) }
 
   it 'is a subclass of Array' do
     expect(subject).to be_a_kind_of(Array)
@@ -25,7 +25,7 @@ RSpec.describe Enumpath::Results do
     context 'when result_type is :path' do
       let(:result_type) { :path }
 
-      it 'adds a path representation of current_path to the result store' do
+      it 'adds a path representation of resolved_path to the result store' do
         expect { store }.to change { subject }.from([]).to(["$['story']['heroes'][1]"])
       end
 

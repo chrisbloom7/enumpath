@@ -15,7 +15,7 @@ module Enumpath
         @operator = operator
       end
 
-      def apply(remaining_segments, enum, current_path, &block)
+      def apply(remaining_path, enum, resolved_path, &block)
         raise NotImplementedError
       end
 
@@ -25,12 +25,12 @@ module Enumpath
 
       private
 
-      def keys(enum)
+      def keys(object)
         # Arrays
-        return enum.each_with_index.to_h.values if enum.is_a?(Array)
+        return (0...object.length).to_a if object.is_a?(Array)
 
         # Other Enumerables
-        return enum.to_h.keys if enum.respond_to?(:to_h)
+        return object.to_h.keys if object.respond_to?(:to_h)
 
         # Fallback
         []

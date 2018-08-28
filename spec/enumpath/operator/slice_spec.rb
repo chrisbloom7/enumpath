@@ -73,23 +73,23 @@ RSpec.describe Enumpath::Operator::Slice do
   end
 
   describe '#apply' do
-    let(:remaining_segments) { [] }
+    let(:remaining_path) { [] }
     let(:enum) { %w(1 2 3 4 5 6 7 8 9 10) }
-    let(:current_path) { ['numbers'] }
-    let(:subject) { ->(block) { instance.apply(remaining_segments, enum, current_path, &block) } }
+    let(:resolved_path) { ['numbers'] }
+    let(:subject) { ->(block) { instance.apply(remaining_path, enum, resolved_path, &block) } }
 
     context 'when the operator includes a numeric start, length, and step' do
       it 'yields to the given block for each key of the enumerable from start up to length at step increments' do
         expect { |block| subject[block] }.to yield_control.exactly(5).times
       end
 
-      it 'passes remaining_segments with each key prepended, enumerable, and current_path' do
+      it 'passes remaining_path with each key prepended, enumerable, and resolved_path' do
         expect { |block| subject[block] }.to yield_successive_args(
-          [['0'] + remaining_segments, enum, current_path],
-          [['2'] + remaining_segments, enum, current_path],
-          [['4'] + remaining_segments, enum, current_path],
-          [['6'] + remaining_segments, enum, current_path],
-          [['8'] + remaining_segments, enum, current_path]
+          [['0'] + remaining_path, enum, resolved_path],
+          [['2'] + remaining_path, enum, resolved_path],
+          [['4'] + remaining_path, enum, resolved_path],
+          [['6'] + remaining_path, enum, resolved_path],
+          [['8'] + remaining_path, enum, resolved_path]
         )
       end
     end
@@ -100,9 +100,9 @@ RSpec.describe Enumpath::Operator::Slice do
       # Given keys 0..9, starting at index 1 and stopping at (before) index 4 gives us indexes 1,2, and 3
       it 'yields to the given block for each key of the enumerable from start up to length at step increments' do
         expect { |block| subject[block] }.to yield_successive_args(
-          [['1'] + remaining_segments, enum, current_path],
-          [['2'] + remaining_segments, enum, current_path],
-          [['3'] + remaining_segments, enum, current_path]
+          [['1'] + remaining_path, enum, resolved_path],
+          [['2'] + remaining_path, enum, resolved_path],
+          [['3'] + remaining_path, enum, resolved_path]
         )
       end
     end
@@ -114,8 +114,8 @@ RSpec.describe Enumpath::Operator::Slice do
       # gives us indexes 0 and 2
       it 'yields to the given block for each key of the enumerable from start up to length at step increments' do
         expect { |block| subject[block] }.to yield_successive_args(
-          [['0'] + remaining_segments, enum, current_path],
-          [['2'] + remaining_segments, enum, current_path]
+          [['0'] + remaining_path, enum, resolved_path],
+          [['2'] + remaining_path, enum, resolved_path]
         )
       end
     end
@@ -127,11 +127,11 @@ RSpec.describe Enumpath::Operator::Slice do
       # gives us indexes 1, 3, 5, 7, and 9
       it 'yields to the given block for each key of the enumerable from start up to length at step increments' do
         expect { |block| subject[block] }.to yield_successive_args(
-          [['1'] + remaining_segments, enum, current_path],
-          [['3'] + remaining_segments, enum, current_path],
-          [['5'] + remaining_segments, enum, current_path],
-          [['7'] + remaining_segments, enum, current_path],
-          [['9'] + remaining_segments, enum, current_path]
+          [['1'] + remaining_path, enum, resolved_path],
+          [['3'] + remaining_path, enum, resolved_path],
+          [['5'] + remaining_path, enum, resolved_path],
+          [['7'] + remaining_path, enum, resolved_path],
+          [['9'] + remaining_path, enum, resolved_path]
         )
       end
     end
@@ -142,15 +142,15 @@ RSpec.describe Enumpath::Operator::Slice do
       # Given keys 0..9, starting at index 1 and through the end (implicit) gives us indexes 0 - 9
       it 'yields to the given block for each key of the enumerable from start up to length at step increments' do
         expect { |block| subject[block] }.to yield_successive_args(
-          [['1'] + remaining_segments, enum, current_path],
-          [['2'] + remaining_segments, enum, current_path],
-          [['3'] + remaining_segments, enum, current_path],
-          [['4'] + remaining_segments, enum, current_path],
-          [['5'] + remaining_segments, enum, current_path],
-          [['6'] + remaining_segments, enum, current_path],
-          [['7'] + remaining_segments, enum, current_path],
-          [['8'] + remaining_segments, enum, current_path],
-          [['9'] + remaining_segments, enum, current_path]
+          [['1'] + remaining_path, enum, resolved_path],
+          [['2'] + remaining_path, enum, resolved_path],
+          [['3'] + remaining_path, enum, resolved_path],
+          [['4'] + remaining_path, enum, resolved_path],
+          [['5'] + remaining_path, enum, resolved_path],
+          [['6'] + remaining_path, enum, resolved_path],
+          [['7'] + remaining_path, enum, resolved_path],
+          [['8'] + remaining_path, enum, resolved_path],
+          [['9'] + remaining_path, enum, resolved_path]
         )
       end
     end
@@ -161,8 +161,8 @@ RSpec.describe Enumpath::Operator::Slice do
       # Given keys 0..9, starting at index 0 (implicit) and up to length gives us indexes 0 and 1
       it 'yields to the given block for each key of the enumerable from start up to length at step increments' do
         expect { |block| subject[block] }.to yield_successive_args(
-          [['0'] + remaining_segments, enum, current_path],
-          [['1'] + remaining_segments, enum, current_path]
+          [['0'] + remaining_path, enum, resolved_path],
+          [['1'] + remaining_path, enum, resolved_path]
         )
       end
     end
@@ -174,11 +174,11 @@ RSpec.describe Enumpath::Operator::Slice do
       # every 2 items gives us indexes 0, 2, 4, 6, 8
       it 'yields to the given block for each key of the enumerable from start up to length at step increments' do
         expect { |block| subject[block] }.to yield_successive_args(
-          [['0'] + remaining_segments, enum, current_path],
-          [['2'] + remaining_segments, enum, current_path],
-          [['4'] + remaining_segments, enum, current_path],
-          [['6'] + remaining_segments, enum, current_path],
-          [['8'] + remaining_segments, enum, current_path]
+          [['0'] + remaining_path, enum, resolved_path],
+          [['2'] + remaining_path, enum, resolved_path],
+          [['4'] + remaining_path, enum, resolved_path],
+          [['6'] + remaining_path, enum, resolved_path],
+          [['8'] + remaining_path, enum, resolved_path]
         )
       end
     end

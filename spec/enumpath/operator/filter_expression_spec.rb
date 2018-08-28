@@ -24,15 +24,15 @@ RSpec.describe Enumpath::Operator::FilterExpression do
   end
 
   describe '#apply' do
-    let(:remaining_segments) { [] }
+    let(:remaining_path) { [] }
     let(:enum) { books }
     let(:books) { [book1, book2, book3, book4] }
     let(:book1) { { category: 'reference', author: 'Nigel Rees', title: 'Sayings of the Century', price: 8.95 } }
     let(:book2) { { category: 'fiction', author: 'Evelyn Waugh', title: 'Sword of Honour', sku: '6789', price: 12.99 } }
     let(:book3) { { category: 'fiction', author: 'Herman Melville', title: 'Moby Dick', sku: '1234', price: 8.99 } }
     let(:book4) { { category: 'fiction', author: 'J. R. R. Tolkien', title: 'Lord of the Rings', price: 22 } }
-    let(:current_path) { ['store', 'book'] }
-    let(:subject) { ->(block) { instance.apply(remaining_segments, enum, current_path, &block) } }
+    let(:resolved_path) { ['store', 'book'] }
+    let(:subject) { ->(block) { instance.apply(remaining_path, enum, resolved_path, &block) } }
 
     context 'when the expression includes a comparison operator' do
       context 'when members of the enumerator pass the filter' do
@@ -46,17 +46,17 @@ RSpec.describe Enumpath::Operator::FilterExpression do
 
           it 'yields to the given block with the correct arguments' do
             expect { |block| subject[block] }.to yield_with_args(
-              remaining_segments, 'fiction', current_path + ['1']
+              remaining_path, 'fiction', resolved_path + ['1']
             )
           end
         end
 
         context 'when the operator is `==`' do
-          it 'passes remaining_segments with the key prepended, enumerable, and current_path' do
+          it 'passes remaining_path with the key prepended, enumerable, and resolved_path' do
             expect { |block| subject[block] }.to yield_successive_args(
-              [remaining_segments, enum[1], current_path + ['1']],
-              [remaining_segments, enum[2], current_path + ['2']],
-              [remaining_segments, enum[3], current_path + ['3']]
+              [remaining_path, enum[1], resolved_path + ['1']],
+              [remaining_path, enum[2], resolved_path + ['2']],
+              [remaining_path, enum[3], resolved_path + ['3']]
             )
           end
         end
@@ -66,7 +66,7 @@ RSpec.describe Enumpath::Operator::FilterExpression do
 
           it 'yields to the given block with the correct arguments' do
             expect { |block| subject[block] }.to yield_with_args(
-              remaining_segments, enum[0], current_path + ['0']
+              remaining_path, enum[0], resolved_path + ['0']
             )
           end
         end
@@ -76,8 +76,8 @@ RSpec.describe Enumpath::Operator::FilterExpression do
 
           it 'yields to the given block with the correct arguments' do
             expect { |block| subject[block] }.to yield_successive_args(
-              [remaining_segments, enum[1], current_path + ['1']],
-              [remaining_segments, enum[3], current_path + ['3']]
+              [remaining_path, enum[1], resolved_path + ['1']],
+              [remaining_path, enum[3], resolved_path + ['3']]
             )
           end
         end
@@ -87,7 +87,7 @@ RSpec.describe Enumpath::Operator::FilterExpression do
 
           it 'yields to the given block with the correct arguments' do
             expect { |block| subject[block] }.to yield_with_args(
-              remaining_segments, enum[2], current_path + ['2']
+              remaining_path, enum[2], resolved_path + ['2']
             )
           end
         end
@@ -97,8 +97,8 @@ RSpec.describe Enumpath::Operator::FilterExpression do
 
           it 'yields to the given block with the correct arguments' do
             expect { |block| subject[block] }.to yield_successive_args(
-              [remaining_segments, enum[1], current_path + ['1']],
-              [remaining_segments, enum[3], current_path + ['3']]
+              [remaining_path, enum[1], resolved_path + ['1']],
+              [remaining_path, enum[3], resolved_path + ['3']]
             )
           end
         end
@@ -108,8 +108,8 @@ RSpec.describe Enumpath::Operator::FilterExpression do
 
           it 'yields to the given block with the correct arguments' do
             expect { |block| subject[block] }.to yield_successive_args(
-              [remaining_segments, enum[0], current_path + ['0']],
-              [remaining_segments, enum[3], current_path + ['3']]
+              [remaining_path, enum[0], resolved_path + ['0']],
+              [remaining_path, enum[3], resolved_path + ['3']]
             )
           end
 
@@ -127,9 +127,9 @@ RSpec.describe Enumpath::Operator::FilterExpression do
 
           it 'yields to the given block with the correct arguments' do
             expect { |block| subject[block] }.to yield_successive_args(
-              [remaining_segments, enum[0], current_path + ['0']],
-              [remaining_segments, enum[2], current_path + ['2']],
-              [remaining_segments, enum[3], current_path + ['3']]
+              [remaining_path, enum[0], resolved_path + ['0']],
+              [remaining_path, enum[2], resolved_path + ['2']],
+              [remaining_path, enum[3], resolved_path + ['3']]
             )
           end
         end
@@ -164,10 +164,10 @@ RSpec.describe Enumpath::Operator::FilterExpression do
           expect { |block| subject[block] }.to yield_control.twice
         end
 
-        it 'passes remaining_segments with the result prepended, enumerable, and current_path' do
+        it 'passes remaining_path with the result prepended, enumerable, and resolved_path' do
           expect { |block| subject[block] }.to yield_successive_args(
-            [remaining_segments, enum[0], current_path + ['0']],
-            [remaining_segments, enum[3], current_path + ['3']]
+            [remaining_path, enum[0], resolved_path + ['0']],
+            [remaining_path, enum[3], resolved_path + ['3']]
           )
         end
 
@@ -177,8 +177,8 @@ RSpec.describe Enumpath::Operator::FilterExpression do
 
           it 'yields to the given block with the correct arguments' do
             expect { |block| subject[block] }.to yield_successive_args(
-              [remaining_segments, 'reference', current_path + ['0']],
-              [remaining_segments, 'fiction', current_path + ['1']]
+              [remaining_path, 'reference', resolved_path + ['0']],
+              [remaining_path, 'fiction', resolved_path + ['1']]
             )
           end
         end
@@ -208,8 +208,8 @@ RSpec.describe Enumpath::Operator::FilterExpression do
       context 'when both exressions pass' do
         it 'yields to the given block with the correct arguments for any member that passes' do
           expect { |block| subject[block] }.to yield_successive_args(
-            [remaining_segments, enum[1], current_path + ['1']],
-            [remaining_segments, enum[2], current_path + ['2']]
+            [remaining_path, enum[1], resolved_path + ['1']],
+            [remaining_path, enum[2], resolved_path + ['2']]
           )
         end
       end
@@ -236,8 +236,8 @@ RSpec.describe Enumpath::Operator::FilterExpression do
         context 'when both expressions pass' do
           it 'yields to the given block with the correct arguments' do
             expect { |block| subject[block] }.to yield_successive_args(
-              [remaining_segments, enum[0], current_path + ['0']],
-              [remaining_segments, enum[1], current_path + ['1']]
+              [remaining_path, enum[0], resolved_path + ['0']],
+              [remaining_path, enum[1], resolved_path + ['1']]
             )
           end
         end
@@ -255,7 +255,7 @@ RSpec.describe Enumpath::Operator::FilterExpression do
 
           it 'yields to the given block with the correct arguments' do
             expect { |block| subject[block] }.to yield_with_args(
-              remaining_segments, enum[0], current_path + ['0']
+              remaining_path, enum[0], resolved_path + ['0']
             )
           end
         end
@@ -267,7 +267,7 @@ RSpec.describe Enumpath::Operator::FilterExpression do
         context 'when all expressions pass' do
           it 'yields to the given block with the correct arguments' do
             expect { |block| subject[block] }.to yield_with_args(
-              remaining_segments, enum[0], current_path + ['0']
+              remaining_path, enum[0], resolved_path + ['0']
             )
           end
         end
@@ -294,10 +294,10 @@ RSpec.describe Enumpath::Operator::FilterExpression do
           context 'when all expressions pass' do
             it 'yields to the given block with the correct arguments' do
               expect { |block| subject[block] }.to yield_successive_args(
-                [remaining_segments, enum[0], current_path + ['0']],
-                [remaining_segments, enum[1], current_path + ['1']],
-                [remaining_segments, enum[2], current_path + ['2']],
-                [remaining_segments, enum[3], current_path + ['3']]
+                [remaining_path, enum[0], resolved_path + ['0']],
+                [remaining_path, enum[1], resolved_path + ['1']],
+                [remaining_path, enum[2], resolved_path + ['2']],
+                [remaining_path, enum[3], resolved_path + ['3']]
               )
             end
           end
@@ -315,10 +315,10 @@ RSpec.describe Enumpath::Operator::FilterExpression do
 
             it 'yields to the given block with the correct arguments' do
               expect { |block| subject[block] }.to yield_successive_args(
-                [remaining_segments, enum[0], current_path + ['0']],
-                [remaining_segments, enum[1], current_path + ['1']],
-                [remaining_segments, enum[2], current_path + ['2']],
-                [remaining_segments, enum[3], current_path + ['3']]
+                [remaining_path, enum[0], resolved_path + ['0']],
+                [remaining_path, enum[1], resolved_path + ['1']],
+                [remaining_path, enum[2], resolved_path + ['2']],
+                [remaining_path, enum[3], resolved_path + ['3']]
               )
             end
           end

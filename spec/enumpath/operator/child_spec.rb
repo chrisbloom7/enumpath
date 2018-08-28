@@ -24,18 +24,18 @@ RSpec.describe Enumpath::Operator::Child do
   end
 
   describe '#apply' do
-    let(:remaining_segments) { [] }
+    let(:remaining_path) { [] }
     let(:enum) { { name: name } }
     let(:name) { { first: 'Ted', last: 'Barry' } }
-    let(:current_path) { ['runners', 1, 'personal_info'] }
-    let(:subject) { ->(block) { instance.apply(remaining_segments, enum, current_path, &block) } }
+    let(:resolved_path) { ['runners', 1, 'personal_info'] }
+    let(:subject) { ->(block) { instance.apply(remaining_path, enum, resolved_path, &block) } }
 
     it 'yields to the given block' do
       expect { |block| subject[block] }.to yield_control.once
     end
 
-    it 'passes remaining_segments, the value of the enumerable at operator, and current_path plus the operator' do
-      expect { |block| subject[block] }.to yield_with_args(remaining_segments, name, current_path + [operator])
+    it 'passes remaining_path, the value of the enumerable at operator, and resolved_path plus the operator' do
+      expect { |block| subject[block] }.to yield_with_args(remaining_path, name, resolved_path + [operator])
     end
 
     context 'when the operator does not describe a valid path through enum' do

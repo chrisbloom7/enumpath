@@ -15,14 +15,14 @@ module Enumpath
       super()
     end
 
-    def store(current_path, enum)
+    def store(resolved_path, result)
       value = if result_type == RESULT_TYPE_PATH
-                as_path(current_path)
+                as_path(resolved_path)
               else
-                enum
+                result
               end
       Enumpath.log('New Result') { { result: value } }
-      push(result_type == RESULT_TYPE_PATH ? as_path(current_path) : enum)
+      push(result_type == RESULT_TYPE_PATH ? as_path(resolved_path) : result)
       return last
     end
 
@@ -32,9 +32,9 @@ module Enumpath
 
     private
 
-    def as_path(current_path)
+    def as_path(resolved_path)
       path = [Enumpath::Operator::ROOT]
-      current_path.each do |segment|
+      resolved_path.each do |segment|
         path << %([#{segment.to_s =~ /^[0-9*]+$/ ? segment : "'#{segment}'"}])
       end
       path.join('')

@@ -22,19 +22,19 @@ module Enumpath
 
     private
 
-    def trace(path_segments, enum, current_path = [], nesting_level = 0)
+    def trace(path_segments, enum, resolved_path = [], nesting_level = 0)
       Enumpath.logger.level = nesting_level
       if path_segments.any?
         Enumpath.log("Applying") { { operator: path_segments, to: enum } }
         segment = path_segments.first
-        remaining_segments = path_segments[1..-1]
+        remaining_path = path_segments[1..-1]
         operator = Enumpath::Operator.detect(segment, enum)
-        operator&.apply(remaining_segments, enum, current_path) do |s, e, c|
+        operator&.apply(remaining_path, enum, resolved_path) do |s, e, c|
           trace(s, e, c, nesting_level + 1)
         end
       else
-        Enumpath.log('Storing') { { current_path: current_path, enum: enum } }
-        results.store(current_path, enum)
+        Enumpath.log('Storing') { { resolved_path: resolved_path, enum: enum } }
+        results.store(resolved_path, enum)
       end
       Enumpath.logger.level = nesting_level
     end

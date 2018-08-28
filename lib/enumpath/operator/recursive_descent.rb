@@ -13,16 +13,16 @@ module Enumpath
         end
       end
 
-      def apply(remaining_segments, enum, current_path, &block)
-        Enumpath.log('Applying remaining path recursively to enum') { { 'remaining path': remaining_segments } }
-        yield(remaining_segments, enum, current_path)
+      def apply(remaining_path, enum, resolved_path, &block)
+        Enumpath.log('Applying remaining path recursively to enum') { { 'remaining path': remaining_path } }
+        yield(remaining_path, enum, resolved_path)
         keys(enum).each do |key|
           value = Enumpath::Resolver::Simple.resolve(key, enum)
           if recursable?(value)
             Enumpath.log('Applying remaining path recursively to key') do
-              { key: key, 'remaining path': ['..'] + remaining_segments }
+              { key: key, 'remaining path': ['..'] + remaining_path }
             end
-            yield(['..'] + remaining_segments, value, current_path + [key])
+            yield(['..'] + remaining_path, value, resolved_path + [key])
           end
         end
       end

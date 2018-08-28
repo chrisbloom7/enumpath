@@ -16,12 +16,12 @@ module Enumpath
         end
       end
 
-      def apply(remaining_segments, enum, current_path, &block)
+      def apply(remaining_path, enum, resolved_path, &block)
         _match, start, length, step = OPERATOR_REGEX.match(operator).to_a
         max_length = enum.size
         slices(start, length, step, max_length).each do |index|
           Enumpath.log('Applying slice') { { slice: index } }
-          yield([index.to_s] + remaining_segments, enum, current_path)
+          yield([index.to_s] + remaining_path, enum, resolved_path)
         end
       end
 

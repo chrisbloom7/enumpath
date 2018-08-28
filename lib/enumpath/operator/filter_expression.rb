@@ -24,7 +24,7 @@ module Enumpath
         end
       end
 
-      def apply(remaining_segments, enum, current_path, &block)
+      def apply(remaining_path, enum, resolved_path, &block)
         Enumpath.log('Evaluating filter expression') { { expression: operator, to: enum } }
 
         _match, unpacked_operator = OPERATOR_REGEX.match(operator).to_a
@@ -35,7 +35,7 @@ module Enumpath
           Enumpath.log('Applying filter to key') { { key: key, enum: value } }
           if pass?(expressions.dup, value)
             Enumpath.log('Applying filtered key') { { 'filtered key': key, 'filtered enum': value } }
-            yield(remaining_segments, value, current_path + [key.to_s])
+            yield(remaining_path, value, resolved_path + [key.to_s])
           end
         end
       end

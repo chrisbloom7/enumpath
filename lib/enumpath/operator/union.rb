@@ -19,10 +19,10 @@ module Enumpath
         end
       end
 
-      def apply(remaining_segments, enum, current_path, &block)
+      def apply(remaining_path, enum, resolved_path, &block)
         parts = operator.split(SPLIT_REGEX).map { |part| part.strip.gsub(/^['"]|['"]$/, '') }
         Enumpath.log('Applying union parts') { { parts: parts } }
-        parts.each { |part| yield([part] + remaining_segments, enum, current_path) }
+        parts.each { |part| yield([part] + remaining_path, enum, resolved_path) }
       end
     end
   end

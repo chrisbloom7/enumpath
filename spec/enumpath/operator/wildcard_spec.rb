@@ -21,18 +21,18 @@ RSpec.describe Enumpath::Operator::Wildcard do
   end
 
   describe '#apply' do
-    let(:remaining_segments) { [] }
+    let(:remaining_path) { [] }
     let(:enum) { [{ first: 'Ted', last: 'Barry' }, { first: 'Kim', last: 'Larry' }] }
-    let(:current_path) { ['employees'] }
-    let(:subject) { ->(block) { instance.apply(remaining_segments, enum, current_path, &block) } }
+    let(:resolved_path) { ['employees'] }
+    let(:subject) { ->(block) { instance.apply(remaining_path, enum, resolved_path, &block) } }
 
     it 'yields to the given block for each element in enum' do
       expect { |block| subject[block] }.to yield_control.twice
     end
 
-    it 'passes remaining_segments with each key prepended, enumerable, and current_path' do
+    it 'passes remaining_path with each key prepended, enumerable, and resolved_path' do
       expect { |block| subject[block] }.to yield_successive_args(
-        [['0'] + remaining_segments, enum, current_path], [['1'] + remaining_segments, enum, current_path]
+        [['0'] + remaining_path, enum, resolved_path], [['1'] + remaining_path, enum, resolved_path]
       )
     end
   end

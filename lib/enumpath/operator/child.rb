@@ -16,10 +16,10 @@ module Enumpath
         end
       end
 
-      def apply(remaining_segments, enum, current_path, &block)
+      def apply(remaining_path, enum, resolved_path, &block)
         value = Enumpath::Resolver::Simple.resolve(operator, enum)
         value = Enumpath::Resolver::Property.resolve(operator, enum) if value.nil?
-        yield(remaining_segments, value, current_path + [operator]) if !value.nil?
+        yield(remaining_path, value, resolved_path + [operator]) if !value.nil?
       end
     end
   end

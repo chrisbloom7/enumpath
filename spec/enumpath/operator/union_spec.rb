@@ -25,21 +25,21 @@ RSpec.describe Enumpath::Operator::Union do
   end
 
   describe '#apply' do
-    let(:remaining_segments) { [] }
+    let(:remaining_path) { [] }
     let(:enum) { { first_name: first_name, last_name: last_name } }
     let(:first_name) { 'Ted' }
     let(:last_name) { 'Barry' }
-    let(:current_path) { ['employees', 1, 'personal_info'] }
-    let(:subject) { ->(block) { instance.apply(remaining_segments, enum, current_path, &block) } }
+    let(:resolved_path) { ['employees', 1, 'personal_info'] }
+    let(:subject) { ->(block) { instance.apply(remaining_path, enum, resolved_path, &block) } }
 
     it 'yields to the given block for each segment of the operator' do
       expect { |block| subject[block] }.to yield_control.twice
     end
 
-    it 'passes remaining_segments with each segment prepended, enumerable, and current_path' do
+    it 'passes remaining_path with each segment prepended, enumerable, and resolved_path' do
       expect { |block| subject[block] }.to yield_successive_args(
-        [['first_name'] + remaining_segments, enum, current_path],
-        [['last_name'] + remaining_segments, enum, current_path]
+        [['first_name'] + remaining_path, enum, resolved_path],
+        [['last_name'] + remaining_path, enum, resolved_path]
       )
     end
 
@@ -48,7 +48,7 @@ RSpec.describe Enumpath::Operator::Union do
 
       it 'removes the quotes from around the segment before yielding' do
         expect { |block| subject[block] }.to yield_successive_args(
-          [['first_name'] + remaining_segments, enum, current_path]
+          [['first_name'] + remaining_path, enum, resolved_path]
         )
       end
     end
@@ -58,7 +58,7 @@ RSpec.describe Enumpath::Operator::Union do
 
       it 'removes the quotes from around the segment before yielding' do
         expect { |block| subject[block] }.to yield_successive_args(
-          [['first_name'] + remaining_segments, enum, current_path]
+          [['first_name'] + remaining_path, enum, resolved_path]
         )
       end
     end
@@ -68,8 +68,8 @@ RSpec.describe Enumpath::Operator::Union do
 
       it 'removes the quotes from around the segment before yielding' do
         expect { |block| subject[block] }.to yield_successive_args(
-          [['first_name'] + remaining_segments, enum, current_path],
-          [['last_name'] + remaining_segments, enum, current_path]
+          [['first_name'] + remaining_path, enum, resolved_path],
+          [['last_name'] + remaining_path, enum, resolved_path]
         )
       end
     end

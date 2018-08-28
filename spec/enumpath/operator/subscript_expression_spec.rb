@@ -22,10 +22,10 @@ RSpec.describe Enumpath::Operator::SubscriptExpression do
   end
 
   describe '#apply' do
-    let(:remaining_segments) { [] }
+    let(:remaining_path) { [] }
     let(:enum) { (2..10).to_a }
-    let(:current_path) { ['numbers'] }
-    let(:subject) { ->(block) { instance.apply(remaining_segments, enum, current_path, &block) } }
+    let(:resolved_path) { ['numbers'] }
+    let(:subject) { ->(block) { instance.apply(remaining_path, enum, resolved_path, &block) } }
 
     context 'when the operator includes an arithmetic operator' do
       context 'when the result describes a valid path through enum' do
@@ -35,9 +35,9 @@ RSpec.describe Enumpath::Operator::SubscriptExpression do
 
         context 'when the operator is `-`' do
           # length of enumerable is 9. 9-1 = 8
-          it 'passes remaining_segments with the result prepended, enumerable, and current_path' do
+          it 'passes remaining_path with the result prepended, enumerable, and resolved_path' do
             expect { |block| subject[block] }.to yield_with_args(
-              remaining_segments, enum[8], current_path + ['8']
+              remaining_path, enum[8], resolved_path + ['8']
             )
           end
         end
@@ -48,7 +48,7 @@ RSpec.describe Enumpath::Operator::SubscriptExpression do
           # enum.first is 2. 2+1 = 3
           it 'yields to the given block with the correct arguments' do
             expect { |block| subject[block] }.to yield_with_args(
-              remaining_segments, enum[3], current_path + ['3']
+              remaining_path, enum[3], resolved_path + ['3']
             )
           end
         end
@@ -59,7 +59,7 @@ RSpec.describe Enumpath::Operator::SubscriptExpression do
           # enum.first is 2. 2*3 = 6
           it 'yields to the given block with the correct arguments' do
             expect { |block| subject[block] }.to yield_with_args(
-              remaining_segments, enum[6], current_path + ['6']
+              remaining_path, enum[6], resolved_path + ['6']
             )
           end
         end
@@ -70,7 +70,7 @@ RSpec.describe Enumpath::Operator::SubscriptExpression do
           # enum.last is 10. 10/2 = 5
           it 'yields to the given block with the correct arguments' do
             expect { |block| subject[block] }.to yield_with_args(
-              remaining_segments, enum[5], current_path + ['5']
+              remaining_path, enum[5], resolved_path + ['5']
             )
           end
         end
@@ -81,7 +81,7 @@ RSpec.describe Enumpath::Operator::SubscriptExpression do
           # enum.size is 9. 9%6 = 3
           it 'yields to the given block with the correct arguments' do
             expect { |block| subject[block] }.to yield_with_args(
-              remaining_segments, enum[3], current_path + ['3']
+              remaining_path, enum[3], resolved_path + ['3']
             )
           end
         end
@@ -92,7 +92,7 @@ RSpec.describe Enumpath::Operator::SubscriptExpression do
           # enum.first is 2. 2**3 = 8
           it 'yields to the given block with the correct arguments' do
             expect { |block| subject[block] }.to yield_with_args(
-              remaining_segments, enum[8], current_path + ['8']
+              remaining_path, enum[8], resolved_path + ['8']
             )
           end
         end
@@ -117,9 +117,9 @@ RSpec.describe Enumpath::Operator::SubscriptExpression do
         end
 
         # enum.first is 2
-        it 'passes remaining_segments with the result prepended, enumerable, and current_path' do
+        it 'passes remaining_path with the result prepended, enumerable, and resolved_path' do
           expect { |block| subject[block] }.to yield_with_args(
-            remaining_segments, enum[2], current_path + ['2']
+            remaining_path, enum[2], resolved_path + ['2']
           )
         end
       end

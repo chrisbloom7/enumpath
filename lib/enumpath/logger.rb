@@ -9,8 +9,8 @@ module Enumpath
 
     attr_accessor :logger, :level
 
-    def initialize(stream = STDOUT)
-      @logger = ::Logger.new(stream)
+    def initialize(logdev = STDOUT)
+      @logger = ::Logger.new(logdev)
       @level = 0
       @padding = {}
     end

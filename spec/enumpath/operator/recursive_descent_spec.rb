@@ -21,9 +21,9 @@ RSpec.describe Enumpath::Operator::RecursiveDescent do
   end
 
   describe '#apply' do
-    let(:remaining_segments) { [] }
-    let(:current_path) { ['employees'] }
-    let(:subject) { ->(block) { instance.apply(remaining_segments, enum, current_path, &block) } }
+    let(:remaining_path) { [] }
+    let(:resolved_path) { ['employees'] }
+    let(:subject) { ->(block) { instance.apply(remaining_path, enum, resolved_path, &block) } }
 
     context 'when the enumerable contains no other enumerables' do
       let(:enum) { [] }
@@ -33,7 +33,7 @@ RSpec.describe Enumpath::Operator::RecursiveDescent do
       end
 
       it 'passes all arguments to the block as-is' do
-        expect { |block| subject[block] }.to yield_with_args(remaining_segments, enum, current_path)
+        expect { |block| subject[block] }.to yield_with_args(remaining_path, enum, resolved_path)
       end
     end
 
@@ -48,11 +48,11 @@ RSpec.describe Enumpath::Operator::RecursiveDescent do
         end
 
         describe 'for each element in enum it sends' do
-          it 'operator prepended to remaining_segments, the element of enumerable matching key, and key appended to current_path' do
+          it 'operator prepended to remaining_path, the element of enumerable matching key, and key appended to resolved_path' do
             expect { |block| subject[block] }.to yield_successive_args(
-              [remaining_segments, enum, current_path],
-              [['..'] + remaining_segments, enum1, current_path + [0]],
-              [['..'] + remaining_segments, enum2, current_path + [1]]
+              [remaining_path, enum, resolved_path],
+              [['..'] + remaining_path, enum1, resolved_path + [0]],
+              [['..'] + remaining_path, enum2, resolved_path + [1]]
             )
           end
         end
@@ -63,8 +63,8 @@ RSpec.describe Enumpath::Operator::RecursiveDescent do
 
         it 'does not yield the given block for that key' do
           expect { |block| subject[block] }.to yield_successive_args(
-            [remaining_segments, enum, current_path],
-            [['..'] + remaining_segments, enum1, current_path + [0]]
+            [remaining_path, enum, resolved_path],
+            [['..'] + remaining_path, enum1, resolved_path + [0]]
           )
         end
       end

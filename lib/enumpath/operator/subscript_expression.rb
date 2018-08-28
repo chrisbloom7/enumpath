@@ -18,7 +18,7 @@ module Enumpath
         end
       end
 
-      def apply(remaining_segments, enum, current_path, &block)
+      def apply(remaining_path, enum, resolved_path, &block)
         Enumpath.log('Applying subscript expression') { { expression: operator, to: enum } }
 
         _match, unpacked_operator = OPERATOR_REGEX.match(operator).to_a
@@ -26,9 +26,9 @@ module Enumpath
 
         value = Enumpath::Resolver::Simple.resolve(result, enum)
         if !value.nil?
-          # yield([result.to_s] + remaining_segments, enum, current_path)
+          # yield([result.to_s] + remaining_path, enum, resolved_path)
           Enumpath.log('Applying subscript') { { 'enum at subscript': value } }
-          yield(remaining_segments, value, current_path + [result.to_s])
+          yield(remaining_path, value, resolved_path + [result.to_s])
         end
       end
 
