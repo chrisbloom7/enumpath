@@ -28,10 +28,10 @@ module Enumpath
       # Yields to the block once for every union member
       #
       # @param (see Enumpath::Operator::Base#apply)
-      #
-      # @yieldparam remaining_path [Array] the union member plus {remaining_path}
-      # @yieldparam enum [Enumerable] {enum} as-is
-      # @yieldparam resolved_path [Array] {resolved_path} as-is
+      # @yield (see Enumpath::Operator::Base#apply)
+      # @yieldparam remaining_path [Array] the union member plus remaining_path
+      # @yieldparam enum [Enumerable] enum
+      # @yieldparam resolved_path [Array] resolved_path
       def apply(remaining_path, enum, resolved_path, &block)
         parts = operator.split(SPLIT_REGEX).map { |part| part.strip.gsub(/^['"]|['"]$/, '') }
         Enumpath.log('Applying union parts') { { parts: parts } }

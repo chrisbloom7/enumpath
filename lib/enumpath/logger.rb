@@ -23,9 +23,9 @@ module Enumpath
       @padding = {}
     end
 
-    # Generates a log message for debugging. Returns fast if {Enumpath.verbose} is {false}. Accepts an optional block
+    # Generates a log message for debugging. Returns fast if {Enumpath.verbose} is false. Accepts an optional block
     # which must contain a single hash, the contents of which will be added to the log message, and which are lazily
-    # evaluated only if {Enumpath.verbose} is {true}.
+    # evaluated only if {Enumpath.verbose} is true.
     #
     # @param title [String] the title of this log message
     # @yield A lazily evaluated hash of key/value pairs to include in the log message

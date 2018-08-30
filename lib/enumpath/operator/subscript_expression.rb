@@ -21,10 +21,10 @@ module Enumpath
       # Yields to the block once if the subscript expression evaluates to a member of the enumerable
       #
       # @param (see Enumpath::Operator::Base#apply)
-      #
-      # @yieldparam remaining_path [Array] {remaining_path} as-is
+      # @yield (see Enumpath::Operator::Base#apply)
+      # @yieldparam remaining_path [Array] remaining_path
       # @yieldparam enum [Enumerable] the member of the enumerable at the value of the subscript expression
-      # @yieldparam resolved_path [Array] {resolved_path} plus the value of the subscript expression
+      # @yieldparam resolved_path [Array] resolved_path plus the value of the subscript expression
       def apply(remaining_path, enum, resolved_path, &block)
         Enumpath.log('Applying subscript expression') { { expression: operator, to: enum } }
 

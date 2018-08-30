@@ -21,10 +21,10 @@ module Enumpath
       # starting with the first.
       #
       # @param (see Enumpath::Operator::Base#apply)
-      #
-      # @yieldparam remaining_path [Array] the included index plus {remaining_path}
-      # @yieldparam enum [Enumerable] {enum} as-is
-      # @yieldparam resolved_path [Array] {resolved_path} as-is
+      # @yield (see Enumpath::Operator::Base#apply)
+      # @yieldparam remaining_path [Array] the included index plus remaining_path
+      # @yieldparam enum [Enumerable] enum
+      # @yieldparam resolved_path [Array] resolved_path
       def apply(remaining_path, enum, resolved_path, &block)
         _match, start, length, step = OPERATOR_REGEX.match(operator).to_a
         max_length = enum.size

@@ -24,10 +24,10 @@ module Enumpath
       # Yields to the block once for each member of the enumerable that passes the filter expression
       #
       # @param (see Enumpath::Operator::Base#apply)
-      #
-      # @yieldparam remaining_path [Array] {remaining_path} as-is
+      # @yield (see Enumpath::Operator::Base#apply)
+      # @yieldparam remaining_path [Array] remaining_path
       # @yieldparam enum [Enumerable] the member of the enumerable that passed the filter
-      # @yieldparam resolved_path [Array] {resolved_path} plus the key for each member of the enumerable that passed
+      # @yieldparam resolved_path [Array] resolved_path plus the key for each member of the enumerable that passed
       #   the filter
       def apply(remaining_path, enum, resolved_path, &block)
         Enumpath.log('Evaluating filter expression') { { expression: operator, to: enum } }

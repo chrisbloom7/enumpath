@@ -19,10 +19,10 @@ module Enumpath
       # Yields to the block once for every direct member of the enumerable
       #
       # @param (see Enumpath::Operator::Base#apply)
-      #
-      # @yieldparam remaining_path [Array] the key of the given member plus {remaining_path}
-      # @yieldparam enum [Enumerable] {enum} as-is
-      # @yieldparam resolved_path [Array] {resolved_path} as-is
+      # @yield (see Enumpath::Operator::Base#apply)
+      # @yieldparam remaining_path [Array] the key of the given member plus remaining_path
+      # @yieldparam enum [Enumerable] enum
+      # @yieldparam resolved_path [Array] resolved_path
       def apply(remaining_path, enum, resolved_path, &block)
         keys = keys(enum)
         Enumpath.log('Applying wildcard to keys') { { keys: keys } }

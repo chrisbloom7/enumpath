@@ -20,10 +20,10 @@ module Enumpath
       # property of the enumerable it is yielded to the block.
       #
       # @param (see Enumpath::Operator::Base#apply)
-      #
-      # @yieldparam remaining_path [Array] the remaining_path
+      # @yield (see Enumpath::Operator::Base#apply)
+      # @yieldparam remaining_path [Array] remaining_path
       # @yieldparam enum [Enumerable] the resolved value of the enumerable
-      # @yieldparam resolved_path [Array] the resolved_path plus the child operator
+      # @yieldparam resolved_path [Array] resolved_path plus the child operator
       def apply(remaining_path, enum, resolved_path, &block)
         value = Enumpath::Resolver::Simple.resolve(operator, enum)
         value = Enumpath::Resolver::Property.resolve(operator, enum) if value.nil?

@@ -14,7 +14,7 @@ module Enumpath
     # @return [Symbol] the current result type
     attr_reader :result_type
 
-    # @param result_type [Symbol] the type of result to store, {:value} (default) or {:path}
+    # @param result_type [Symbol] the type of result to store, :value (default) or :path
     def initialize(result_type: RESULT_TYPE_VALUE)
       @result_type = result_type
       super()
