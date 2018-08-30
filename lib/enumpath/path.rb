@@ -3,17 +3,28 @@
 require 'enumpath/path/normalized_path'
 
 module Enumpath
+  # A mechanism for applying path expressions to enumerables and tracking results
   class Path
-    attr_reader :path, :results
+    # @return [Enumpath::Path::NormalizedPath] the normalized path
+    attr_reader :path
 
+    # @return [Enumpath::Results] the current results array
+    attr_reader :results
+
+    # @param path [String, Array<String>] the path expression to apply to the enumerable
+    # @param result_type (see Enumpath::Results#initialize)
     def initialize(path, result_type: nil)
       @path = path
       normalize!
       @results = Enumpath::Results.new(result_type: result_type)
     end
 
-    # This deviates from the original JSONPath spec in that we don't return false if there are no results.
-    # Instead we return the empty result set. This is a thoughtful divergence based on the Robustness Principle.
+    # Apply the path expression against an enumerable
+    #
+    # @note Calling this method resets the previous results array
+    #
+    # @param enum [Enumerable] the enumerable to apply the path to
+    # @return [Enumpath::Results] an array of resolved values or paths
     def apply(enum)
       results.clear
       trace(@path.dup, enum)
@@ -22,6 +33,16 @@ module Enumpath
 
     private
 
+    # Applies the next normalized path segment to enumerable and keeps track of resolved path segments. This method
+    # recursively yields to itself via each Operator subclass's {#apply} method. If there are no remaining path
+    # segments then it stores a new result in the results array effectively ending processing on that branch of the
+    # original enumerator.
+    #
+    # @param path_segments [Array] an array containing the normalized path segments to be resolved
+    # @param enum [Enumerable] the object to apply the next normalized path segment to
+    # @param resolved_path [Array] an array containing the static path segments that have been resolved so far
+    # @param nesting_level [Integer] used to set the indentation level for {Enumpath::Logger}
+    # @return [void]
     def trace(path_segments, enum, resolved_path = [], nesting_level = 0)
       Enumpath.logger.level = nesting_level
       if path_segments.any?

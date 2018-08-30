@@ -2,14 +2,16 @@
 
 module Enumpath
   module Resolver
+    # A utility for resolving a string as an index, key, or member of an enumerable
     class Simple
       NUMERIC_INDEX_TEST = /\A\-?(?:0|[1-9][0-9]*)\z/
 
       class << self
-        # Precedence:
-        # 1. Resolve to numeric index or key
-        # 2. Resolve to string key
-        # 3. Resolve to symbol key
+        # Attempts to resolve a string as an index, key, or member of an enumerable
+        #
+        # @param variable [String] the value to attempt to resolve
+        # @param enum [Enumerable] the enumerable to resolve the value against
+        # @return the resolved value, or nil if it could not be resolved
         def resolve(variable, enum)
           variable = variable.to_s
           value = rescued_dig(enum, variable.to_i) if variable =~ NUMERIC_INDEX_TEST

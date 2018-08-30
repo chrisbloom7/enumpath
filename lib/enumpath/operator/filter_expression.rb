@@ -1,29 +1,34 @@
 # frozen_string_literal: true
 
-# Implements JSONPath filter expressions operator syntax `?(<boolean expr>)`
-# The expression is evaluated as a property on each member of the local enumerable.
-# If a comparison operator and an operand are included in the expression then the
-# value of the property is compared against the operand, otherwise it is evaluated
-# for thruthiness. If the result is true, then the member is yielded to the block,
-# otherwise it is skipped. Expressions can be chained together with logical `&&`
-# or `||` operators, in which case the results will be compared to each other in
-# definition order.
-
 require 'to_regexp'
 
 module Enumpath
   module Operator
+    # Implements JSONPath filter expression operator syntax. See {file:README.md#label-Filter+expression+operator} for
+    # syntax and examples
     class FilterExpression < Base
       COMPARISON_OPERATOR_REGEX = /(==|!=|>=|<=|<=>|>|<|=~|!~)/
       LOGICAL_OPERATORS_REGEX = /(&&)|(\|\|)/
       OPERATOR_REGEX = /^\?\((.*)\)$/
 
       class << self
+        # Whether the operator matches {Enumpath::Operator::FilterExpression::OPERATOR_REGEX}
+        #
+        # @param operator (see Enumpath::Operator::Base.detect?)
+        # @return (see Enumpath::Operator::Base.detect?)
         def detect?(operator)
           !!(operator =~ OPERATOR_REGEX)
         end
       end
 
+      # Yields to the block once for each member of the enumerable that passes the filter expression
+      #
+      # @param (see Enumpath::Operator::Base#apply)
+      #
+      # @yieldparam remaining_path [Array] {remaining_path} as-is
+      # @yieldparam enum [Enumerable] the member of the enumerable that passed the filter
+      # @yieldparam resolved_path [Array] {resolved_path} plus the key for each member of the enumerable that passed
+      #   the filter
       def apply(remaining_path, enum, resolved_path, &block)
         Enumpath.log('Evaluating filter expression') { { expression: operator, to: enum } }
 

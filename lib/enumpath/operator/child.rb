@@ -1,21 +1,29 @@
 # frozen_string_literal: true
 
-# Implements JSONPath child operator syntax. In a non-normalized path a child operator
-# is preceded by `.` or wrapped in '[]'. In a normalized path the child operator is the
-# segment that followed the `.` or that was contained within the '[]'. In bracket notation
-# the child may optionally be wrapped in single quotes. If the child operator matches a
-# index, key, member, or property of the enumerable, it is yielded to the block.
-
 module Enumpath
   module Operator
+    # Implements JSONPath child operator syntax. See {file:README.md#label-Child+operator} for syntax and examples.
     class Child < Base
       class << self
+        # Checks to see if an operator is valid as a child operator. It is considered valid if the enumerable contains
+        # an index, key, member, or property that responds to child.
+        #
+        # @param operator (see Enumpath::Operator::Base.detect?)
+        # @return (see Enumpath::Operator::Base.detect?)
         def detect?(operator, enum)
           !Enumpath::Resolver::Simple.resolve(operator, enum).nil? ||
             !Enumpath::Resolver::Property.resolve(operator, enum).nil?
         end
       end
 
+      # Resolves a child operator against an enumerable. If the child operator matches a index, key, member, or
+      # property of the enumerable it is yielded to the block.
+      #
+      # @param (see Enumpath::Operator::Base#apply)
+      #
+      # @yieldparam remaining_path [Array] the remaining_path
+      # @yieldparam enum [Enumerable] the resolved value of the enumerable
+      # @yieldparam resolved_path [Array] the resolved_path plus the child operator
       def apply(remaining_path, enum, resolved_path, &block)
         value = Enumpath::Resolver::Simple.resolve(operator, enum)
         value = Enumpath::Resolver::Property.resolve(operator, enum) if value.nil?

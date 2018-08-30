@@ -1,23 +1,30 @@
 # frozen_string_literal: true
 
-# Implements JSONPath subscript expressions operator syntax `(<expr>)`
-# The expression is evaluated as a property on the local enumerable. If an arithmetic
-# operator and operand are included in the expression then the value of the property
-# is operated on with the operand and that is used as the new value. If the value
-# maps to a member of the local enumerable then the member is yielded to the block.
-
 module Enumpath
   module Operator
+    # Implements JSONPath subscript expressions operator syntax. See
+    # {file:README.md#label-Subscript+expressions+operator} for syntax and examples
     class SubscriptExpression < Base
       ARITHMETIC_OPERATOR_REGEX = /(\+|-|\*\*|\*|\/|%)/
       OPERATOR_REGEX = /^\((.*)\)$/
 
       class << self
+        # Whether the operator matches {Enumpath::Operator::SubscriptExpression::OPERATOR_REGEX}
+        #
+        # @param operator (see Enumpath::Operator::Base.detect?)
+        # @return (see Enumpath::Operator::Base.detect?)
         def detect?(operator)
           !!(operator =~ OPERATOR_REGEX)
         end
       end
 
+      # Yields to the block once if the subscript expression evaluates to a member of the enumerable
+      #
+      # @param (see Enumpath::Operator::Base#apply)
+      #
+      # @yieldparam remaining_path [Array] {remaining_path} as-is
+      # @yieldparam enum [Enumerable] the member of the enumerable at the value of the subscript expression
+      # @yieldparam resolved_path [Array] {resolved_path} plus the value of the subscript expression
       def apply(remaining_path, enum, resolved_path, &block)
         Enumpath.log('Applying subscript expression') { { expression: operator, to: enum } }
 
@@ -26,7 +33,6 @@ module Enumpath
 
         value = Enumpath::Resolver::Simple.resolve(result, enum)
         if !value.nil?
-          # yield([result.to_s] + remaining_path, enum, resolved_path)
           Enumpath.log('Applying subscript') { { 'enum at subscript': value } }
           yield(remaining_path, value, resolved_path + [result.to_s])
         end

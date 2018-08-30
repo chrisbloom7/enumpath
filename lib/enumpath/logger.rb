@@ -3,18 +3,32 @@
 require 'logger'
 
 module Enumpath
+  # A logger for providing debugging information while evaluating path expressions
+  # @private
   class Logger
     PAD = "  "
+
     SEPARATOR = '--------------------------------------'
 
-    attr_accessor :logger, :level
+    # @return [Integer] the indentation level to apply to log messages
+    attr_accessor :level
 
+    # @return [::Logger, #<<] a {::Logger}-compatible logger instance
+    attr_accessor :logger
+
+    # @param logdev [String, IO] The log device. See Ruby's {::Logger.new} documentation.
     def initialize(logdev = STDOUT)
       @logger = ::Logger.new(logdev)
       @level = 0
       @padding = {}
     end
 
+    # Generates a log message for debugging. Returns fast if {Enumpath.verbose} is {false}. Accepts an optional block
+    # which must contain a single hash, the contents of which will be added to the log message, and which are lazily
+    # evaluated only if {Enumpath.verbose} is {true}.
+    #
+    # @param title [String] the title of this log message
+    # @yield A lazily evaluated hash of key/value pairs to include in the log message
     def log(title)
       return unless Enumpath.verbose
       append_log "#{padding}#{SEPARATOR}\n"

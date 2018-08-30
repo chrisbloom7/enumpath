@@ -10,10 +10,17 @@ require 'enumpath/operator/union'
 require 'enumpath/operator/wildcard'
 
 module Enumpath
+  # Namespace for classes that represent path expression operators
   module Operator
     ROOT = '$'
 
     class << self
+      # Infer the type of operator and return an instance of its Enumpath::Operator subclass
+      #
+      # @param operator [String] the operator to infer type on
+      # @param enum [Enumerable] the enumerable to assist in detecting child operators
+      # @return an instance of a subclass of Enumpath::Operator based on what was detected, or nil if nothing was
+      #   detected
       def detect(operator, enum)
         if Enumpath::Operator::Child.detect?(operator, enum)
           Enumpath.log('Child operator detected')

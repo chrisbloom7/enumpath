@@ -2,10 +2,12 @@
 
 module Enumpath
   class Path
+    # A utility for automatically normalizing string path expressions
     class NormalizedPath < Array
       FILTER_EXPRESSION_REGEX = /[\['](\??\(.*?\))[\]']/
       INDEX_NOTATION_REGEX = /#([0-9]+)/
 
+      # @param path (see Enumpath::Path#initialize)
       def initialize(path)
         super(normalize(path))
       end

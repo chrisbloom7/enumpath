@@ -2,19 +2,18 @@
 
 module Enumpath
   module Resolver
+    # A utility for resolving a string as a property of an object
     class Property
-      NUMERIC_INDEX_TEST = /\A\-?(?:0|[1-9][0-9]*)\z/
-
       class << self
-        def resolve(variable, enum)
-          variable = variable.to_s
-          rescued_public_send(enum, variable.to_sym)
-        end
-
-        private
-
-        def rescued_public_send(enum, method_symbol)
-          enum.public_send(method_symbol)
+        # Attempts to resolve a string as a property of an object. In this context a property is a public method that
+        # expects no arguments.
+        #
+        # @param property [String] the name of the property to attempt to resolve
+        # @param object [Object] the object to resolve the property against
+        # @return the resolved property value, or nil if it could not be resolved
+        def resolve(property, object)
+          # TODO: return if Enumpath.disable_property_resolver
+          object.public_send(property.to_s.to_sym)
         rescue ArgumentError, NoMethodError
           nil
         end

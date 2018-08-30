@@ -1,21 +1,30 @@
 # frozen_string_literal: true
 
-# Implements JSONPath array slice operator syntax. Each member of the local enumerable
-# whose index, key, or member is included by position between the _start index and up
-# to (but not including) the _length_ is yielded to the block. If _step_ is included
-# then only every _step_ member is included, starting with the first.
-
 module Enumpath
   module Operator
+    # Implements JSONPath array slice operator syntax. See {file:README.md#label-Slice+operator} for syntax and examples
     class Slice < Base
       OPERATOR_REGEX = /^(-?[0-9]*):(-?[0-9]*):?(-?[0-9]*)$/
 
       class << self
+        # Whether the operator matches {Enumpath::Operator::Slice::OPERATOR_REGEX}
+        #
+        # @param operator (see Enumpath::Operator::Base.detect?)
+        # @return (see Enumpath::Operator::Base.detect?)
         def detect?(operator)
           !!(operator =~ OPERATOR_REGEX)
         end
       end
 
+      # Yields to the block once for each member of the local enumerable whose index is included by position between
+      # _start_ and up to (but not including) _end_. If _step_ is included then only every _step_ member is included,
+      # starting with the first.
+      #
+      # @param (see Enumpath::Operator::Base#apply)
+      #
+      # @yieldparam remaining_path [Array] the included index plus {remaining_path}
+      # @yieldparam enum [Enumerable] {enum} as-is
+      # @yieldparam resolved_path [Array] {resolved_path} as-is
       def apply(remaining_path, enum, resolved_path, &block)
         _match, start, length, step = OPERATOR_REGEX.match(operator).to_a
         max_length = enum.size

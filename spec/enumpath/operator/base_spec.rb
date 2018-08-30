@@ -31,13 +31,14 @@ RSpec.describe Enumpath::Operator::Base do
     end
 
     context 'when enum is an object that responds to :to_h' do
-      class Enumpath::Operator::Base::TestObject
-        def to_h
-          { a: :b, c: :d }
+      let(:object) do
+        class Enumpath::Operator::Base::TestObject
+          def to_h
+            { a: :b, c: :d }
+          end
         end
+        Enumpath::Operator::Base::TestObject
       end
-
-      let(:object) { Enumpath::Operator::Base::TestObject }
       let(:enum) { object.new }
 
       it 'returns the keys from the hash that #to_h returns' do
