@@ -4,7 +4,7 @@ A JSONPath-compatible library for safely navigating nested Ruby objects using pa
 
 ## Introduction
 
-Enumpath is an implementation of the JSONPath spec for Ruby objects, plus some added sugar. It's like Ruby's native `Enumerable#dig` method, but fancier. It is designed for situations where you need to provide a dynamic way of describing a complex path through nested enumerable objects. This makes it exceptionally well suited for flexible ETL (Extract, Transform, Load) processes by allowing you to define paths through your data in a simple, easily readable, easily storable syntax.
+Enumpath is an implementation of the [JSONPath][jsonpath] spec for Ruby objects, plus some added sugar. It's like Ruby's native `Enumerable#dig` method, but fancier. It is designed for situations where you need to provide a dynamic way of describing a complex path through nested enumerable objects. This makes it exceptionally well suited for flexible ETL (Extract, Transform, Load) processes by allowing you to define paths through your data in a simple, easily readable, easily storable syntax.
 
 Enumpath path expressions look like this:
 
@@ -458,11 +458,21 @@ After checking out the repo, run `bin/setup` to install dependencies. Then, run 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/youearnedit/enumpath. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct. All contributors must agree to our Contributor License Agreement before any merge requests will be accepted.
+Bug reports and pull requests are welcome on GitHub at [https://github.com/youearnedit/enumpath](). Please read [CONTRIBUTING.md]() for details on our code of conduct, and the process for submitting pull requests to us.
+
+## Versioning
+
+We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags](https://github.com/youearnedit/enumpath/tags) on this repository.
+
+## Authors
+
+- [Chris Bloom](https://github.com/chrisbloom7) - YouEarnedIt
+
+See also the list of [contributors](https://github.com/youearnedit/enumpath/graphs/contributors) who participated in this project.
 
 ## License
 
-Copyright 2017 YouEarnedIt.com
+Copyright 2018 YouEarnedIt.com
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
 
@@ -470,15 +480,11 @@ Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
 
-## Code of Conduct
+## Acknowledgements
 
-Everyone interacting in the Enumpath project’s codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/youearnedit/enumpath/blob/master/CODE_OF_CONDUCT.md).
+This project is maintained by the Engineering team at [YouEarnedIt](http://youearnedit.com), an employee engagement and performance metrics platform, headquartered in Austin, TX.
 
-## Credits
-
-This project is developed and maintained by the Engineering team at [YouEarnedIt](http://youearnedit.com), an employee engagement and performance metrics platform, headquartered in Austin, TX.
-
-Enumpath is based on [Stefan Goessner's JSONPath spec](http://goessner.net/articles/JsonPath/), and was inspired by several similar libraries:
+Enumpath is based on [Stefan Goessner's JSONPath spec][jsonpath], and was inspired by several similar libraries:
 
 - [nickcharlton/keypath-ruby](https://github.com/nickcharlton/keypath-ruby)
 - [joshbuddy/jsonpath](https://github.com/joshbuddy/jsonpath)
@@ -488,3 +494,5 @@ Enumpath is based on [Stefan Goessner's JSONPath spec](http://goessner.net/artic
 - Setup Contributor License Agreement
 - Polyfill `dig` in Ruby < 2.3.0
 - Investigate implementing a version that caches typecast resolved path components to speed up consecutive reads
+
+[jsonpath]: http://goessner.net/articles/JsonPath/
