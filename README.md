@@ -489,10 +489,4 @@ Enumpath is based on [Stefan Goessner's JSONPath spec][jsonpath], and was inspir
 - [nickcharlton/keypath-ruby](https://github.com/nickcharlton/keypath-ruby)
 - [joshbuddy/jsonpath](https://github.com/joshbuddy/jsonpath)
 
-## TODO
-
-- Setup Contributor License Agreement
-- Polyfill `dig` in Ruby < 2.3.0
-- Investigate implementing a version that caches typecast resolved path components to speed up consecutive reads
-
 [jsonpath]: http://goessner.net/articles/JsonPath/
