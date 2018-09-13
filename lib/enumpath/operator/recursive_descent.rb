@@ -13,7 +13,7 @@ module Enumpath
         # @param operator (see Enumpath::Operator::Base.detect?)
         # @return (see Enumpath::Operator::Base.detect?)
         def detect?(operator)
-          !!(operator == OPERATOR)
+          operator == OPERATOR
         end
       end
 
@@ -28,17 +28,17 @@ module Enumpath
       #   enumerable member
       # @yieldparam resolved_path [Array] resolved_path for the enumerable itself, or resolved_path plus the key for
       #   each direct enumerable member
-      def apply(remaining_path, enum, resolved_path, &block)
+      def apply(remaining_path, enum, resolved_path)
         Enumpath.log('Applying remaining path recursively to enum') { { 'remaining path': remaining_path } }
         yield(remaining_path, enum, resolved_path)
         keys(enum).each do |key|
           value = Enumpath::Resolver::Simple.resolve(key, enum)
-          if recursable?(value)
-            Enumpath.log('Applying remaining path recursively to key') do
-              { key: key, 'remaining path': ['..'] + remaining_path }
-            end
-            yield(['..'] + remaining_path, value, resolved_path + [key])
+          next unless recursable?(value)
+
+          Enumpath.log('Applying remaining path recursively to key') do
+            { key: key, 'remaining path': ['..'] + remaining_path }
           end
+          yield(['..'] + remaining_path, value, resolved_path + [key])
         end
       end
 

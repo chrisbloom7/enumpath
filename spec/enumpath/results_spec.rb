@@ -3,7 +3,7 @@
 RSpec.describe Enumpath::Results do
   let(:result_type) { :value }
   let(:subject) { Enumpath::Results.new(result_type: result_type) }
-  let(:resolved_path) { %w(story heroes 1) }
+  let(:resolved_path) { %w[story heroes 1] }
   let(:enum) { { name: 'Frodo' } }
   let(:store) { subject.store(resolved_path, enum) }
 

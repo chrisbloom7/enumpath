@@ -10,7 +10,7 @@ RSpec.describe Enumpath::Operator do
 
   describe '.detect' do
     it 'detects child operators' do
-      expect(described_class.detect(child, { name: []})).to be_an_instance_of(Enumpath::Operator::Child)
+      expect(described_class.detect(child, name: [])).to be_an_instance_of(Enumpath::Operator::Child)
     end
 
     it 'detects wildcard operators' do

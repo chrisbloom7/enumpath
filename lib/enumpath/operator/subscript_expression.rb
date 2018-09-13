@@ -5,7 +5,7 @@ module Enumpath
     # Implements JSONPath subscript expressions operator syntax. See
     # {file:README.md#label-Subscript+expressions+operator} for syntax and examples
     class SubscriptExpression < Base
-      ARITHMETIC_OPERATOR_REGEX = /(\+|-|\*\*|\*|\/|%)/
+      ARITHMETIC_OPERATOR_REGEX = %r{(\+|-|\*\*|\*|\/|%)}
       OPERATOR_REGEX = /^\((.*)\)$/
 
       class << self
@@ -14,7 +14,7 @@ module Enumpath
         # @param operator (see Enumpath::Operator::Base.detect?)
         # @return (see Enumpath::Operator::Base.detect?)
         def detect?(operator)
-          !!(operator =~ OPERATOR_REGEX)
+          !(operator =~ OPERATOR_REGEX).nil?
         end
       end
 
@@ -25,17 +25,15 @@ module Enumpath
       # @yieldparam remaining_path [Array] remaining_path
       # @yieldparam enum [Enumerable] the member of the enumerable at the value of the subscript expression
       # @yieldparam resolved_path [Array] resolved_path plus the value of the subscript expression
-      def apply(remaining_path, enum, resolved_path, &block)
+      def apply(remaining_path, enum, resolved_path)
         Enumpath.log('Applying subscript expression') { { expression: operator, to: enum } }
 
         _match, unpacked_operator = OPERATOR_REGEX.match(operator).to_a
         result = evaluate(unpacked_operator, enum)
 
         value = Enumpath::Resolver::Simple.resolve(result, enum)
-        if !value.nil?
-          Enumpath.log('Applying subscript') { { 'enum at subscript': value } }
-          yield(remaining_path, value, resolved_path + [result.to_s])
-        end
+        Enumpath.log('Applying subscript') { { 'enum at subscript': value } } unless value.nil?
+        yield(remaining_path, value, resolved_path + [result.to_s]) unless value.nil?
       end
 
       private
@@ -47,6 +45,7 @@ module Enumpath
 
       def resolve(property, enum)
         return enum if property == '@'
+
         value = Enumpath::Resolver::Simple.resolve(property.gsub(/^@\./, ''), enum)
         value = Enumpath::Resolver::Property.resolve(property.gsub(/^@\./, ''), enum) if value.nil?
         value
@@ -57,17 +56,20 @@ module Enumpath
           Enumpath.log('Simple subscript') { { subscript: value } }
           value
         else
-          # Evaluate expression using operator
-          typecast_operand = variable_typecaster(operand)
-          result = value.public_send(operator.to_sym, typecast_operand)
-          Enumpath.log('Evaluated subscript') do
-            { value: value, operator: operator, operand: typecast_operand, result: result }
-          end
-          result
+          evaluate_with_operator(operator, operand, value)
         end
       rescue NoMethodError
         Enumpath.log('Subscript could not be evaluated') { { subscript: nil } }
         nil
+      end
+
+      def evaluate_with_operator(operator, operand, value)
+        typecast_operand = variable_typecaster(operand)
+        result = value.public_send(operator.to_sym, typecast_operand)
+        Enumpath.log('Evaluated subscript') do
+          { value: value, operator: operator, operand: typecast_operand, result: result }
+        end
+        result
       end
 
       def variable_typecaster(variable)

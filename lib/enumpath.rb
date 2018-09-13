@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
 require 'mini_cache'
-require "enumpath/logger"
-require "enumpath/operator"
-require "enumpath/path"
-require "enumpath/results"
-require "enumpath/resolver/simple"
-require "enumpath/resolver/property"
-require "enumpath/version"
+require 'enumpath/logger'
+require 'enumpath/operator'
+require 'enumpath/path'
+require 'enumpath/results'
+require 'enumpath/resolver/simple'
+require 'enumpath/resolver/property'
+require 'enumpath/version'
 
 # A JSONPath-compatible library for navigating Ruby objects using path expressions
 module Enumpath

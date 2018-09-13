@@ -31,7 +31,7 @@ RSpec.describe Enumpath::Operator::FilterExpression do
     let(:book2) { { category: 'fiction', author: 'Evelyn Waugh', title: 'Sword of Honour', sku: '6789', price: 12.99 } }
     let(:book3) { { category: 'fiction', author: 'Herman Melville', title: 'Moby Dick', sku: '1234', price: 8.99 } }
     let(:book4) { { category: 'fiction', author: 'J. R. R. Tolkien', title: 'Lord of the Rings', price: 22 } }
-    let(:resolved_path) { ['store', 'book'] }
+    let(:resolved_path) { %w[store book] }
     let(:subject) { ->(block) { instance.apply(remaining_path, enum, resolved_path, &block) } }
 
     context 'when the expression includes a comparison operator' do
@@ -41,7 +41,7 @@ RSpec.describe Enumpath::Operator::FilterExpression do
         end
 
         context 'when the property is just "@"' do
-          let(:enum) { %w(reference fiction) }
+          let(:enum) { %w[reference fiction] }
           let(:operator) { '?(@ == \'fiction\')' }
 
           it 'yields to the given block with the correct arguments' do
@@ -172,7 +172,7 @@ RSpec.describe Enumpath::Operator::FilterExpression do
         end
 
         context 'when the property is just "@"' do
-          let(:enum) { %w(reference fiction) }
+          let(:enum) { %w[reference fiction] }
           let(:operator) { '?(@)' }
 
           it 'yields to the given block with the correct arguments' do

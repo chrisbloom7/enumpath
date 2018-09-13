@@ -4,12 +4,12 @@ RSpec.describe Enumpath::Resolver::Property do
   describe '.resolve' do
     context 'properties' do
       let(:enum) do
-        class Enumpath::Resolver::Property::ObjectWithProperty < Hash
+        class Enumpath::Resolver::Property::ObjectWithProperty < Hash # rubocop:disable Style/ClassAndModuleChildren
           def public_property
             'public property'
           end
 
-          def public_property_with_args(required_arg)
+          def public_property_with_args(_required_arg)
             'public property with args'
           end
 

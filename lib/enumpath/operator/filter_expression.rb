@@ -17,7 +17,7 @@ module Enumpath
         # @param operator (see Enumpath::Operator::Base.detect?)
         # @return (see Enumpath::Operator::Base.detect?)
         def detect?(operator)
-          !!(operator =~ OPERATOR_REGEX)
+          !(operator =~ OPERATOR_REGEX).nil?
         end
       end
 
@@ -31,26 +31,26 @@ module Enumpath
       #   the filter
       def apply(remaining_path, enum, resolved_path, &block)
         Enumpath.log('Evaluating filter expression') { { expression: operator, to: enum } }
-
         _match, unpacked_operator = OPERATOR_REGEX.match(operator).to_a
         expressions = unpacked_operator.split(LOGICAL_OPERATORS_REGEX).map(&:strip)
-
-        keys(enum).each do |key|
-          value = Enumpath::Resolver::Simple.resolve(key, enum)
-          Enumpath.log('Applying filter to key') { { key: key, enum: value } }
-          if pass?(expressions.dup, value)
-            Enumpath.log('Applying filtered key') { { 'filtered key': key, 'filtered enum': value } }
-            yield(remaining_path, value, resolved_path + [key.to_s])
-          end
-        end
+        keys(enum).each { |key| apply_to_key(key, expressions, remaining_path, enum, resolved_path, &block) }
       end
 
       private
 
+      def apply_to_key(key, expressions, remaining_path, enum, resolved_path)
+        value = Enumpath::Resolver::Simple.resolve(key, enum)
+        Enumpath.log('Applying filter to key') { { key: key, enum: value } }
+        return unless pass?(expressions.dup, value)
+
+        Enumpath.log('Applying filtered key') { { 'filtered key': key, 'filtered enum': value } }
+        yield(remaining_path, value, resolved_path + [key.to_s])
+      end
+
       def pass?(expressions, enum)
         running_result = evaluate(expressions.shift, enum)
         Enumpath.log('Initial result') { { result: running_result } }
-        while expressions.any? do
+        while expressions.any?
           logical_operator, expression = expressions.shift(2)
           running_result = evaluate(expression, enum, logical_operator, running_result)
           Enumpath.log('Running result') { { result: running_result } }
@@ -66,34 +66,28 @@ module Enumpath
           { property => value, operator: operator, operand: operand, result: expression_result,
             logical_operator: logical_operator }.compact
         end
-        if logical_operator == '&&'
-          Enumpath.log('&&=')
-          running_result &&= expression_result
-        elsif logical_operator == '||'
-          Enumpath.log('||=')
-          running_result ||= expression_result
-        else
-          expression_result
-        end
+        running_result(logical_operator, running_result, expression_result)
       end
 
       def resolve(property, enum)
         return enum if property == '@'
+
         value = Enumpath::Resolver::Simple.resolve(property.gsub(/^@\./, ''), enum)
         value = Enumpath::Resolver::Property.resolve(property.gsub(/^@\./, ''), enum) if value.nil?
         value
       end
 
       def test(operator, operand, value)
-        return !!value if operator.nil? || operand.nil?
+        return (value ? true : false) if operator.nil? || operand.nil?
+
         typecast_operand = variable_typecaster(operand)
-        !!value.public_send(operator.to_sym, typecast_operand)
+        value.public_send(operator.to_sym, typecast_operand) ? true : false
       rescue NoMethodError
         Enumpath.log('Filter could not be evaluated!')
         false
       end
 
-      def variable_typecaster(variable)
+      def variable_typecaster(variable) # rubocop:disable Metrics/MethodLength
         if variable =~ /\A('|").+\1\z/
           # It quacks like a string
           variable.gsub(/\A('|")|('|")\z/, '')
@@ -102,13 +96,25 @@ module Enumpath
           variable.gsub(/\A:/, '').to_sym
         elsif variable =~ /true|false|nil/i
           # It quacks like an unquoted boolean operator
-          variable == 'true' ? true : false
-        elsif regexp = variable.to_regexp(literal: false, detect: false)
+          variable == 'true'
+        elsif (regexp = variable.to_regexp(literal: false, detect: false))
           # It quacks like a regex
           regexp
         else
           # Otherwise treat it as a number
           variable.to_f
+        end
+      end
+
+      def running_result(logical_operator, running_result, expression_result)
+        if logical_operator == '&&'
+          Enumpath.log('&&=')
+          running_result && expression_result
+        elsif logical_operator == '||'
+          Enumpath.log('||=')
+          running_result || expression_result
+        else
+          expression_result
         end
       end
     end

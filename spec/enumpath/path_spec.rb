@@ -29,7 +29,7 @@ RSpec.describe Enumpath::Path do
 
   describe '#apply' do
     let(:enum) { { workers: workers } }
-    let(:workers) { %w(Barry Kari Larry Laurie) }
+    let(:workers) { %w[Barry Kari Larry Laurie] }
 
     it 'calls #trace with the normalized path and the enumerable' do
       expect(subject).to receive(:trace).with(normalized_path, enum)

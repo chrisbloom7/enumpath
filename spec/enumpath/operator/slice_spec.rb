@@ -74,7 +74,7 @@ RSpec.describe Enumpath::Operator::Slice do
 
   describe '#apply' do
     let(:remaining_path) { [] }
-    let(:enum) { %w(1 2 3 4 5 6 7 8 9 10) }
+    let(:enum) { %w[1 2 3 4 5 6 7 8 9 10] }
     let(:resolved_path) { ['numbers'] }
     let(:subject) { ->(block) { instance.apply(remaining_path, enum, resolved_path, &block) } }
 

@@ -13,7 +13,7 @@ RSpec.describe Enumpath::Logger do
 
   describe '#log' do
     let(:title) { 'A thing you should know' }
-    let(:block) { Proc.new { { a: :b, cd: :e } } }
+    let(:block) { proc { { a: :b, cd: :e } } }
 
     before { Enumpath.verbose = true }
 
