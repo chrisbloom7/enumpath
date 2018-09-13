@@ -6,7 +6,7 @@ module Enumpath
   # A logger for providing debugging information while evaluating path expressions
   # @private
   class Logger
-    PAD = "  "
+    PAD = '  '
 
     SEPARATOR = '--------------------------------------'
 
@@ -31,17 +31,11 @@ module Enumpath
     # @yield A lazily evaluated hash of key/value pairs to include in the log message
     def log(title)
       return unless Enumpath.verbose
+
       append_log "#{padding}#{SEPARATOR}\n"
       append_log "#{padding}Enumpath: #{title}\n"
-      if block_given?
-        append_log "#{padding}#{SEPARATOR}\n"
-        vars = yield
-        return unless vars.is_a?(Hash)
-        label_size = vars.keys.map(&:size).max
-        vars.each do |label, value|
-          append_log "#{padding}#{label.to_s.ljust(label_size)}: #{massaged_value(value)}\n"
-        end
-      end
+      append_log "#{padding}#{SEPARATOR}\n" if block_given?
+      log_vars(yield) if block_given?
     end
 
     private
@@ -50,7 +44,16 @@ module Enumpath
       logger << message
     end
 
-    def massaged_value(value)
+    def log_vars(vars)
+      return unless vars.is_a?(Hash)
+
+      label_size = vars.keys.map(&:size).max
+      vars.each do |label, value|
+        append_log "#{padding}#{label.to_s.ljust(label_size)}: #{massaged_value(value)}\n"
+      end
+    end
+
+    def massaged_value(value) # rubocop:disable Metrics/MethodLength
       if value.is_a?(Enumerable)
         enum_for_log(value)
       elsif value.is_a?(TrueClass)

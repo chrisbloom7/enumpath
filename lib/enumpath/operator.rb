@@ -21,32 +21,53 @@ module Enumpath
       # @param enum [Enumerable] the enumerable to assist in detecting child operators
       # @return an instance of a subclass of Enumpath::Operator based on what was detected, or nil if nothing was
       #   detected
-      def detect(operator, enum)
-        if Enumpath::Operator::Child.detect?(operator, enum)
-          Enumpath.log('Child operator detected')
-          Enumpath::Operator::Child.new(operator)
-        elsif Enumpath::Operator::Wildcard.detect?(operator)
-          Enumpath.log('Wildcard operator detected')
-          Enumpath::Operator::Wildcard.new(operator)
-        elsif Enumpath::Operator::RecursiveDescent.detect?(operator)
-          Enumpath.log('Recursive Descent operator detected')
-          Enumpath::Operator::RecursiveDescent.new(operator)
-        elsif Enumpath::Operator::Union.detect?(operator)
-          Enumpath.log('Union operator detected')
-          Enumpath::Operator::Union.new(operator)
-        elsif Enumpath::Operator::SubscriptExpression.detect?(operator)
-          Enumpath.log('Subscript Expression operator detected')
-          Enumpath::Operator::SubscriptExpression.new(operator)
-        elsif Enumpath::Operator::FilterExpression.detect?(operator)
-          Enumpath.log('Filter Expression operator detected')
-          Enumpath::Operator::FilterExpression.new(operator)
-        elsif Enumpath::Operator::Slice.detect?(operator)
-          Enumpath.log('Slice operator detected')
-          Enumpath::Operator::Slice.new(operator)
-        else
-          Enumpath.log('Not a valid operator for enum')
-          nil
-        end
+      def detect(operator, enum) # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
+        return operator(:Child, operator) if child?(operator, enum)
+        return operator(:Wildcard, operator) if wildcard?(operator)
+        return operator(:RecursiveDescent, operator) if recursive_descent?(operator)
+        return operator(:Union, operator) if union?(operator)
+        return operator(:SubscriptExpression, operator) if subscript_expression?(operator)
+        return operator(:FilterExpression, operator) if filter_expression?(operator)
+        return operator(:Slice, operator) if slice?(operator)
+
+        Enumpath.log('Not a valid operator for enum')
+        nil
+      end
+
+      private
+
+      def child?(operator, enum)
+        Enumpath::Operator::Child.detect?(operator, enum)
+      end
+
+      def wildcard?(operator)
+        Enumpath::Operator::Wildcard.detect?(operator)
+      end
+
+      def recursive_descent?(operator)
+        Enumpath::Operator::RecursiveDescent.detect?(operator)
+      end
+
+      def union?(operator)
+        Enumpath::Operator::Union.detect?(operator)
+      end
+
+      def subscript_expression?(operator)
+        Enumpath::Operator::SubscriptExpression.detect?(operator)
+      end
+
+      def filter_expression?(operator)
+        Enumpath::Operator::FilterExpression.detect?(operator)
+      end
+
+      def slice?(operator)
+        Enumpath::Operator::Slice.detect?(operator)
+      end
+
+      def operator(operator_class, operator)
+        Enumpath.log("#{operator_class} operator detected")
+        klass = Object.const_get("Enumpath::Operator::#{operator_class}")
+        klass.new(operator)
       end
     end
   end

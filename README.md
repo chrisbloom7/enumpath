@@ -51,14 +51,14 @@ Or install it yourself as:
 Enumpath exposes a simple interface via `Enumpath.apply` that takes a path and an enumerable.
 
 ```ruby
-party = { food: %w(pizza tacos) }
+party = { food: %w[pizza tacos] }
 Enumpath.apply('food.0', party) # => ["pizza"]
 ```
 
 The result of `Enumpath.apply` is an array of values that were extracted according to the path. Technically it's an instance of `Enumpath::Results` which is an Array-like object that allows you to chain further calls to `.apply` like this:
 
 ```ruby
-party = { food: %w(pizza tacos) }
+party = { food: %w[pizza tacos] }
 results = Enumpath.apply('food.*', party) # => ["pizza", "tacos"]
 results.apply("[?(@ == 'pizza')]") # => ["pizza"]
 ```
@@ -66,7 +66,7 @@ results.apply("[?(@ == 'pizza')]") # => ["pizza"]
 In the event that the path doesn't match anything, an empty results set is returned:
 
 ```ruby
-party = { food: %w(pizza tacos) }
+party = { food: %w[pizza tacos] }
 Enumpath.apply("drinks.*", party) # => []
 ```
 
@@ -373,7 +373,7 @@ Enumpath.apply("$..*", store_info)
 By default, Enumpath returns the values that match the path expression. Like the original JSONPath implementation, Enumpath also supports returning path results instead of values. This can be useful for collecting static paths from dynamic paths.
 
 ```ruby
-party = { food: %w(pizza tacos) }
+party = { food: %w[pizza tacos] }
 Enumpath.apply("food.*", party, result_type: :path) # => ["$['food'][0]", "$['food'][1]"]
 ```
 

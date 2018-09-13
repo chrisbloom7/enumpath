@@ -16,7 +16,7 @@ module Enumpath
         # @param enum [Enumerable] an enum that can be used to assist in detection. Not all subclasses require an enum
         #   for detection.
         # @return [true, false] whether the operator param appears to represent the operator class
-        def detect?(operator, enum = nil)
+        def detect?(_operator, _enum = nil)
           raise NotImplementedError
         end
       end
@@ -47,7 +47,7 @@ module Enumpath
       # @yieldparam enum [Enumerable] the new enum after applying the operator
       # @yieldparam resolved_path [Array] the new resolved_path after applying the operator
       # @yieldreturn [void]
-      def apply(remaining_path, enum, resolved_path, &block)
+      def apply(_remaining_path, _enum, _resolved_path)
         raise NotImplementedError
       end
 

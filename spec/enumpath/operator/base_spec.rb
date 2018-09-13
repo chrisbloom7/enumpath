@@ -6,7 +6,7 @@ RSpec.describe Enumpath::Operator::Base do
     let(:subject) { instance.send(:keys, enum) }
 
     context 'when enum is an Array' do
-      let(:enum) { %w(look mom i am an array) }
+      let(:enum) { %w[look mom i am an array] }
 
       it 'returns a set of indexes for the array' do
         expect(subject).to eq((0...enum.size).to_a)
@@ -26,13 +26,13 @@ RSpec.describe Enumpath::Operator::Base do
       let(:enum) { struct.new('plastic', 17.99) }
 
       it 'returns a list of attributes from the struct' do
-        expect(subject).to eq(%i(material price inventory))
+        expect(subject).to eq(%i[material price inventory])
       end
     end
 
     context 'when enum is an object that responds to :to_h' do
       let(:object) do
-        class Enumpath::Operator::Base::TestObject
+        class Enumpath::Operator::Base::TestObject # rubocop:disable Style/ClassAndModuleChildren
           def to_h
             { a: :b, c: :d }
           end
@@ -42,7 +42,7 @@ RSpec.describe Enumpath::Operator::Base do
       let(:enum) { object.new }
 
       it 'returns the keys from the hash that #to_h returns' do
-        expect(subject).to eq(%i(a c))
+        expect(subject).to eq(%i[a c])
       end
     end
 

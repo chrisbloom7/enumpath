@@ -46,13 +46,8 @@ module Enumpath
     def trace(path_segments, enum, resolved_path = [], nesting_level = 0)
       Enumpath.logger.level = nesting_level
       if path_segments.any?
-        Enumpath.log("Applying") { { operator: path_segments, to: enum } }
-        segment = path_segments.first
-        remaining_path = path_segments[1..-1]
-        operator = Enumpath::Operator.detect(segment, enum)
-        operator&.apply(remaining_path, enum, resolved_path) do |s, e, c|
-          trace(s, e, c, nesting_level + 1)
-        end
+        Enumpath.log('Applying') { { operator: path_segments, to: enum } }
+        apply_segments(path_segments, enum, resolved_path, nesting_level)
       else
         Enumpath.log('Storing') { { resolved_path: resolved_path, enum: enum } }
         results.store(resolved_path, enum)
@@ -60,7 +55,14 @@ module Enumpath
       Enumpath.logger.level = nesting_level
     end
 
-    private
+    def apply_segments(path_segments, enum, resolved_path, nesting_level)
+      segment = path_segments.first
+      remaining_path = path_segments[1..-1]
+      operator = Enumpath::Operator.detect(segment, enum)
+      operator&.apply(remaining_path, enum, resolved_path) do |s, e, c|
+        trace(s, e, c, nesting_level + 1)
+      end
+    end
 
     def cache
       @cache ||= Enumpath.path_cache

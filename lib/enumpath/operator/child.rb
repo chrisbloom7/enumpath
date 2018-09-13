@@ -24,10 +24,10 @@ module Enumpath
       # @yieldparam remaining_path [Array] remaining_path
       # @yieldparam enum [Enumerable] the resolved value of the enumerable
       # @yieldparam resolved_path [Array] resolved_path plus the child operator
-      def apply(remaining_path, enum, resolved_path, &block)
+      def apply(remaining_path, enum, resolved_path)
         value = Enumpath::Resolver::Simple.resolve(operator, enum)
         value = Enumpath::Resolver::Property.resolve(operator, enum) if value.nil?
-        yield(remaining_path, value, resolved_path + [operator]) if !value.nil?
+        yield(remaining_path, value, resolved_path + [operator]) unless value.nil?
       end
     end
   end

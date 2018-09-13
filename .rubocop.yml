@@ -1,0 +1,13 @@
+AllCops:
+  DisplayStyleGuide: true
+  TargetRubyVersion: 2.3
+
+Metrics/BlockLength:
+  Exclude:
+  - 'enumpath.gemspec'
+  - '**/*.rake'
+  - 'spec/**/*.rb'
+
+Metrics/LineLength:
+  IgnoreCopDirectives: true
+  Max: 120

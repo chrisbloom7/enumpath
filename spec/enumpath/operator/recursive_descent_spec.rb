@@ -48,7 +48,8 @@ RSpec.describe Enumpath::Operator::RecursiveDescent do
         end
 
         describe 'for each element in enum it sends' do
-          it 'operator prepended to remaining_path, the element of enumerable matching key, and key appended to resolved_path' do
+          it 'operator prepended to remaining_path, the element of enumerable matching key, ' \
+             'and key appended to resolved_path' do
             expect { |block| subject[block] }.to yield_successive_args(
               [remaining_path, enum, resolved_path],
               [['..'] + remaining_path, enum1, resolved_path + [0]],

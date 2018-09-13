@@ -20,19 +20,19 @@ RSpec.describe Enumpath::Path::NormalizedPath do
       end
 
       it 'normalizes wildcard operators' do
-        expect(described_class.new('a.*.b[*]')).to eq(%w(a * b *))
+        expect(described_class.new('a.*.b[*]')).to eq(%w[a * b *])
       end
 
       it 'normalizes recursive descent operators' do
-        expect(described_class.new('a..c')).to eq(%w(a .. c))
+        expect(described_class.new('a..c')).to eq(%w[a .. c])
       end
 
       it 'normalizes child dot operators' do
-        expect(described_class.new('a.b.c')).to eq(%w(a b c))
+        expect(described_class.new('a.b.c')).to eq(%w[a b c])
       end
 
       it 'normalizes child bracket operators' do
-        expect(described_class.new('$[a][\'b\']["c"]')).to eq(%w(a b "c"))
+        expect(described_class.new('$[a][\'b\']["c"]')).to eq(['a', 'b', '"c"'])
       end
 
       it 'normalizes union operators' do
@@ -61,7 +61,7 @@ RSpec.describe Enumpath::Path::NormalizedPath do
       end
 
       context 'when the path is already an array' do
-        let(:vanilla_array) { %w(i am an array) }
+        let(:vanilla_array) { %w[i am an array] }
         let(:normalized_path) { Enumpath::Path::NormalizedPath.new('i.am.a.path') }
 
         it 'keeps the array as-is' do

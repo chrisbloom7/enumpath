@@ -251,7 +251,7 @@ RSpec.describe 'Store Examples' do
         it 'returns the path to all books with a price less than 10' do
           expect(subject).to contain_exactly(
             "$['store']['book'][0]",
-            "$['store']['book'][2]",
+            "$['store']['book'][2]"
           )
         end
       end

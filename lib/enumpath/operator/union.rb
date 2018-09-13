@@ -32,7 +32,7 @@ module Enumpath
       # @yieldparam remaining_path [Array] the union member plus remaining_path
       # @yieldparam enum [Enumerable] enum
       # @yieldparam resolved_path [Array] resolved_path
-      def apply(remaining_path, enum, resolved_path, &block)
+      def apply(remaining_path, enum, resolved_path)
         parts = operator.split(SPLIT_REGEX).map { |part| part.strip.gsub(/^['"]|['"]$/, '') }
         Enumpath.log('Applying union parts') { { parts: parts } }
         parts.each { |part| yield([part] + remaining_path, enum, resolved_path) }

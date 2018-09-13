@@ -23,7 +23,7 @@ module Enumpath
       # @yieldparam remaining_path [Array] the key of the given member plus remaining_path
       # @yieldparam enum [Enumerable] enum
       # @yieldparam resolved_path [Array] resolved_path
-      def apply(remaining_path, enum, resolved_path, &block)
+      def apply(remaining_path, enum, resolved_path)
         keys = keys(enum)
         Enumpath.log('Applying wildcard to keys') { { keys: keys } }
         keys.each { |key| yield([key.to_s] + remaining_path, enum, resolved_path) }

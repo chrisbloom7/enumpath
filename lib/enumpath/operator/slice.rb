@@ -12,7 +12,7 @@ module Enumpath
         # @param operator (see Enumpath::Operator::Base.detect?)
         # @return (see Enumpath::Operator::Base.detect?)
         def detect?(operator)
-          !!(operator =~ OPERATOR_REGEX)
+          !(operator =~ OPERATOR_REGEX).nil?
         end
       end
 
@@ -25,7 +25,7 @@ module Enumpath
       # @yieldparam remaining_path [Array] the included index plus remaining_path
       # @yieldparam enum [Enumerable] enum
       # @yieldparam resolved_path [Array] resolved_path
-      def apply(remaining_path, enum, resolved_path, &block)
+      def apply(remaining_path, enum, resolved_path)
         _match, start, length, step = OPERATOR_REGEX.match(operator).to_a
         max_length = enum.size
         slices(start, length, step, max_length).each do |index|
