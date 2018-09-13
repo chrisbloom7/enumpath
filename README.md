@@ -1,4 +1,4 @@
-# Enumpath
+# Enumpath [![Build Status][ci-image]][ci] [![Gem Version][version-image]][version] [![Reviewed by Hound][hound-badge-image]][hound]
 
 A JSONPath-compatible library for safely navigating nested Ruby objects using path expressions.
 
@@ -490,3 +490,9 @@ Enumpath is based on [Stefan Goessner's JSONPath spec][jsonpath], and was inspir
 - [joshbuddy/jsonpath](https://github.com/joshbuddy/jsonpath)
 
 [jsonpath]: http://goessner.net/articles/JsonPath/
+[ci-image]: https://circleci.com/gh/youearnedit/enumpath.svg?style=svg
+[ci]: https://circleci.com/gh/youearnedit/enumpath
+[version-image]: https://badge.fury.io/rb/enumpath.svg
+[version]: https://badge.fury.io/rb/enumpath
+[hound-badge-image]: https://img.shields.io/badge/Reviewed_by-Hound-8E64B0.svg
+[hound]: https://houndci.com
