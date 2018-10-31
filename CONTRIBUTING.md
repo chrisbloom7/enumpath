@@ -1,18 +1,18 @@
 # Contributing
 
-Thanks for being interested in our project! We welcome [all kinds of contributions](https://opensource.guide/how-to-contribute/). There are a few things you should know before contributing to this repository:
+Thanks for being interested in improving Enumpath! We welcome [all kinds of contributions][how-to-contribute]. There are a couple of things you should know before contributing to this repository:
 
-1. All contributors must agree to our Contributor License Agreement before any merge requests will be accepted.
-2. Please first discuss the change you wish to make via issue, email, or any other method with the owners of this repository before making a change.
-3. Please note we have a code of conduct, please follow it in all your interactions with the project.
+1. Unless your changes are related to an existing issue, please first open a new issue to discuss the changes you wish to make.
+2. Please note we have a [code of conduct](#code-of-conduct), please follow it in all your interactions with the project.
+3. Code quality is important to us! Please be prepared to to address all code quality comments, whether from a CI tool like Hound or directly from our maintainers, before we can accept your changes.
 
 ## Pull Request Process
 
 1. Fork the repo.
 2. Make sure the tests pass before you begin working.
-3. Make your changes, with new passing tests. Follow the [Ruby Style Guide](https://github.com/rubocop-hq/ruby-style-guide).
-4. Push to your fork. Write a [good commit message](https://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html).
-5. Submit a [good pull request](https://blog.github.com/2015-01-21-how-to-write-the-perfect-pull-request/).
+3. Make your changes, with new passing tests. Follow the [Ruby Style Guide][ruby-style-guide].
+4. Push to your fork using a [good commit message][a-note-about-git-commit-messages].
+5. Submit a [good pull request][how-to-write-the-perfect-pull-request] from your fork to our project.
 6. Others will give constructive feedback. This is a time for discussion and improvements, and making the necessary changes will be required before we can merge the contribution.
 
 ## Code of Conduct
@@ -72,7 +72,7 @@ further defined and clarified by project maintainers.
 ### Enforcement
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported by contacting the project team at [INSERT EMAIL ADDRESS]. All
+reported by contacting the project team at [chrisbloom7/enumpath][enumpath-gh]. All
 complaints will be reviewed and investigated and will result in a response that
 is deemed necessary and appropriate to the circumstances. The project team is
 obligated to maintain confidentiality with regard to the reporter of an incident.
@@ -87,5 +87,10 @@ members of the project's leadership.
 This Code of Conduct is adapted from the [Contributor Covenant][homepage], version 1.4,
 available at https://www.contributor-covenant.org/version/1/4/code-of-conduct.html
 
+[a-note-about-git-commit-messages]: https://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html
+[enumpath-gh]: https://github.com/chrisbloom7/enumpath
 [homepage]: https://www.contributor-covenant.org
+[how-to-contribute]: https://opensource.guide/how-to-contribute/
+[how-to-write-the-perfect-pull-request]: https://blog.github.com/2015-01-21-how-to-write-the-perfect-pull-request/
+[ruby-style-guide]: https://github.com/rubocop-hq/ruby-style-guide
 [version]: http://contributor-covenant.org/version/1/4/
