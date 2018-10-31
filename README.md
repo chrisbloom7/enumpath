@@ -446,7 +446,7 @@ To save a little bit of time on consecutive calls Enumpath caches the normalized
 
 3. The original implementations of JSONPath allowed unchecked evaluation of filter and subscript expressions. Enumpath limits those expressions to a reasonable subset of operations as detailed in the [Operator Reference](#operator-reference) section and uses `public_send` rather than `eval` to resolve expressions as necessary.
 
-4. The original JSONPath spec did not include support for using logical operators to chain expressions in filter expression operators. This addition was inspired by [Gergely Brautigam's](https://skarlso.github.io/2017/05/28/replace-eval-with-object-send-and-a-parser/) work on [joshbuddy/jsonpath](https://github.com/joshbuddy/jsonpath)
+4. The original JSONPath spec did not include support for using logical operators to chain expressions in filter expression operators. This addition was inspired by [Gergely Brautigam's][replace-eval-with-object-send-and-a-parser] work on [joshbuddy/jsonpath][jsonpath-gh]
 
 ## Requirements
 
@@ -458,41 +458,49 @@ After checking out the repo, run `bin/setup` to install dependencies. Then, run 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at [https://github.com/youearnedit/enumpath](). Please read [CONTRIBUTING.md]() for details on our code of conduct, and the process for submitting pull requests to us.
+Bug reports and pull requests are welcome on GitHub at [chrisbloom7/enumpath][enumpath-gh]. Please read [CONTRIBUTING.md]() for details on our code of conduct, and the process for submitting pull requests to us.
 
 ## Versioning
 
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags](https://github.com/youearnedit/enumpath/tags) on this repository.
+We use [SemVer][semver] for versioning. For the versions available, see the [tags][tags] on this repository.
 
 ## Authors
 
-- [Chris Bloom](https://github.com/chrisbloom7) - YouEarnedIt
+- [Chris Bloom][chris-bloom-gh]
 
-See also the list of [contributors](https://github.com/youearnedit/enumpath/graphs/contributors) who participated in this project.
+See also the list of [contributors][contributors] who participated in this project.
 
 ## License
 
-Copyright 2018 YouEarnedIt.com
-
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
 
-[www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
+[www.apache.org/licenses/LICENSE-2.0][apache-license-2-0]
 
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
 
 ## Acknowledgements
 
-This project is maintained by the Engineering team at [YouEarnedIt](http://youearnedit.com), an employee engagement and performance metrics platform, headquartered in Austin, TX.
+This project originated from an internal project at [YouEarnedIt][youearnedit], an employee engagement and performance metrics platform, headquartered in Austin, TX.
 
 Enumpath is based on [Stefan Goessner's JSONPath spec][jsonpath], and was inspired by several similar libraries:
 
-- [nickcharlton/keypath-ruby](https://github.com/nickcharlton/keypath-ruby)
-- [joshbuddy/jsonpath](https://github.com/joshbuddy/jsonpath)
+- [nickcharlton/keypath-ruby][keypath-ruby]
+- [joshbuddy/jsonpath][jsonpath-gh]
 
-[jsonpath]: http://goessner.net/articles/JsonPath/
-[ci-image]: https://circleci.com/gh/youearnedit/enumpath.svg?style=svg
-[ci]: https://circleci.com/gh/youearnedit/enumpath
-[version-image]: https://badge.fury.io/rb/enumpath.svg
-[version]: https://badge.fury.io/rb/enumpath
-[hound-badge-image]: https://img.shields.io/badge/Reviewed_by-Hound-8E64B0.svg
+[apache-license-2-0]: http://www.apache.org/licenses/LICENSE-2.0
+[chris-bloom-gh]: https://github.com/chrisbloom7
+[ci]: https://circleci.com/gh/chrisbloom7/enumpath
+[ci-image]: https://circleci.com/gh/chrisbloom7/enumpath.svg?style=svg
+[contributors]: https://github.com/chrisbloom7/enumpath/graphs/contributors
+[enumpath-gh]: https://github.com/chrisbloom7/enumpath
 [hound]: https://houndci.com
+[hound-badge-image]: https://img.shields.io/badge/Reviewed_by-Hound-8E64B0.svg
+[jsonpath]: http://goessner.net/articles/JsonPath/
+[jsonpath-gh]: https://github.com/joshbuddy/jsonpath
+[keypath-ruby]: https://github.com/nickcharlton/keypath-ruby
+[replace-eval-with-object-send-and-a-parser]: https://skarlso.github.io/2017/05/28/replace-eval-with-object-send-and-a-parser/
+[semver]: http://semver.org/
+[tags]: https://github.com/chrisbloom7/enumpath/tags
+[version]: https://badge.fury.io/rb/enumpath
+[version-image]: https://badge.fury.io/rb/enumpath.svg
+[youearnedit]: http://youearnedit.com
