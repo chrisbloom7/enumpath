@@ -102,10 +102,10 @@ Child operators match on an index, key, member, or property of the enumerable. I
 
 ```
 Car = Struct.new(:color, :transmition, :owners)
-hiundai = Car.new('blue', :automatic, [{ name: 'Bill' }, { name: 'Ted' }])
+hyundai = Car.new('blue', :automatic, [{ name: 'Bill' }, { name: 'Ted' }])
 subaru = Car.new('gold', :standard, [{ name: 'Kate' }])
 jeep = Car.new('black', :automatic, [])
-garages = [{ 'cars' => [hiundai, subaru] }, { 'cars' => [jeep] }]
+garages = [{ 'cars' => [hyundai, subaru] }, { 'cars' => [jeep] }]
 Enumpath.apply('1', garages) # => [{"cars"=>[#<struct Car color="black", transmition=:automatic, owners=[]>]}]
 Enumpath.apply('0.cars.-1', garages) # => [#<struct Car color="gold", transmition=:standard, owners=[{:name=>"Kate"}]>]
 Enumpath.apply('1.cars.0.owners.length', garages) # => [0]
