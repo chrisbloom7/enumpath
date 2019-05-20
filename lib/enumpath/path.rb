@@ -1,11 +1,12 @@
 # frozen_string_literal: true
 
-require 'enumpath/path/normalized_path'
+require 'enumpath/path/normalized'
+require 'enumpath/path/resolved'
 
 module Enumpath
   # A mechanism for applying path expressions to enumerables and tracking results
   class Path
-    # @return [Enumpath::Path::NormalizedPath] the normalized path
+    # @return [Enumpath::Path::Normalized] the normalized path
     attr_reader :path
 
     # @return [Enumpath::Results] the current results array
@@ -69,7 +70,7 @@ module Enumpath
     end
 
     def normalize!
-      @path = cache.get_or_set(@path) { Enumpath::Path::NormalizedPath.new(@path) }
+      @path = cache.get_or_set(@path) { Enumpath::Path::Normalized.new(@path) }
     end
   end
 end

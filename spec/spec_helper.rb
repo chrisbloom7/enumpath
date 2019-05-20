@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'bundler/setup'
+require 'rspec-benchmark'
 require 'enumpath'
 
 RSpec.configure do |config|
@@ -15,6 +16,10 @@ RSpec.configure do |config|
   end
 
   config.before(:suite) do
+    # Swallow output from the Enumpath logger
     Enumpath.logger.logger = ::Logger.new('/dev/null')
   end
+
+  # Do not run performance tests by default
+  config.filter_run_excluding perf: true
 end

@@ -3,7 +3,7 @@
 RSpec.describe Enumpath::Path do
   let(:path) { '$.workers' }
   let(:subject) { described_class.new(path) }
-  let(:normalized_path) { Enumpath::Path::NormalizedPath.new(path) }
+  let(:normalized_path) { Enumpath::Path::Normalized.new(path) }
 
   describe '.new' do
     it 'automatically normalizes string paths' do

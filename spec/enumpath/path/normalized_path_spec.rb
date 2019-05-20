@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe Enumpath::Path::NormalizedPath do
+RSpec.describe Enumpath::Path::Normalized do
   let(:subject) { described_class.new('') }
 
   it 'is a subclass of Array' do
@@ -62,7 +62,7 @@ RSpec.describe Enumpath::Path::NormalizedPath do
 
       context 'when the path is already an array' do
         let(:vanilla_array) { %w[i am an array] }
-        let(:normalized_path) { Enumpath::Path::NormalizedPath.new('i.am.a.path') }
+        let(:normalized_path) { Enumpath::Path::Normalized.new('i.am.a.path') }
 
         it 'keeps the array as-is' do
           expect(described_class.new(vanilla_array)).to eq(vanilla_array)
