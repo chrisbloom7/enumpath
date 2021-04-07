@@ -7,6 +7,6 @@ Metrics/BlockLength:
   - '**/*.rake'
   - 'spec/**/*.rb'
 
-Metrics/LineLength:
+Layout/LineLength:
   IgnoreCopDirectives: true
   Max: 120
