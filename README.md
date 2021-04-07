@@ -1,4 +1,4 @@
-# Enumpath [![Build Status][ci-image]][ci] [![Gem Version][version-image]][version] [![Reviewed by Hound][hound-badge-image]][hound]
+# Enumpath
 
 A JSONPath-compatible library for safely navigating nested Ruby objects using path expressions.
 
