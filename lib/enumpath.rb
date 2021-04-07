@@ -48,7 +48,7 @@ module Enumpath
     # @private
     # @see Enumpath::Logger#log
     def log(title)
-      block_given? ? logger.log(title, &Proc.new) : logger.log(title)
+      block_given? ? logger.log(title, &-> { yield }) : logger.log(title)
     end
 
     # A lightweight in-memory cache for caching normalized path expressions
