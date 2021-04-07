@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    enumpath (0.1.1)
+    enumpath (0.1.2)
       mini_cache (~> 1.1.0)
       to_regexp (~> 0.2.1)
 
@@ -47,7 +47,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  bundler (~> 2.2)
+  bundler (~> 2.1)
   enumpath!
   null-logger (~> 0.1)
   pry-byebug (~> 3.6)
