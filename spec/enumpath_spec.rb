@@ -53,7 +53,7 @@ RSpec.describe Enumpath do
     it 'passes the :result_type option through to Enumpath::Path#new' do
       result_type = :path
       expect(Enumpath::Path).to receive(:new).with(path, result_type: result_type).and_call_original
-      Enumpath.apply(path, enum, result_type: :path)
+      Enumpath.apply(path, enum, result_type: result_type)
     end
 
     it 'calls #apply with enum on the Enumpath::Path instance' do
