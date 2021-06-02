@@ -8,7 +8,7 @@ Enumpath is an implementation of the [JSONPath][jsonpath] spec for Ruby objects,
 
 Enumpath path expressions look like this:
 
-```
+```plain
 $.pets.cats.0.name
 
 $.pets[cats,dogs].*.name
@@ -40,11 +40,15 @@ gem 'enumpath'
 
 And then execute:
 
-    $ bundle
+```shell
+bundle
+```
 
 Or install it yourself as:
 
-    $ gem install enumpath
+```shell
+gem install enumpath
+```
 
 ## Usage
 
@@ -98,9 +102,9 @@ Child operators match on an index, key, member, or property of the enumerable. I
 3. then as a symbol key,
 4. and finally as a public property (i.e. a public method of the target that expects no arguments)
 
-#### Examples
+#### Operator Examples
 
-```
+```ruby
 Car = Struct.new(:color, :transmition, :owners)
 hyundai = Car.new('blue', :automatic, [{ name: 'Bill' }, { name: 'Ted' }])
 subaru = Car.new('gold', :standard, [{ name: 'Kate' }])
@@ -178,7 +182,7 @@ The following are all valid filter expressions:
 - `[(length / 2)]`: the subscript becomes the index at half the length of the enumerable
 - `[(@.type)]`: the subscript becomes the value at the `type` key, member, or property of the enumerable
 
-## Examples
+## Usage Examples
 
 Given the same store example from the JSONPath project:
 
@@ -391,7 +395,7 @@ Enumpath.logger.logger = ::Logger.new('log/enumpath.log')
 
 Once enabled, it will log debugging information like so:
 
-```
+```plain
 Enumpath.apply('$.store.book', store_info, verbose: true)
 
 --------------------------------------
@@ -437,15 +441,15 @@ To save a little bit of time on consecutive calls Enumpath caches the normalized
 ## Deviations from the Original JSONPath Spec
 
 1. The JSONPath spec required that `false` be returned when no matches were found, but Enumpath will return an empty result set (`[]`) instead. This is a thoughtful divergence based on the principle of least astonishment and the robustness principle.
-
 2. Enumpath supports relative child indexes, which the original implementation did not support. For instance:
 
-        # Get the last element. Both are equivalent to `$..book[-1:]`
-        Enumpath.apply('$..book.-1', store_info)
-        Enumpath.apply('$..book[-1]', store_info)
+    ```ruby
+    # Get the last element. Both are equivalent to `$..book[-1:]`
+    Enumpath.apply('$..book.-1', store_info)
+    Enumpath.apply('$..book[-1]', store_info)
+    ```
 
 3. The original implementations of JSONPath allowed unchecked evaluation of filter and subscript expressions. Enumpath limits those expressions to a reasonable subset of operations as detailed in the [Operator Reference](#operator-reference) section and uses `public_send` rather than `eval` to resolve expressions as necessary.
-
 4. The original JSONPath spec did not include support for using logical operators to chain expressions in filter expression operators. This addition was inspired by [Gergely Brautigam's][replace-eval-with-object-send-and-a-parser] work on [joshbuddy/jsonpath][jsonpath-gh]
 
 ## Requirements
@@ -458,7 +462,7 @@ After checking out the repo, run `bin/setup` to install dependencies. Then, run 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at [chrisbloom7/enumpath][enumpath-gh]. Please read [CONTRIBUTING.md]() for details on our code of conduct, and the process for submitting pull requests to us.
+Bug reports and pull requests are welcome on GitHub at [chrisbloom7/enumpath][enumpath-gh]. Please read [CONTRIBUTING.md][contributing] for details on our code of conduct, and the process for submitting pull requests to us.
 
 ## Versioning
 
@@ -489,18 +493,19 @@ Enumpath is based on [Stefan Goessner's JSONPath spec][jsonpath], and was inspir
 
 [apache-license-2-0]: http://www.apache.org/licenses/LICENSE-2.0
 [chris-bloom-gh]: https://github.com/chrisbloom7
-[ci]: https://circleci.com/gh/chrisbloom7/enumpath
 [ci-image]: https://circleci.com/gh/chrisbloom7/enumpath.svg?style=svg
+[ci]: https://circleci.com/gh/chrisbloom7/enumpath
+[contributing]: https://github.com/chrisbloom7/enumpath/blob/main/CONTRIBUTING.md
 [contributors]: https://github.com/chrisbloom7/enumpath/graphs/contributors
 [enumpath-gh]: https://github.com/chrisbloom7/enumpath
-[hound]: https://houndci.com
 [hound-badge-image]: https://img.shields.io/badge/Reviewed_by-Hound-8E64B0.svg
-[jsonpath]: http://goessner.net/articles/JsonPath/
+[hound]: https://houndci.com
 [jsonpath-gh]: https://github.com/joshbuddy/jsonpath
+[jsonpath]: http://goessner.net/articles/JsonPath/
 [keypath-ruby]: https://github.com/nickcharlton/keypath-ruby
 [replace-eval-with-object-send-and-a-parser]: https://skarlso.github.io/2017/05/28/replace-eval-with-object-send-and-a-parser/
 [semver]: http://semver.org/
 [tags]: https://github.com/chrisbloom7/enumpath/tags
-[version]: https://badge.fury.io/rb/enumpath
 [version-image]: https://badge.fury.io/rb/enumpath.svg
+[version]: https://badge.fury.io/rb/enumpath
 [youearnedit]: http://youearnedit.com
