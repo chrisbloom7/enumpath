@@ -9,5 +9,5 @@ RSpec::Core::RakeTask.new(:spec)
 task default: :spec
 
 YARD::Rake::YardocTask.new do |t|
-  t.options = ['--no-private', '-', 'LICENSE']
+  t.options = ['-o', 'docs', '--no-private', '-', 'LICENSE']
 end
