@@ -34,12 +34,12 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'mini_cache', '~> 1.1.0'
   spec.add_dependency 'to_regexp', '~> 0.2.1'
 
-  spec.add_development_dependency 'bundler', '~> 2.1'
+  spec.add_development_dependency 'bundler', '~> 2.2'
   spec.add_development_dependency 'null-logger', '~> 0.1'
-  spec.add_development_dependency 'pry-byebug', '~> 3.6'
-  spec.add_development_dependency 'rake', '~> 12.3'
-  spec.add_development_dependency 'rspec', '~> 3.8'
-  spec.add_development_dependency 'rspec-benchmark', '~> 0.3.0'
+  spec.add_development_dependency 'pry-byebug', '~> 3.9'
+  spec.add_development_dependency 'rake', '~> 13.0'
+  spec.add_development_dependency 'rspec', '~> 3.10'
+  spec.add_development_dependency 'rspec-benchmark', '~> 0.6'
   spec.add_development_dependency 'rspec_junit_formatter', '~> 0.4'
-  spec.add_development_dependency 'yard', '~> 0.9.26'
+  spec.add_development_dependency 'yard', '~> 0.9'
 end
