@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  File: README
+  
+    &mdash; Documentation by YARD 0.9.26
+  
+</title>
+
+  <link rel="stylesheet" href="css/style.css" type="text/css" />
+
+  <link rel="stylesheet" href="css/common.css" type="text/css" />
+
+<script type="text/javascript">
+  pathId = "README";
+  relpath = '';
+</script>
+
+
+  <script type="text/javascript" charset="utf-8" src="js/jquery.js"></script>
+
+  <script type="text/javascript" charset="utf-8" src="js/app.js"></script>
+
+
+  </head>
+  <body>
+    <div class="nav_wrap">
+      <iframe id="nav" src="file_list.html?1"></iframe>
+      <div id="resizer"></div>
+    </div>
+
+    <div id="main" tabindex="-1">
+      <div id="header">
+        <div id="menu">
+  
+    <a href="_index.html">Index</a> &raquo; 
+    <span class="title">File: README</span>
+  
+</div>
+
+        <div id="search">
+  
+    <a class="full_list_link" id="class_list_link"
+        href="class_list.html">
+
+        <svg width="24" height="24">
+          <rect x="0" y="4" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="12" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="20" width="24" height="4" rx="1" ry="1"></rect>
+        </svg>
+    </a>
+  
+</div>
+        <div class="clear"></div>
+      </div>
+
+      <div id="content"><div id='filecontents'><h1 id="enumpath">Enumpath</h1>
+
+<p>A JSONPath-compatible library for safely navigating nested Ruby objects using path expressions.</p>
+
+<h2 id="introduction">Introduction</h2>
+
+<p>Enumpath is an implementation of the <a href="http://goessner.net/articles/JsonPath/">JSONPath</a> spec for Ruby objects, plus some added sugar. It’s like Ruby’s native <code>Enumerable#dig</code> method, but fancier. It is designed for situations where you need to provide a dynamic way of describing a complex path through nested enumerable objects. This makes it exceptionally well suited for flexible ETL (Extract, Transform, Load) processes by allowing you to define paths through your data in a simple, easily readable, easily storable syntax.</p>
+
+<p>Enumpath path expressions look like this:</p>
+
+<p>```
+$.pets.cats.0.name</p>
+
+<p>$.pets[cats,dogs].*.name</p>
+
+<p>pets..name</p>
+
+<p>[‘pets’]..[?(@.age &gt; 10)].name</p>
+
+<p>..age</p>
+
+<p>pets.cats.-1
+```</p>
+
+<p>Enumpath has the following benefits over vanilla <code>Enumerable#dig</code>:</p>
+
+<ul>
+  <li>Paths can be described as simple strings</li>
+  <li>It’s smart enough to figure out which path segments are integer indexes versus symbolic keys versus string keys</li>
+  <li>It enables the use of wildcard, recursive descent, filter, subscript, union, and slice operators to describe complex paths through the data</li>
+</ul>
+
+<p>Like <code>Enumerable#dig</code>, Enumpath protects against missing path segments and returns safely if the full path cannot be resolved.</p>
+
+<h2 id="installation">Installation</h2>
+
+<p>Add this line to your application’s Gemfile:</p>
+
+<p><code>ruby
+gem 'enumpath'
+</code></p>
+
+<p>And then execute:</p>
+
+<pre class="code ruby"><code class="ruby">$ bundle
+</code></pre>
+
+<p>Or install it yourself as:</p>
+
+<pre class="code ruby"><code class="ruby">$ gem install enumpath
+</code></pre>
+
+<h2 id="usage">Usage</h2>
+
+<p>Enumpath exposes a simple interface via <code>Enumpath.apply</code> that takes a path and an enumerable.</p>
+
+<p><code>ruby
+party = { food: %w[pizza tacos] }
+Enumpath.apply('food.0', party) # =&gt; ["pizza"]
+</code></p>
+
+<p>The result of <code>Enumpath.apply</code> is an array of values that were extracted according to the path. Technically it’s an instance of <code>Enumpath::Results</code> which is an Array-like object that allows you to chain further calls to <code>.apply</code> like this:</p>
+
+<p><code>ruby
+party = { food: %w[pizza tacos] }
+results = Enumpath.apply('food.*', party) # =&gt; ["pizza", "tacos"]
+results.apply("[?(@ == 'pizza')]") # =&gt; ["pizza"]
+</code></p>
+
+<p>In the event that the path doesn’t match anything, an empty results set is returned:</p>
+
+<p><code>ruby
+party = { food: %w[pizza tacos] }
+Enumpath.apply("drinks.*", party) # =&gt; []
+</code></p>
+
+<blockquote>
+  <p>This is a thoughtful deviation from the original JSONPath spec which would return <code>false</code> on no matches.</p>
+</blockquote>
+
+<h2 id="operator-reference">Operator Reference</h2>
+
+<p>Enumpath currently implements the following path operators:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">operator</th>
+      <th>summary</th>
+      <th>basic examples</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center"><code>$</code></td>
+      <td><strong>Root</strong>; only valid at the beginning of a path and it is entirely optional</td>
+      <td><code>$.puppies</code> is equivalent to <code>puppies</code></td>
+    </tr>
+    <tr>
+      <td style="text-align: center"><code>.</code> or <code>[]</code></td>
+      <td><strong><a href="#child-operator">Child</a></strong>; can be dot notation or bracket, and bracketed child operators can optionally be wrapped in single quotes</td>
+      <td><code>locations</code>, <code>0</code>, <code>[departments]</code>, and <code>['human resources']</code> are all valid child operators</td>
+    </tr>
+    <tr>
+      <td style="text-align: center"><code>*</code></td>
+      <td><strong><a href="#wildcard-operator">Wildcard</a></strong>; applies the remaining path to each member of the current enumerable</td>
+      <td><code>children.*.name</code> would result in an array containing the names of all the children</td>
+    </tr>
+    <tr>
+      <td style="text-align: center"><code>..</code></td>
+      <td><strong><a href="#recursive-descent-operator">Recursive descent</a></strong>; applies the remaining path to all members at every level of the current enumerable, including to the current enumerable itself</td>
+      <td><code>..name</code> would find all the <code>name</code> members all the way down through the enumerable regardless of nesting level</td>
+    </tr>
+    <tr>
+      <td style="text-align: center"><code>[start:end:step]</code></td>
+      <td><strong><a href="#slice-operator">Slice</a></strong>; similar in functionality to Ruby’s <code>Array#slice</code> method with the addition of a step argument</td>
+      <td><code>[1:8:2]</code> would operate on indices 1, 3, 5, and 7</td>
+    </tr>
+    <tr>
+      <td style="text-align: center"><code>[child1,child2[,...]]</code></td>
+      <td><strong><a href="#union-operator">Union</a></strong>; combines the results from multiple child operators</td>
+      <td><code>authors.*[first_name,last_name]</code> is equivalent to <code>authors.*.first_name</code> + <code>authors.*.last_name</code></td>
+    </tr>
+    <tr>
+      <td style="text-align: center"><code>?()</code></td>
+      <td><strong><a href="#filter-expression-operator">Filter expression</a></strong>; evaluates boolean expressions against the current enumerable; only the members of enumerable that meet the criteria are passed through</td>
+      <td><code>[?(@.price &gt; 10 &amp;&amp; @.price &lt;= 20 )]</code> would return all items whose price is greater than 10 and less than or equal to 20</td>
+    </tr>
+    <tr>
+      <td style="text-align: center"><code>()</code></td>
+      <td><strong><a href="#subscript-expression-operator">Subscript expression</a></strong>; evaluates an expression as a subscript on the current enumerator</td>
+      <td><code>[(@.length - 1)]</code> would apply a child operator equal to the <code>#length</code> of the current enumerable minus 1 to the current enumerable (i.e. the last member of an array)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="child-operator">Child operator</h3>
+
+<p>Syntax: <code>child</code> or <code>[child]</code> or <code>['child']</code></p>
+
+<p>Child operators match on an index, key, member, or property of the enumerable. In its non-normalized form a child operator is preceded by <code>.</code> or wrapped in ‘[]’. In bracket notation the child may optionally be wrapped in single quotes. Enumpath will attempt to resolve the data type of the child operator in the following order of precedence:</p>
+
+<ol>
+  <li>as an integer key or index (if the segment is integer-like),</li>
+  <li>then as a string key,</li>
+  <li>then as a symbol key,</li>
+  <li>and finally as a public property (i.e. a public method of the target that expects no arguments)</li>
+</ol>
+
+<h4 id="examples">Examples</h4>
+
+<p><code>
+Car = Struct.new(:color, :transmition, :owners)
+hyundai = Car.new('blue', :automatic, [{ name: 'Bill' }, { name: 'Ted' }])
+subaru = Car.new('gold', :standard, [{ name: 'Kate' }])
+jeep = Car.new('black', :automatic, [])
+garages = [{ 'cars' =&gt; [hyundai, subaru] }, { 'cars' =&gt; [jeep] }]
+Enumpath.apply('1', garages) # =&gt; [{"cars"=&gt;[#&lt;struct Car color="black", transmition=:automatic, owners=[]&gt;]}]
+Enumpath.apply('0.cars.-1', garages) # =&gt; [#&lt;struct Car color="gold", transmition=:standard, owners=[{:name=&gt;"Kate"}]&gt;]
+Enumpath.apply('1.cars.0.owners.length', garages) # =&gt; [0]
+</code></p>
+
+<h3 id="wildcard-operator">Wildcard operator</h3>
+
+<p>Syntax: <code>*</code> or <code>[*]</code></p>
+
+<p>Wildcards match each immediate member of the enumerable.</p>
+
+<h3 id="recursive-descent-operator">Recursive descent operator</h3>
+
+<p>Syntax: <code>..</code></p>
+
+<p>Applies the remaining path expression segments recursively to all members of the enumerable regardless of their nesting level, including the enumerable itself.</p>
+
+<h3 id="slice-operator">Slice operator</h3>
+
+<p>Syntax: <code>[start:end:step]</code>, <code>[start:]</code>, <code>[start:end]</code>, <code>[start::step]</code>, <code>[:end]</code>, <code>[:end:step]</code>, <code>[::step]</code>, …</p>
+
+<p>The slice operator selects a range of elements like Ruby’s <em><code>start...end</code></em> literal, excluding the end value, and then selects each <em>step</em> items. The <em>start</em>, <em>end</em>, and <em>step</em> arguments default to <code>0</code>, <code>Enumerable#length</code>, and <code>1</code> respectively. The remaining path expression segments are passed to each member whose index is included by the slice operator.</p>
+
+<p>The operator accepts a mixed bag of argument combinations. For instance, these are all valid slice operators:</p>
+
+<ul>
+  <li><code>[1:8]</code>: passes through the members of the enumerable at indices 1 – 7</li>
+  <li><code>[1:]</code>: passes through the members of the enumerable at indices 1 – <code>Enumerable#length</code></li>
+  <li><code>[:8]</code>: passes through the members of the enumerable at indices 0 – 7</li>
+  <li><code>[:8:2]</code>: passes through the members of the enumerable at indices 0, 2, 4, and 6</li>
+  <li><code>[::2]</code>: passes through the members of the enumerable at indices 0, 2, 4, 6, 8, … up to <code>Enumerable#length</code></li>
+</ul>
+
+<h3 id="union-operator">Union operator</h3>
+
+<p>Syntax: <code>[child1,child2,...]</code></p>
+
+<p>The union operator combines the results of two or more child operators. There is no limit to the number of child operators you can specify in a single union. Each child operator is separated by a comma (<code>,</code>). White space is stripped from around each child operator. Child operators can optionally be wrapped in single quotes. Bracket notation is not supporter in this context.</p>
+
+<p>The following are all valid union operators:</p>
+
+<ul>
+  <li><code>[first,last]</code></li>
+  <li><code>[first,middle,last]</code></li>
+  <li><code>['first', middle , last]</code></li>
+</ul>
+
+<h3 id="filter-expression-operator">Filter expression operator</h3>
+
+<p>Syntax: <code>[?(expression)]</code>, <code>[?(expression &amp;&amp; expression)]</code>, <code>[?(expression || expression)]</code>, …</p>
+
+<p>A filter expression is made up of one or more boolean expressions. Each boolean expression consists of a child operator (<code>@.child</code> or <code>child</code>; the leading <code>@.</code> is optional), plus an optional pair of comparison operator and operand. The comparison operator can be any one of <code>==</code>, <code>!=</code>, <code>&gt;=</code>, <code>&lt;=</code>, <code>&lt;=&gt;</code>, <code>&gt;</code>, <code>&lt;</code>, <code>=~</code>, <code>!~</code>. The operand can be a string (<code>'some string'</code>), symbol (<code>:some_symbol</code>), boolean constant (<code>true</code> or <code>false</code>), nil constant (<code>nil</code>), regular expression (<code>/^Some\s+/i</code>), or numeric value (<code>10</code> or <code>1.0</code>). If an operator and operand are not included in an expression then the value located at the child operator is evaluated for truthiness. Multiple expression groups can be chained together with <code>&amp;&amp;</code> or <code>||</code> logical operators, but note that parenthetical grouping of expressions is not supported; the results of each are applied to the previous running result in order. Any member of the current enumerable that passes the net result of the filter expression will be included in further processing of the path.</p>
+
+<p>The following are all valid filter expressions:</p>
+
+<ul>
+  <li><code>[?(@.isbn)]</code>: any member who has an <code>isbn</code> value that is not falsey</li>
+  <li><code>[?(isbn)]</code>: equivalent to the previous example</li>
+  <li><code>[?(@.price == 8)]</code>: any member whose <code>price</code> value is equal to 8</li>
+  <li><code>[?(@.price == 8 || @.price == 10)]</code>: members with a <code>price</code> of 8 <em>or</em> 10</li>
+  <li><code>[?(@.price &gt; 2 &amp;&amp; @.price &lt; 10)]</code>: members with a <code>price</code> greater than 8 <em>and</em> less than 10</li>
+  <li><code>[?(@.name =~ /bob/i || @.name == 'Mark')]</code>: any member whose <code>name</code> matches the regex <code>/bob/i</code> or equals <code>'Mark'</code></li>
+</ul>
+
+<blockquote>
+  <p>Regular expression operands are safely parsed using the <code>to_regexp</code> gem</p>
+</blockquote>
+
+<h3 id="subscript-expression-operator">Subscript expression operator</h3>
+
+<p>Syntax: <code>[(expression)]</code></p>
+
+<p>A subscript expression is made up of a singe expression that consists of a child operator (<code>@.child</code> or <code>child</code>; the leading <code>@.</code> is optional), plus an optional pair of arithmetic operator and operand. The arithmetic operator can be any one of <code>+</code>, <code>-</code>, <code>**</code>, <code>*</code>, <code>/</code>, or <code>%</code>. The operand can be a string (<code>'some string'</code>), symbol (<code>:some_symbol</code>), or numeric value (<code>10</code> or <code>1.0</code>). The expression is evaluated and the result becomes the subscript. If an operator and operand are not included in an expression then the value located at the child operator is used as the subscript. If the subscript represents a valid child path for the enumerable, the value of that member will be passed along for further processing of the path.</p>
+
+<p>The following are all valid filter expressions:</p>
+
+<ul>
+  <li><code>[(@.length - 1)]</code>: the subscript becomes the length of the current enumerable, minus 1</li>
+  <li><code>[(length / 2)]</code>: the subscript becomes the index at half the length of the enumerable</li>
+  <li><code>[(@.type)]</code>: the subscript becomes the value at the <code>type</code> key, member, or property of the enumerable</li>
+</ul>
+
+<h2 id="examples-1">Examples</h2>
+
+<p>Given the same store example from the JSONPath project:</p>
+
+<p>```ruby
+store_info = {
+  store: {
+    book: [
+      { category: “reference”,
+        author: “Nigel Rees”,
+        title: “Sayings of the Century”,
+        price: 8.95 },
+      { category: “fiction”,
+        author: “Evelyn Waugh”,
+        title: “Sword of Honour”,
+        price: 12.99 },
+      { category: “fiction”,
+        author: “Herman Melville”,
+        title: “Moby Dick”,
+        isbn: “0-553-21311-3”,
+        price: 8.99 },
+      { category: “fiction”,
+        author: “J. R. R. Tolkien”,
+        title: “The Lord of the Rings”,
+        isbn: “0-395-19395-8”,
+        price: 22.99 }
+    ],
+    bicycle: { color: “red”, price: 19.95 }
+  }
+}</p>
+
+<h1 id="the-authors-of-all-the-books-in-the-store">The authors of all the books in the store</h1>
+<p>Enumpath.apply(“$.store.book[*].author”, store_info)
+# =&gt; [“Nigel Rees”, “Evelyn Waugh”, “Herman Melville”, “J. R. R. Tolkien”]</p>
+
+<h1 id="all-prices-in-the-store">All prices in the store</h1>
+<p>Enumpath.apply(“$..price”, store_info)
+# =&gt; [8.95, 12.99, 8.99, 22.99, 19.95]</p>
+
+<h1 id="all-things-in-store-which-are-some-books-and-a-red-bicycle">All things in store, which are some books and a red bicycle</h1>
+<p>Enumpath.apply(“$.store.*”, store_info)
+# =&gt; [[#       :author=&gt;”Nigel Rees”,
+#       :title=&gt;”Sayings of the Century”,
+#       :price=&gt;8.95,
+#      #       :author=&gt;”Evelyn Waugh”,
+#       :title=&gt;”Sword of Honour”,
+#       :price=&gt;12.99,
+#      #       :author=&gt;”Herman Melville”,
+#       :title=&gt;”Moby Dick”,
+#       :isbn=&gt;”0-553-21311-3”,
+#       :price=&gt;8.99,
+#      #       :author=&gt;”J. R. R. Tolkien”,
+#       :title=&gt;”The Lord of the Rings”,
+#       :isbn=&gt;”0-395-19395-8”,
+#       :price=&gt;22.99],
+#     :price=&gt;19.95]</p>
+
+<h1 id="the-third-book">The third book</h1>
+<p>Enumpath.apply(“$..book[2]”, store_info)
+# =&gt; [:author=&gt;”Herman Melville”, :title=&gt;”Moby Dick”, :isbn=&gt;”0-553-21311-3”, :price=&gt;8.99]</p>
+
+<h1 id="the-last-book-in-order">The last book in order</h1>
+<p>Enumpath.apply(“$..book[(@.length-1)]”, store_info)
+Enumpath.apply(“$..book[-1:]”, store_info)
+# =&gt; Both return: [:author=&gt;”J. R. R. Tolkien”, :title=&gt;”The Lord of the Rings”, :isbn=&gt;”0-395-19395-8”, :price=&gt;22.99]</p>
+
+<h1 id="the-first-two-books-in-order-both-of-these-path-expressions-are-equivalent">The first two books in order. Both of these path expressions are equivalent</h1>
+<p>Enumpath.apply(“$..book[0,1]”, store_info)
+Enumpath.apply(“$..book[:2]”, store_info)
+# =&gt; [#      :author=&gt;”Nigel Rees”,
+#      :title=&gt;”Sayings of the Century”,
+#      :price=&gt;8.95,
+#     #      :author=&gt;”Evelyn Waugh”,
+#      :title=&gt;”Sword of Honour”,
+#      :price=&gt;12.99]</p>
+
+<h1 id="all-books-with-an-isbn-number">All books with an isbn number</h1>
+<p>Enumpath.apply(“$..book[?(@.isbn)]”, store_info)
+# =&gt; [#      :author=&gt;”Herman Melville”,
+#      :title=&gt;”Moby Dick”,
+#      :isbn=&gt;”0-553-21311-3”,
+#      :price=&gt;8.99,
+#     #      :author=&gt;”J. R. R. Tolkien”,
+#      :title=&gt;”The Lord of the Rings”,
+#      :isbn=&gt;”0-395-19395-8”,
+#      :price=&gt;22.99]</p>
+
+<h1 id="all-books-with-a-price-less-than-10">All books with a price less than 10</h1>
+<p>Enumpath.apply(“$..book[?(@.price&lt;10)]”, store_info)
+# =&gt; [#      :author=&gt;”Nigel Rees”,
+#      :title=&gt;”Sayings of the Century”,
+#      :price=&gt;8.95,
+#     #      :author=&gt;”Herman Melville”,
+#      :title=&gt;”Moby Dick”,
+#      :isbn=&gt;”0-553-21311-3”,
+#      :price=&gt;8.99]</p>
+
+<h1 id="all-members-of-the-enumerable-recursively">All members of the enumerable, recursively</h1>
+<p>Enumpath.apply(“$..*”, store_info)
+# =&gt; [#       [{:category=&gt;”reference”,
+#         :author=&gt;”Nigel Rees”,
+#         :title=&gt;”Sayings of the Century”,
+#         :price=&gt;8.95,
+#        #         :author=&gt;”Evelyn Waugh”,
+#         :title=&gt;”Sword of Honour”,
+#         :price=&gt;12.99,
+#        #         :author=&gt;”Herman Melville”,
+#         :title=&gt;”Moby Dick”,
+#         :isbn=&gt;”0-553-21311-3”,
+#         :price=&gt;8.99,
+#        #         :author=&gt;”J. R. R. Tolkien”,
+#         :title=&gt;”The Lord of the Rings”,
+#         :isbn=&gt;”0-395-19395-8”,
+#         :price=&gt;22.99],
+#      :bicycle=&gt;:price=&gt;19.95},
+#     [#       :author=&gt;”Nigel Rees”,
+#       :title=&gt;”Sayings of the Century”,
+#       :price=&gt;8.95,
+#      #       :author=&gt;”Evelyn Waugh”,
+#       :title=&gt;”Sword of Honour”,
+#       :price=&gt;12.99,
+#      #       :author=&gt;”Herman Melville”,
+#       :title=&gt;”Moby Dick”,
+#       :isbn=&gt;”0-553-21311-3”,
+#       :price=&gt;8.99,
+#      #       :author=&gt;”J. R. R. Tolkien”,
+#       :title=&gt;”The Lord of the Rings”,
+#       :isbn=&gt;”0-395-19395-8”,
+#       :price=&gt;22.99],
+#     :price=&gt;19.95,
+#     #      :author=&gt;”Nigel Rees”,
+#      :title=&gt;”Sayings of the Century”,
+#      :price=&gt;8.95,
+#     #      :author=&gt;”Evelyn Waugh”,
+#      :title=&gt;”Sword of Honour”,
+#      :price=&gt;12.99,
+#     #      :author=&gt;”Herman Melville”,
+#      :title=&gt;”Moby Dick”,
+#      :isbn=&gt;”0-553-21311-3”,
+#      :price=&gt;8.99,
+#     #      :author=&gt;”J. R. R. Tolkien”,
+#      :title=&gt;”The Lord of the Rings”,
+#      :isbn=&gt;”0-395-19395-8”,
+#      :price=&gt;22.99,
+#     “reference”,
+#     “Nigel Rees”,
+#     “Sayings of the Century”,
+#     8.95,
+#     “fiction”,
+#     “Evelyn Waugh”,
+#     “Sword of Honour”,
+#     12.99,
+#     “fiction”,
+#     “Herman Melville”,
+#     “Moby Dick”,
+#     “0-553-21311-3”,
+#     8.99,
+#     “fiction”,
+#     “J. R. R. Tolkien”,
+#     “The Lord of the Rings”,
+#     “0-395-19395-8”,
+#     22.99,
+#     “red”,
+#     19.95]
+```</p>
+
+<h2 id="options">Options</h2>
+
+<h3 id="returntype">:return_type</h3>
+
+<p>By default, Enumpath returns the values that match the path expression. Like the original JSONPath implementation, Enumpath also supports returning path results instead of values. This can be useful for collecting static paths from dynamic paths.</p>
+
+<p><code>ruby
+party = { food: %w[pizza tacos] }
+Enumpath.apply("food.*", party, result_type: :path) # =&gt; ["$['food'][0]", "$['food'][1]"]
+</code></p>
+
+<p>Each returned path is a valid path expression that can be used in calls to <code>Enumpath.apply</code>. If you want to be explicit about returning values instead of paths you can specify that with the option <code>result_type: :value</code>.</p>
+
+<h3 id="verbose">:verbose</h3>
+
+<p>Seeing how your path expression is being applied to an enumerable can be helpful in understanding the path expression syntax. Enumpath has a built-in logger to assist with this. It can be enabled by simply passing <code>verbose: true</code> as an option on <code>Enumpath.apply</code>. By default this will log debugging information to STDOUT, however you can provide your own logger.</p>
+
+<p>For example:</p>
+
+<p><code>ruby
+Enumpath.logger.logger = ::Logger.new('log/enumpath.log')
+</code></p>
+
+<p>Once enabled, it will log debugging information like so:</p>
+
+<p>```
+Enumpath.apply(‘$.store.book’, store_info, verbose: true)</p>
+
+<hr />
+<p>Enumpath: Path normalized
+————————————–
+original  : $.store.book
+normalized: [“store”, “book”]
+————————————–
+Enumpath: Applying
+————————————–
+operator: [“store”, “book”]
+to      : {:store=&gt;{:book=&gt;[{:category=&gt;”reference”, :author…
+————————————–
+Enumpath: Child operator detected
+  ————————————–
+  Enumpath: Applying
+  ————————————–
+  operator: [“book”]
+  to      : {:book=&gt;[{:category=&gt;”reference”, :author=&gt;”Nigel …
+  ————————————–
+  Enumpath: Child operator detected
+    ————————————–
+    Enumpath: Storing
+    ————————————–
+    resolved_path: [“store”, “book”]
+    enum        : [{:category=&gt;”reference”, :author=&gt;”Nigel Rees”, :…
+    ————————————–
+    Enumpath: New Result
+    ————————————–
+    result: [{:category=&gt;”reference”, :author=&gt;”Nigel Rees”, :…
+```</p>
+
+<p>You can also control verbose mode via <code>Enumpath.verbose = true</code> and <code>Enumpath.verbose = false</code>.</p>
+
+<h2 id="path-normalization">Path normalization</h2>
+
+<p>When you give a string path to Enumpath it will automatically normalize it to an array of path segments. You can also pass it an array of path segments to avoid the normalization, for instance if the normalization process is having trouble parsing your path, or you happen to have a pre-normalized path already. For example the path <code>['pets']..[?(@.age &gt; 10)].name</code> is represented in normalized form as <code>['pets', '..', '?(@.age &gt; 10)', 'name']</code>. For the most part you should stick with string paths and let Enumpath normalize on its own.</p>
+
+<h3 id="normalized-path-caching">Normalized path caching</h3>
+
+<p>To save a little bit of time on consecutive calls Enumpath caches the normalized version of each path. This is an implementation detail that can generally be ignored but if you run into trouble with it you can clear the cache with <code>Enumpath.path_cache.reset</code>.</p>
+
+<h2 id="deviations-from-the-original-jsonpath-spec">Deviations from the Original JSONPath Spec</h2>
+
+<ol>
+  <li>
+    <p>The JSONPath spec required that <code>false</code> be returned when no matches were found, but Enumpath will return an empty result set (<code>[]</code>) instead. This is a thoughtful divergence based on the principle of least astonishment and the robustness principle.</p>
+  </li>
+  <li>
+    <p>Enumpath supports relative child indexes, which the original implementation did not support. For instance:</p>
+
+    <pre class="code ruby"><code class="ruby"> <span class='comment'># Get the last element. Both are equivalent to `$..book[-1:]`
+</span> <span class='const'><span class='object_link'><a href="Enumpath.html" title="Enumpath (module)">Enumpath</a></span></span><span class='period'>.</span><span class='id identifier rubyid_apply'><span class='object_link'><a href="Enumpath.html#apply-class_method" title="Enumpath.apply (method)">apply</a></span></span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>$..book.-1</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_store_info'>store_info</span><span class='rparen'>)</span>
+ <span class='const'><span class='object_link'><a href="Enumpath.html" title="Enumpath (module)">Enumpath</a></span></span><span class='period'>.</span><span class='id identifier rubyid_apply'><span class='object_link'><a href="Enumpath.html#apply-class_method" title="Enumpath.apply (method)">apply</a></span></span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>$..book[-1]</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_store_info'>store_info</span><span class='rparen'>)</span>
+</code></pre>
+  </li>
+  <li>
+    <p>The original implementations of JSONPath allowed unchecked evaluation of filter and subscript expressions. Enumpath limits those expressions to a reasonable subset of operations as detailed in the <a href="#operator-reference">Operator Reference</a> section and uses <code>public_send</code> rather than <code>eval</code> to resolve expressions as necessary.</p>
+  </li>
+  <li>
+    <p>The original JSONPath spec did not include support for using logical operators to chain expressions in filter expression operators. This addition was inspired by <a href="https://skarlso.github.io/2017/05/28/replace-eval-with-object-send-and-a-parser/">Gergely Brautigam’s</a> work on <a href="https://github.com/joshbuddy/jsonpath">joshbuddy/jsonpath</a></p>
+  </li>
+</ol>
+
+<h2 id="requirements">Requirements</h2>
+
+<p>Enumpath requires Ruby 2.3.0 or higher.</p>
+
+<h2 id="development">Development</h2>
+
+<p>After checking out the repo, run <code>bin/setup</code> to install dependencies. Then, run <code>rspec</code> to run the tests. You can also run <code>bin/console</code> for an interactive prompt that will allow you to experiment.</p>
+
+<h2 id="contributing">Contributing</h2>
+
+<p>Bug reports and pull requests are welcome on GitHub at <a href="https://github.com/chrisbloom7/enumpath">chrisbloom7/enumpath</a>. Please read <a href="">CONTRIBUTING.md</a> for details on our code of conduct, and the process for submitting pull requests to us.</p>
+
+<h2 id="versioning">Versioning</h2>
+
+<p>We use <a href="http://semver.org/">SemVer</a> for versioning. For the versions available, see the <a href="https://github.com/chrisbloom7/enumpath/tags">tags</a> on this repository.</p>
+
+<h2 id="authors">Authors</h2>
+
+<ul>
+  <li><a href="https://github.com/chrisbloom7">Chris Bloom</a></li>
+</ul>
+
+<p>See also the list of <a href="https://github.com/chrisbloom7/enumpath/graphs/contributors">contributors</a> who participated in this project.</p>
+
+<h2 id="license">License</h2>
+
+<p>Licensed under the Apache License, Version 2.0 (the “License”); you may not use this file except in compliance with the License. You may obtain a copy of the License at</p>
+
+<p><a href="http://www.apache.org/licenses/LICENSE-2.0">www.apache.org/licenses/LICENSE-2.0</a></p>
+
+<p>Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an “AS IS” BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.</p>
+
+<h2 id="acknowledgements">Acknowledgements</h2>
+
+<p>This project originated from an internal project at <a href="http://youearnedit.com">YouEarnedIt</a>, an employee engagement and performance metrics platform, headquartered in Austin, TX.</p>
+
+<p>Enumpath is based on <a href="http://goessner.net/articles/JsonPath/">Stefan Goessner’s JSONPath spec</a>, and was inspired by several similar libraries:</p>
+
+<ul>
+  <li><a href="https://github.com/nickcharlton/keypath-ruby">nickcharlton/keypath-ruby</a></li>
+  <li><a href="https://github.com/joshbuddy/jsonpath">joshbuddy/jsonpath</a></li>
+</ul>
+
+</div></div>
+
+      <div id="footer">
+  Generated on Wed Jun  2 15:30:57 2021 by
+  <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.9.26 (ruby-2.6.5).
+</div>
+
+    </div>
+  </body>
+</html>
