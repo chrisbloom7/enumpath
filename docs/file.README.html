@@ -67,7 +67,7 @@
 
 <p>Enumpath path expressions look like this:</p>
 
-<p>```
+<p>```text
 $.pets.cats.0.name</p>
 
 <p>$.pets[cats,dogs].*.name</p>
@@ -101,13 +101,15 @@ gem 'enumpath'
 
 <p>And then execute:</p>
 
-<pre class="code ruby"><code class="ruby">$ bundle
-</code></pre>
+<p><code>shell
+bundle
+</code></p>
 
 <p>Or install it yourself as:</p>
 
-<pre class="code ruby"><code class="ruby">$ gem install enumpath
-</code></pre>
+<p><code>shell
+gem install enumpath
+</code></p>
 
 <h2 id="usage">Usage</h2>
 
@@ -206,9 +208,9 @@ Enumpath.apply("drinks.*", party) # =&gt; []
   <li>and finally as a public property (i.e. a public method of the target that expects no arguments)</li>
 </ol>
 
-<h4 id="examples">Examples</h4>
+<h4 id="operator-examples">Operator Examples</h4>
 
-<p><code>
+<p><code>ruby
 Car = Struct.new(:color, :transmition, :owners)
 hyundai = Car.new('blue', :automatic, [{ name: 'Bill' }, { name: 'Ted' }])
 subaru = Car.new('gold', :standard, [{ name: 'Kate' }])
@@ -296,7 +298,7 @@ Enumpath.apply('1.cars.0.owners.length', garages) # =&gt; [0]
   <li><code>[(@.type)]</code>: the subscript becomes the value at the <code>type</code> key, member, or property of the enumerable</li>
 </ul>
 
-<h2 id="examples-1">Examples</h2>
+<h2 id="usage-examples">Usage Examples</h2>
 
 <p>Given the same store example from the JSONPath project:</p>
 
@@ -487,7 +489,7 @@ Enumpath.logger.logger = ::Logger.new('log/enumpath.log')
 
 <p>Once enabled, it will log debugging information like so:</p>
 
-<p>```
+<p>```plain
 Enumpath.apply(‘$.store.book’, store_info, verbose: true)</p>
 
 <hr />
@@ -533,23 +535,18 @@ Enumpath: Child operator detected
 <h2 id="deviations-from-the-original-jsonpath-spec">Deviations from the Original JSONPath Spec</h2>
 
 <ol>
-  <li>
-    <p>The JSONPath spec required that <code>false</code> be returned when no matches were found, but Enumpath will return an empty result set (<code>[]</code>) instead. This is a thoughtful divergence based on the principle of least astonishment and the robustness principle.</p>
-  </li>
+  <li>The JSONPath spec required that <code>false</code> be returned when no matches were found, but Enumpath will return an empty result set (<code>[]</code>) instead. This is a thoughtful divergence based on the principle of least astonishment and the robustness principle.</li>
   <li>
     <p>Enumpath supports relative child indexes, which the original implementation did not support. For instance:</p>
 
-    <pre class="code ruby"><code class="ruby"> <span class='comment'># Get the last element. Both are equivalent to `$..book[-1:]`
-</span> <span class='const'><span class='object_link'><a href="Enumpath.html" title="Enumpath (module)">Enumpath</a></span></span><span class='period'>.</span><span class='id identifier rubyid_apply'><span class='object_link'><a href="Enumpath.html#apply-class_method" title="Enumpath.apply (method)">apply</a></span></span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>$..book.-1</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_store_info'>store_info</span><span class='rparen'>)</span>
- <span class='const'><span class='object_link'><a href="Enumpath.html" title="Enumpath (module)">Enumpath</a></span></span><span class='period'>.</span><span class='id identifier rubyid_apply'><span class='object_link'><a href="Enumpath.html#apply-class_method" title="Enumpath.apply (method)">apply</a></span></span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>$..book[-1]</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_store_info'>store_info</span><span class='rparen'>)</span>
-</code></pre>
+    <p><code>ruby
+ # Get the last element. Both are equivalent to `$..book[-1:]`
+ Enumpath.apply('$..book.-1', store_info)
+ Enumpath.apply('$..book[-1]', store_info)
+</code></p>
   </li>
-  <li>
-    <p>The original implementations of JSONPath allowed unchecked evaluation of filter and subscript expressions. Enumpath limits those expressions to a reasonable subset of operations as detailed in the <a href="#operator-reference">Operator Reference</a> section and uses <code>public_send</code> rather than <code>eval</code> to resolve expressions as necessary.</p>
-  </li>
-  <li>
-    <p>The original JSONPath spec did not include support for using logical operators to chain expressions in filter expression operators. This addition was inspired by <a href="https://skarlso.github.io/2017/05/28/replace-eval-with-object-send-and-a-parser/">Gergely Brautigam’s</a> work on <a href="https://github.com/joshbuddy/jsonpath">joshbuddy/jsonpath</a></p>
-  </li>
+  <li>The original implementations of JSONPath allowed unchecked evaluation of filter and subscript expressions. Enumpath limits those expressions to a reasonable subset of operations as detailed in the <a href="#operator-reference">Operator Reference</a> section and uses <code>public_send</code> rather than <code>eval</code> to resolve expressions as necessary.</li>
+  <li>The original JSONPath spec did not include support for using logical operators to chain expressions in filter expression operators. This addition was inspired by <a href="https://skarlso.github.io/2017/05/28/replace-eval-with-object-send-and-a-parser/">Gergely Brautigam’s</a> work on <a href="https://github.com/joshbuddy/jsonpath">joshbuddy/jsonpath</a></li>
 </ol>
 
 <h2 id="requirements">Requirements</h2>
@@ -562,7 +559,7 @@ Enumpath: Child operator detected
 
 <h2 id="contributing">Contributing</h2>
 
-<p>Bug reports and pull requests are welcome on GitHub at <a href="https://github.com/chrisbloom7/enumpath">chrisbloom7/enumpath</a>. Please read <a href="">CONTRIBUTING.md</a> for details on our code of conduct, and the process for submitting pull requests to us.</p>
+<p>Bug reports and pull requests are welcome on GitHub at <a href="https://github.com/chrisbloom7/enumpath">chrisbloom7/enumpath</a>. Please read <a href="https://github.com/chrisbloom7/enumpath/blob/main/CONTRIBUTING.md">CONTRIBUTING.md</a> for details on our code of conduct, and the process for submitting pull requests to us.</p>
 
 <h2 id="versioning">Versioning</h2>
 
@@ -598,7 +595,7 @@ Enumpath: Child operator detected
 </div></div>
 
       <div id="footer">
-  Generated on Wed Jun  2 16:01:02 2021 by
+  Generated on Wed Jun  2 16:45:37 2021 by
   <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.26 (ruby-2.6.5).
 </div>
