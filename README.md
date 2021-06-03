@@ -8,7 +8,7 @@ Enumpath is an implementation of the [JSONPath][jsonpath] spec for Ruby objects,
 
 Enumpath path expressions look like this:
 
-```text
+```plain
 $.pets.cats.0.name
 
 $.pets[cats,dogs].*.name

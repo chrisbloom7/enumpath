@@ -10,8 +10,9 @@ task default: :spec
 
 YARD::Rake::YardocTask.new do |t|
   t.options = [
+    '-M', 'redcarpet',
+    '-m', 'markdown',
     '-o', 'docs',
     '--no-private',
-    '-', 'LICENSE'
-  ]
+    '-', 'LICENSE']
 end
