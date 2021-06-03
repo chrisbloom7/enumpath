@@ -103,12 +103,11 @@
   <div class="discussion">
     <div class="note abstract">
   <strong>This class is abstract.</strong>
-  <div class='inline'>
-<p>Subclass and override <span class='object_link'><a href="#detect%3F-class_method" title="Enumpath::Operator::Base.detect? (method)">Base.detect?</a></span> and <span class='object_link'><a href="#apply-instance_method" title="Enumpath::Operator::Base#apply (method)">#apply</a></span> to implement a new path expression operator.</p>
+  <div class='inline'><p>Subclass and override <span class='object_link'><a href="#detect%3F-class_method" title="Enumpath::Operator::Base.detect? (method)">Base.detect?</a></span> and <span class='object_link'><a href="#apply-instance_method" title="Enumpath::Operator::Base#apply (method)">#apply</a></span> to implement a new path expression operator.</p>
 </div>
 </div>
-
-<p>Abstract base class for Operator definitions. Provides some helper methods for each operator and defines the basic factory methods that must be implemented.</p>
+<p>Abstract base class for Operator definitions. Provides some helper methods for each operator and defines the
+basic factory methods that must be implemented.</p>
 
 
   </div>
@@ -149,8 +148,7 @@
   
 
   
-    <span class="summary_desc"><div class='inline'>
-<p>The full, normalized operator.</p>
+    <span class="summary_desc"><div class='inline'><p>The full, normalized operator.</p>
 </div></span>
   
 </li>
@@ -186,8 +184,7 @@
   
 
   
-    <span class="summary_desc"><div class='inline'>
-<p>Provides an interface for determining if a given string represents the operator class.</p>
+    <span class="summary_desc"><div class='inline'><p>Provides an interface for determining if a given string represents the operator class.</p>
 </div></span>
   
 </li>
@@ -219,8 +216,7 @@
   
 
   
-    <span class="summary_desc"><div class='inline'>
-<p>Provides an interface for applying the operator to a given enumerable and yielding that result back to the caller with updated arguments.</p>
+    <span class="summary_desc"><div class='inline'><p>Provides an interface for applying the operator to a given enumerable and yielding that result back to the caller with updated arguments.</p>
 </div></span>
   
 </li>
@@ -245,8 +241,7 @@
   
 
   
-    <span class="summary_desc"><div class='inline'>
-<p>Initializes an operator class with an operator string.</p>
+    <span class="summary_desc"><div class='inline'><p>Initializes an operator class with an operator string.</p>
 </div></span>
   
 </li>
@@ -269,8 +264,7 @@
   
 </h3><div class="docstring">
   <div class="discussion">
-    
-<p>Initializes an operator class with an operator string</p>
+    <p>Initializes an operator class with an operator string</p>
 
 
   </div>
@@ -289,8 +283,7 @@
       
       
         &mdash;
-        <div class='inline'>
-<p>the the full, normalized operator</p>
+        <div class='inline'><p>the the full, normalized operator</p>
 </div>
       
     </li>
@@ -337,8 +330,7 @@
   
 </h3><div class="docstring">
   <div class="discussion">
-    
-<p>Returns the full, normalized operator.</p>
+    <p>Returns the full, normalized operator.</p>
 
 
   </div>
@@ -356,8 +348,7 @@
       
       
         &mdash;
-        <div class='inline'>
-<p>the full, normalized operator</p>
+        <div class='inline'><p>the full, normalized operator</p>
 </div>
       
     </li>
@@ -405,11 +396,9 @@
   <div class="discussion">
     <div class="note abstract">
   <strong>This method is abstract.</strong>
-  <div class='inline'>
-<p>Override in each path expression operator subclass</p>
+  <div class='inline'><p>Override in each path expression operator subclass</p>
 </div>
 </div>
-
 <p>Provides an interface for determining if a given string represents the operator class</p>
 
 
@@ -429,8 +418,7 @@
       
       
         &mdash;
-        <div class='inline'>
-<p>the the full, normalized operator to test</p>
+        <div class='inline'><p>the the full, normalized operator to test</p>
 </div>
       
     </li>
@@ -447,8 +435,8 @@
       
       
         &mdash;
-        <div class='inline'>
-<p>an enum that can be used to assist in detection. Not all subclasses require an enum for detection.</p>
+        <div class='inline'><p>an enum that can be used to assist in detection. Not all subclasses require an enum
+for detection.</p>
 </div>
       
     </li>
@@ -466,8 +454,7 @@
       
       
         &mdash;
-        <div class='inline'>
-<p>whether the operator param appears to represent the operator class</p>
+        <div class='inline'><p>whether the operator param appears to represent the operator class</p>
 </div>
       
     </li>
@@ -527,12 +514,11 @@
   <div class="discussion">
     <div class="note abstract">
   <strong>This method is abstract.</strong>
-  <div class='inline'>
-<p>Override in each path expression operator subclass</p>
+  <div class='inline'><p>Override in each path expression operator subclass</p>
 </div>
 </div>
-
-<p>Provides an interface for applying the operator to a given enumerable and yielding that result back to the caller with updated arguments</p>
+<p>Provides an interface for applying the operator to a given enumerable and yielding that result back to the
+caller with updated arguments</p>
 
 
   </div>
@@ -551,8 +537,7 @@
       
       
         &mdash;
-        <div class='inline'>
-<p>an array containing the normalized path segments yet to be resolved</p>
+        <div class='inline'><p>an array containing the normalized path segments yet to be resolved</p>
 </div>
       
     </li>
@@ -567,8 +552,7 @@
       
       
         &mdash;
-        <div class='inline'>
-<p>the object to apply the operator to</p>
+        <div class='inline'><p>the object to apply the operator to</p>
 </div>
       
     </li>
@@ -583,8 +567,7 @@
       
       
         &mdash;
-        <div class='inline'>
-<p>an array containing the static path segments that have been resolved</p>
+        <div class='inline'><p>an array containing the static path segments that have been resolved</p>
 </div>
       
     </li>
@@ -602,8 +585,8 @@
       
       
         
-        <div class='inline'>
-<p>A block that will be called if the operator is applied successfully. If the operator cannot or should not be applied then the block is not yielded.</p>
+        <div class='inline'><p>A block that will be called if the operator is applied successfully. If the operator cannot or should
+not be applied then the block is not yielded.</p>
 </div>
       
     </li>
@@ -622,8 +605,7 @@
       
       
         &mdash;
-        <div class='inline'>
-<p>the new remaining_path after applying the operator</p>
+        <div class='inline'><p>the new remaining_path after applying the operator</p>
 </div>
       
     </li>
@@ -638,8 +620,7 @@
       
       
         &mdash;
-        <div class='inline'>
-<p>the new enum after applying the operator</p>
+        <div class='inline'><p>the new enum after applying the operator</p>
 </div>
       
     </li>
@@ -654,8 +635,7 @@
       
       
         &mdash;
-        <div class='inline'>
-<p>the new resolved_path after applying the operator</p>
+        <div class='inline'><p>the new resolved_path after applying the operator</p>
 </div>
       
     </li>
@@ -714,7 +694,7 @@
 </div>
 
       <div id="footer">
-  Generated on Wed Jun  2 16:01:03 2021 by
+  Generated on Wed Jun  2 20:26:04 2021 by
   <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.26 (ruby-2.6.5).
 </div>
