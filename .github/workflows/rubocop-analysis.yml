@@ -1,14 +1,11 @@
-# pulled from repo
-name: "Rubocop"
+# https://github.com/arthurnn/code-scanning-rubocop#action-installation
+name: "RuboCop"
 
 on:
   push:
     branches: [ main ]
   pull_request:
-    # The branches below must be a subset of the branches above
     branches: [ main ]
-  schedule:
-    - cron: '15 23 * * 6'
 
 jobs:
   rubocop:
@@ -20,12 +17,10 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    # If running on a self-hosted runner, check it meets the requirements
-    # listed at https://github.com/ruby/setup-ruby#using-self-hosted-runners
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
-        ruby-version: 3.1
+        ruby-version: 2.7
 
     # This step is not necessary if you add the gem to your Gemfile
     - name: Install Code Scanning integration
@@ -34,10 +29,10 @@ jobs:
     - name: Install dependencies
       run: bundle install
 
-    - name: Rubocop run
+    - name: RuboCop run
       run: |
         bash -c "
-          bundle exec rubocop --enable-pending-cops --require code_scanning --format CodeScanning::SarifFormatter -o rubocop.sarif
+          bundle exec rubocop --require code_scanning --format CodeScanning::SarifFormatter -o rubocop.sarif
           [[ $? -ne 2 ]]
         "
 
