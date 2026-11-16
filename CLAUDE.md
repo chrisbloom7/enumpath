@@ -33,6 +33,9 @@ bin/console                     # pry console with the gem loaded
   `lib/` and run `bundle exec rake yard`.
 - CI runs Ruby 2.6, 2.7, 3.0 and 3.1 (the gemspec says `>= 2.3.0`). Avoid syntax newer than 2.6.
 - Do not hand-edit `Gemfile.lock` or `lib/enumpath/version.rb` outside a dependency bump or release.
+- Releases use the `release-enumpath` skill (`.claude/skills/release-enumpath/SKILL.md`), an overlay on the
+  shared `chrisbloom7-development:release` skill (install it from `chrisbloom7/ai-tools` first). Never run
+  `rake release`; publishing to rubygems.org is always an explicit request.
 - The default branch is `main`; changes go through PRs from a fork or branch.
 
 ## Claude Code setup
