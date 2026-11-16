@@ -1,0 +1,8 @@
+# frozen_string_literal: true
+
+# Used only by the CI lint job (BUNDLE_GEMFILE=gemfiles/rubocop.gemfile). Kept apart from the main
+# Gemfile because rubocop 1.x needs Ruby >= 2.7 while the test matrix still covers Ruby 2.6, and
+# adding it there would also change the pinned, hand-protected Gemfile.lock.
+source 'https://rubygems.org'
+
+gem 'rubocop', '~> 1.92', require: false

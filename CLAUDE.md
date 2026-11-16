@@ -7,15 +7,17 @@ structs). Read `CONTRIBUTING.md` before opening a PR (open an issue first unless
 
 ```bash
 bin/setup                       # bundle install
+bundle exec rake                # what CI runs: the full spec suite
 bundle exec rspec               # full suite (rake spec is equivalent)
 bundle exec rspec spec/enumpath/operator/slice_spec.rb   # one file
-rubocop                         # lint; line length 120, specs exempt from BlockLength
+BUNDLE_GEMFILE=gemfiles/rubocop.gemfile bundle exec rubocop   # lint, as CI does
 bundle exec rake yard           # regenerate docs/ (redcarpet markdown)
 bin/console                     # pry console with the gem loaded
 ```
 
-`rubocop` is not in the bundle. Install it separately (`gem install rubocop`); CI adds it with
-`bundle add`.
+`rubocop` is not in the main bundle (it needs Ruby >= 2.7); it lives in `gemfiles/rubocop.gemfile`, which the
+CI `lint` job uses. Config: line length 120, specs exempt from BlockLength; existing offenses are listed in
+`.rubocop_todo.yml`.
 
 ## Architecture
 
@@ -31,7 +33,8 @@ bin/console                     # pry console with the gem loaded
 
 - `docs/` is generated YARD output and is committed. Never hand-edit it; change the YARD comments in
   `lib/` and run `bundle exec rake yard`.
-- CI runs Ruby 2.6, 2.7, 3.0 and 3.1 (the gemspec says `>= 2.3.0`). Avoid syntax newer than 2.6.
+- CI (`.github/workflows/ruby.yml`) runs the specs on Ruby 2.6 to 3.4 plus a rubocop `lint` job; the `ci-gate`
+  job aggregates them. The gemspec says `>= 2.3.0`; avoid syntax newer than 2.6.
 - Do not hand-edit `Gemfile.lock` or `lib/enumpath/version.rb` outside a dependency bump or release.
 - Releases use the `release-enumpath` skill (`.claude/skills/release-enumpath/SKILL.md`), an overlay on the
   shared `chrisbloom7-development:release` skill (install it from `chrisbloom7/ai-tools` first). Never run

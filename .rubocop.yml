@@ -1,5 +1,9 @@
+inherit_from: .rubocop_todo.yml
+
 AllCops:
   DisplayStyleGuide: true
+  NewCops: disable
+  SuggestExtensions: false
 
 Metrics/BlockLength:
   Exclude:
@@ -8,5 +12,5 @@ Metrics/BlockLength:
   - 'spec/**/*.rb'
 
 Layout/LineLength:
-  IgnoreCopDirectives: true
+  AllowCopDirectives: true
   Max: 120
