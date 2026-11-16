@@ -15,6 +15,8 @@ Thanks for being interested in improving Enumpath! We welcome [all kinds of cont
 5. Submit a [good pull request][how-to-write-the-perfect-pull-request] from your fork to our project.
 6. Others will give constructive feedback. This is a time for discussion and improvements, and making the necessary changes will be required before we can merge the contribution.
 
+Changes to `.claude/` (Claude Code hooks and permissions) and `CLAUDE.md` get extra scrutiny: they run or steer Claude Code on a maintainer's machine, so `.github/CODEOWNERS` routes them to the maintainer for review.
+
 ## Code of Conduct
 
 ### Our Pledge
