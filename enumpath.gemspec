@@ -21,9 +21,9 @@ Gem::Specification.new do |spec|
   spec.authors       = ['Chris Bloom']
   spec.email         = ['chrisbloom7@gmail.com']
 
-  spec.files         = `git ls-files -z`.split("\x0").reject do |f|
-    f.match(%r{^(test|spec|features)/})
-  end
+  # Ship only the library, the license and the README. Dir.glob is used instead of `git ls-files`
+  # so the gem can be built outside a git checkout and never picks up repo tooling.
+  spec.files         = Dir['lib/**/*'].select { |f| File.file?(f) }.sort + %w[LICENSE README.md]
   spec.require_paths = ['lib']
 
   spec.homepage      = 'https://github.com/chrisbloom7/enumpath'
