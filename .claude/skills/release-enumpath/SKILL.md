@@ -27,7 +27,9 @@ post_tag steps below and always needs an explicit request from the owner.
   `Gemfile.lock` records `enumpath (X.Y.Z)` under PATH, so after the edit run `bundle install` and
   commit the changed `Gemfile.lock` with the release. Never edit `Gemfile.lock` by hand (a project
   hook blocks it). If `bundle install` cannot run, stop and ask.
-- changelog: none (the repo has no CHANGELOG; GitHub releases are the only notes, see post_tag)
+- changelog: keep-a-changelog (`CHANGELOG.md`; no `v` prefix in headings, links are not used). The
+  release moves the `## [Unreleased]` content under the new version heading. If `[Unreleased]` is
+  empty, warn the owner before going on: contributors add entries as they change the gem.
 - tag_prefix: `v`; tag_style: lightweight, `vX.Y.Z` (existing tags v0.1.0 to v0.1.2 are lightweight)
 - commit_message: `Bump version to X.Y.Z` (the repo's earlier release commit); pr_title: `Release vX.Y.Z`;
   branch `chore/release-vX.Y.Z`
@@ -42,17 +44,20 @@ post_tag steps below and always needs an explicit request from the owner.
     line, the install and usage examples and any version mention vs the gemspec
     (`required_ruby_version`) and the CI matrix in `.github/workflows/ruby.yml` (currently Ruby 2.6,
     2.7, 3.0, 3.1). CONTRIBUTING.md: same check for any Ruby or version mention.
-  - (advisory) Read `spec.files` in `enumpath.gemspec`: it is `git ls-files` minus `test|spec|features`,
-    so the gem also ships `docs/`, `.claude/`, `.github/`, `CLAUDE.md` and `Gemfile.lock`. Report it
-    again if the list of tracked files has changed.
-  - (advisory) Report whether `rubygems_mfa_required` is set in the gemspec metadata (it is not, as
-    of this overlay).
+  - (advisory) Check what the gem will ship: it should contain only `lib/`, `LICENSE` and
+    `README.md`. Build into a throwaway path (see post_tag step 1) and list it with
+    `tar -xOf <gem> data.tar.gz | tar tz`. Report anything else (for example `docs/`, `.claude/`,
+    `.github/`, `CLAUDE.md` or `Gemfile.lock`), which means `spec.files` in `enumpath.gemspec` has
+    drifted.
+  - (advisory) Check that the gemspec metadata sets `rubygems_mfa_required` to `'true'` and report it
+    if not.
 - post_tag:
   1. Build the gem without publishing, into a throwaway path:
      `gem build enumpath.gemspec -o "$(mktemp -d)/enumpath-X.Y.Z.gem"`. Report the file name and size.
      Never push it.
   2. **Stop and ask.** Publishing to rubygems.org (`gem push <file>`) and creating a GitHub release
-     (`gh release create vX.Y.Z`) are separate steps. Do them only if the owner explicitly asks, and
+     (`gh release create vX.Y.Z`, with the CHANGELOG entry for that version as the notes) are
+     separate steps. Do them only if the owner explicitly asks, and
      confirm each one immediately before running it. Never ask for or store rubygems credentials; the
      owner signs in on their own machine. If the gemspec lacks `rubygems_mfa_required`, say so before
      any `gem push`.
