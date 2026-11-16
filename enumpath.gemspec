@@ -27,6 +27,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ['lib']
 
   spec.homepage      = 'https://github.com/chrisbloom7/enumpath'
+  spec.metadata['rubygems_mfa_required'] = 'true'
 
   # Enumerable#dig was added in Ruby 2.3.0
   spec.required_ruby_version = '>= 2.3.0'
