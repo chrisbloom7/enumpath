@@ -36,6 +36,8 @@ bin/console                     # pry console with the gem loaded
 - Releases use the `release-enumpath` skill (`.claude/skills/release-enumpath/SKILL.md`), an overlay on the
   shared `chrisbloom7-development:release` skill (install it from `chrisbloom7/ai-tools` first). Never run
   `rake release`; publishing to rubygems.org is always an explicit request.
+- Add a line under `## [Unreleased]` in `CHANGELOG.md` for any change to the published gem (what a
+  user of the gem would notice). The release skill moves those lines under the new version.
 - The default branch is `main`; changes go through PRs from a fork or branch.
 
 ## Claude Code setup
