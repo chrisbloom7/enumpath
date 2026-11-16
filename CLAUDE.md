@@ -40,3 +40,8 @@ bin/console                     # pry console with the gem loaded
 `.claude/settings.json` registers two hooks (scripts in `.claude/hooks/`): `rubocop-autocorrect.sh`
 runs `rubocop -a` on edited `.rb` files and reports what is left, and `block-generated-files.sh`
 refuses edits to `docs/` and `Gemfile.lock`. Both skip quietly when a tool they need is missing.
+
+Changes to `.claude/` (hooks and the allowlist) and to this file run or steer Claude Code on the machine
+of whoever opens the repo, so `.github/CODEOWNERS` routes them to the maintainer. When reviewing an
+outside PR that touches them, read the diff first (`gh pr diff <number> -- .claude CLAUDE.md`) before
+checking the branch out and starting Claude Code there.
