@@ -7,8 +7,8 @@ structs). Read `CONTRIBUTING.md` before opening a PR (open an issue first unless
 
 ```bash
 bin/setup                       # bundle install
-bundle exec rake                # what CI runs: the full spec suite
-bundle exec rspec               # full suite (rake spec is equivalent)
+bundle exec rake                # default task = `rake spec`: the full spec suite, what CI runs
+bundle exec rspec               # same suite, run directly
 bundle exec rspec spec/enumpath/operator/slice_spec.rb   # one file
 BUNDLE_GEMFILE=gemfiles/rubocop.gemfile bundle exec rubocop   # lint, as CI does
 bundle exec rake yard           # regenerate docs/ (redcarpet markdown)
@@ -16,15 +16,19 @@ bin/console                     # pry console with the gem loaded
 ```
 
 `rubocop` is not in the main bundle (it needs Ruby >= 2.7); it lives in `gemfiles/rubocop.gemfile`, which the
-CI `lint` job uses. Config: line length 120, specs exempt from BlockLength; existing offenses are listed in
-`.rubocop_todo.yml`.
+CI `lint` job uses (run it locally with the `BUNDLE_GEMFILE=` command above, on Ruby >= 2.7). Config: line
+length 120, specs exempt from BlockLength; `.rubocop_todo.yml` parks 26 existing offenses (fix those rather
+than adding new entries).
 
 ## Architecture
 
 - `lib/enumpath.rb`: public entry point (`Enumpath.apply`, `Enumpath.verbose`).
 - `lib/enumpath/path.rb`, `path/normalized_path.rb`: parse and normalize path expressions.
+- `lib/enumpath/operator.rb`: `Operator.detect` maps a path segment to an operator class instance (or `nil`).
 - `lib/enumpath/operator/*.rb`: one class per JSONPath operator (child, slice, union, wildcard,
   recursive descent, filter and subscript expressions), all inheriting `operator/base.rb`.
+- `lib/enumpath/results.rb`: `Results`, an Array subclass that stores matches as values or `:path` strings.
+- `lib/enumpath/logger.rb`: `Logger`, the debug logger behind `Enumpath.verbose` (`Enumpath.log`).
 - `lib/enumpath/resolver/`: how a key is read from an object (`simple`, `property`).
 - `spec/` mirrors `lib/`. Shared operator examples live in `spec/shared_examples/operator/base.rb`;
   `spec/integration_tests/store_examples_spec.rb` runs the JSONPath "store" examples end to end.
@@ -34,8 +38,10 @@ CI `lint` job uses. Config: line length 120, specs exempt from BlockLength; exis
 - `docs/` is generated YARD output and is committed. Never hand-edit it; change the YARD comments in
   `lib/` and run `bundle exec rake yard`.
 - CI (`.github/workflows/ruby.yml`) runs the specs on Ruby 2.6 to 3.4 plus a rubocop `lint` job; the `ci-gate`
-  job aggregates them. The gemspec says `>= 2.3.0`; avoid syntax newer than 2.6.
-- Do not hand-edit `Gemfile.lock` or `lib/enumpath/version.rb` outside a dependency bump or release.
+  job aggregates them. The gemspec says `>= 2.3.0` but CI only tests 2.6 and up; avoid syntax newer than 2.6.
+- `Gemfile.lock` is pinned to Bundler 2.4.22 (the last Bundler that supports Ruby 2.6); regenerate it with
+  `bundle` commands, never by hand (the `block-generated-files.sh` hook refuses edits). Do not touch it or
+  `lib/enumpath/version.rb` outside a dependency bump or release.
 - Releases use the `release-enumpath` skill (`.claude/skills/release-enumpath/SKILL.md`), an overlay on the
   shared `chrisbloom7-development:release` skill (install it from `chrisbloom7/ai-tools` first). Never run
   `rake release`; publishing to rubygems.org is always an explicit request.
