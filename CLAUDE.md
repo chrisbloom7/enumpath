@@ -12,17 +12,17 @@ bundle exec rspec               # same suite, run directly
 bundle exec rspec spec/enumpath/operator/slice_spec.rb   # one file
 BUNDLE_GEMFILE=gemfiles/rubocop.gemfile bundle exec rubocop   # lint, as CI does
 bundle exec rake yard           # regenerate docs/ (redcarpet markdown)
-bin/console                     # pry console with the gem loaded
+bin/console                     # IRB console with the gem loaded
 ```
 
 `rubocop` is not in the main bundle (it needs Ruby >= 2.7); it lives in `gemfiles/rubocop.gemfile`, which the
 CI `lint` job uses (run it locally with the `BUNDLE_GEMFILE=` command above, on Ruby >= 2.7). Config: line
-length 120, specs exempt from BlockLength; `.rubocop_todo.yml` parks 26 existing offenses (fix those rather
+length 120, specs exempt from BlockLength; `.rubocop_todo.yml` parks existing offenses (fix those rather
 than adding new entries).
 
 ## Architecture
 
-- `lib/enumpath.rb`: public entry point (`Enumpath.apply`, `Enumpath.verbose`).
+- `lib/enumpath.rb`: public entry point (`Enumpath.apply(path, enum, options = {})`, `Enumpath.verbose`).
 - `lib/enumpath/path.rb`, `path/normalized_path.rb`: parse and normalize path expressions.
 - `lib/enumpath/operator.rb`: `Operator.detect` maps a path segment to an operator class instance (or `nil`).
 - `lib/enumpath/operator/*.rb`: one class per JSONPath operator (child, slice, union, wildcard,
@@ -32,6 +32,7 @@ than adding new entries).
 - `lib/enumpath/resolver/`: how a key is read from an object (`simple`, `property`).
 - `spec/` mirrors `lib/`. Shared operator examples live in `spec/shared_examples/operator/base.rb`;
   `spec/integration_tests/store_examples_spec.rb` runs the JSONPath "store" examples end to end.
+  `.rspec` auto-requires `spec_helper` and uses the documentation format.
 
 ## Gotchas
 
