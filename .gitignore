@@ -12,3 +12,7 @@
 .byebug_history
 .ruby-gemset
 .ruby-version
+
+# Claude Code personal settings
+/.claude/settings.local.json
+CLAUDE.local.md
