@@ -4,9 +4,11 @@ Navigate nested Ruby objects with JSONPath-style path expressions, safely by def
 
 ## Introduction
 
-Enumpath lets you describe a path through nested Ruby objects as a string, using [JSONPath][jsonpath]-style syntax, and pull out whatever it matches. It works on the data you actually have in memory: hashes with symbol, string or integer keys, arrays, `Struct`s, plain Ruby objects and `OpenStruct`s, in any mix. It is like Ruby's native `dig`, but with wildcards, filters, slices and recursive descent, and with paths you can store and change at runtime. That makes it a good fit for flexible ETL (Extract, Transform, Load) processes and anywhere else a path needs to live in configuration instead of code.
+Enumpath lets you describe a path through nested Ruby objects as a string, using [JSONPath][jsonpath]-style syntax, and pull out whatever it matches. It works on the data you actually have in memory: hashes with symbol, string or integer keys, arrays, `Struct`s, plain Ruby objects and `OpenStruct`s, in any mix. It is like Ruby's native `dig`, but a path is a plain string that can use wildcards, filters, slices and recursive descent, so it can live in configuration or a database and change without a deploy. (`dig(*keys)` also takes keys at runtime, but only as a fixed chain: it can't say "every item" or "items where the price is over 100".) That makes it a good fit for flexible ETL (Extract, Transform, Load) processes and anywhere else a path should be data instead of code.
 
 Paths are safe by default: a path can read your data but cannot call mutating or destructive methods such as `clear` or `destroy`. See [`:property_resolver`](#property_resolver) to allow more. See [Object traversal](#object-traversal) for examples, and [Alternatives](#alternatives) for when another gem is the better choice.
+
+Only accept paths from sources you trust. The default resolver stops a path from calling methods that change your data, but a hostile path can still be expensive to evaluate.
 
 Enumpath path expressions look like this:
 
