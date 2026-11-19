@@ -80,7 +80,7 @@ Enumpath.apply("drinks.*", party) # => []
 
 ## Object traversal
 
-The same path syntax works on whatever shape your data has. These examples are run by `spec/integration_tests/object_traversal_spec.rb`, so they stay accurate.
+The same path syntax works on whatever shape your data has. These examples are mirrored by `spec/integration_tests/object_traversal_spec.rb`, so they stay accurate.
 
 A hash with symbol keys, using a wildcard and a filter:
 
@@ -549,8 +549,7 @@ To save a little bit of time on consecutive calls Enumpath caches the normalized
     ```
 
 3. The original implementations of JSONPath allowed unchecked evaluation of filter and subscript expressions. Enumpath limits those expressions to a reasonable subset of operations as detailed in the [Operator Reference](#operator-reference) section and uses `public_send` rather than `eval` to resolve expressions as necessary.
-4. The original JSONPath spec did not include support for using logical operators to chain expressions in filter expression operators. This addition was inspired by [Gergely Brautigam's][rfc-9535]: https://www.rfc-editor.org/rfc/rfc9535
-[replace-eval-with-object-send-and-a-parser] work on [joshbuddy/jsonpath][jsonpath-gh]
+4. The original JSONPath spec did not include support for using logical operators to chain expressions in filter expression operators. This addition was inspired by [Gergely Brautigam's][replace-eval-with-object-send-and-a-parser] work on [joshbuddy/jsonpath][jsonpath-gh]
 
 ## Alternatives
 
@@ -560,15 +559,15 @@ Enumpath is not the only JSONPath library for Ruby, and for some data it is not 
 - [`jsonpath`][jsonpath-gh] is the long-standing de facto Ruby gem. It was about as fast as Enumpath in the same benchmark.
 - Enumpath is **not** RFC 9535 compliant. It implements the original JSONPath spec with some deviations (see [below](#deviations-from-the-original-jsonpath-spec)).
 
-If your data is parsed JSON with string keys, either alternative works and `json_p3` is the standards-compliant, faster choice. Enumpath is for data that is not plain JSON. The same queries behave like this across the three gems (checked with `jsonpath` 1.1.5 and `json_p3` 1.0.1 on Ruby 3.4):
+If your data is parsed JSON with string keys, either alternative works and `json_p3` is the standards-compliant, faster choice. Enumpath is for data that is not plain JSON, in particular symbol keys (`jsonpath` loses track of objects nested inside a symbol-keyed Hash) and paths that should only be allowed to read, not call arbitrary methods (see [`:property_resolver`](#property_resolver)). The same queries behave like this across the three gems (checked with `jsonpath` 1.1.5 and `json_p3` 1.0.1 on Ruby 3.4):
 
 data | Enumpath | `jsonpath` | `json_p3`
 --- | --- | --- | ---
 Hash and Array with string keys | works | works | works
 Hash with symbol keys | works | no match | no match
 `Struct` | works | works for top-level members; no match once a `Struct` is inside a symbol-keyed Hash | no match
-Plain Ruby object with readers | works (`attr_reader`s under `:safe`, computed readers under `:readers`) | no match | no match
-`OpenStruct` | works | no match | no match
+Plain Ruby object with readers | works (`attr_reader`s under `:safe`, computed readers under `:readers`) | works (it calls any method), except inside a symbol-keyed Hash | no match
+`OpenStruct` | works | works, except inside a symbol-keyed Hash | no match
 
 If you only need a fixed path into data you already know, plain `dig` is simpler and much faster (about 50 times faster than Enumpath on a simple path).
 
@@ -625,6 +624,7 @@ Enumpath is based on [Stefan Goessner's JSONPath spec][jsonpath], and was inspir
 [jsonpath]: http://goessner.net/articles/JsonPath/
 [keypath-ruby]: https://github.com/nickcharlton/keypath-ruby
 [replace-eval-with-object-send-and-a-parser]: https://skarlso.github.io/2017/05/28/replace-eval-with-object-send-and-a-parser/
+[rfc-9535]: https://www.rfc-editor.org/rfc/rfc9535
 [semver]: http://semver.org/
 [tags]: https://github.com/chrisbloom7/enumpath/tags
 [version-image]: https://badge.fury.io/rb/enumpath.svg
