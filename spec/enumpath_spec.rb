@@ -62,5 +62,21 @@ RSpec.describe Enumpath do
       expect(path_instance).to receive(:apply).with(enum)
       Enumpath.apply(path, enum)
     end
+
+    it 'does not modify the options hash' do
+      options = { verbose: false, result_type: :value, property_resolver: :none }.freeze
+      expect { Enumpath.apply(path, enum, options) }.not_to raise_error
+      expect(options).to eq(verbose: false, result_type: :value, property_resolver: :none)
+    end
+
+    it 'resolves properties with the :property_resolver option for the duration of the call' do
+      expect(Enumpath::Resolver::Property).to receive(:with_policy).with(:all).and_call_original
+      expect(Enumpath.apply('length', [1, 2], property_resolver: :all)).to eq([2])
+      expect(Enumpath::Resolver::Property.current_policy).to eq(:safe)
+    end
+
+    it 'raises ArgumentError for an invalid :property_resolver option' do
+      expect { Enumpath.apply(path, enum, property_resolver: :bogus) }.to raise_error(ArgumentError, /:bogus/)
+    end
   end
 end
