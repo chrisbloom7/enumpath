@@ -493,7 +493,7 @@ To save a little bit of time on consecutive calls Enumpath caches the normalized
 
 ## Requirements
 
-Enumpath requires Ruby 2.3.0 or higher.
+Enumpath requires Ruby 2.6.0 or higher.
 
 ## Development
 
