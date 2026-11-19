@@ -45,7 +45,7 @@ module Enumpath
     # @param nesting_level [Integer] used to set the indentation level for {Enumpath::Logger}
     # @return [void]
     def trace(path_segments, enum, resolved_path = [], nesting_level = 0)
-      Enumpath.logger.level = nesting_level
+      Enumpath.logger.level = nesting_level if Enumpath.verbose
       if path_segments.any?
         Enumpath.log('Applying') { { operator: path_segments, to: enum } }
         apply_segments(path_segments, enum, resolved_path, nesting_level)
@@ -53,7 +53,7 @@ module Enumpath
         Enumpath.log('Storing') { { resolved_path: resolved_path, enum: enum } }
         results.store(resolved_path, enum)
       end
-      Enumpath.logger.level = nesting_level
+      Enumpath.logger.level = nesting_level if Enumpath.verbose
     end
 
     def apply_segments(path_segments, enum, resolved_path, nesting_level)
@@ -65,15 +65,11 @@ module Enumpath
       end
     end
 
-    def cache
-      @cache ||= Enumpath.path_cache
-    end
-
     # String paths are normalized once and cached. An array is already a list of path segments, so it only has its
     # segments converted to strings and never touches the cache.
     def normalize!
       @path = case @path
-              when String then cache.get_or_set(@path) { Enumpath::Path::NormalizedPath.new(@path) }
+              when String then Enumpath.path_cache.get_or_set(@path) { Enumpath::Path::NormalizedPath.new(@path) }
               when Array then Enumpath::Path::NormalizedPath.new(@path.map(&:to_s))
               else raise ArgumentError, 'path must be a String or an Array of path segments'
               end

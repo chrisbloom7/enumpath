@@ -11,6 +11,18 @@ RSpec.describe Enumpath::Logger do
     end
   end
 
+  describe '#level' do
+    it 'defaults to 0' do
+      expect(subject.level).to eq(0)
+    end
+
+    it 'belongs to the thread that set it' do
+      subject.level = 2
+      expect(Thread.new { subject.level }.value).to eq(0)
+      subject.level = 0
+    end
+  end
+
   describe '#log' do
     let(:title) { 'A thing you should know' }
     let(:block) { proc { { a: :b, cd: :e } } }
@@ -21,7 +33,7 @@ RSpec.describe Enumpath::Logger do
       logger = double('::Logger').as_null_object
       subject.logger = logger
       subject.log(title, &block)
-      expect(logger).to have_received(:<<).with("Enumpath: #{title}\n")
+      expect(logger).to have_received(:<<).once.with(a_string_including("Enumpath: #{title}\n"))
     end
 
     context 'when Enumpath.verbose is false' do
@@ -49,20 +61,19 @@ RSpec.describe Enumpath::Logger do
           logger = double('::Logger').as_null_object
           subject.logger = logger
           subject.log(title, &block)
-          expect(logger).to have_received(:<<).with("a : b\n")
-          expect(logger).to have_received(:<<).with("cd: e\n")
+          expect(logger).to have_received(:<<).once.with(a_string_including("a : b\ncd: e\n"))
         end
       end
     end
 
-    context 'when @level is more than 0' do
+    context 'when the level is more than 0' do
       before { subject.level = 1 }
 
       it 'adds padding to the log messages' do
         logger = double('::Logger').as_null_object
         subject.logger = logger
         subject.log(title, &block)
-        expect(logger).to have_received(:<<).with("  Enumpath: #{title}\n")
+        expect(logger).to have_received(:<<).once.with(a_string_including("  Enumpath: #{title}\n"))
       end
     end
   end

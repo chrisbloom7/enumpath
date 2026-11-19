@@ -10,8 +10,8 @@ module Enumpath
 
     SEPARATOR = '--------------------------------------'
 
-    # @return [Integer] the indentation level to apply to log messages
-    attr_accessor :level
+    # The `Thread.current` key that holds the indentation level of the current thread
+    LEVEL_KEY = :enumpath_log_level
 
     # @return [::Logger, #<<] a {::Logger}-compatible logger instance
     attr_accessor :logger
@@ -19,8 +19,20 @@ module Enumpath
     # @param logdev [String, IO] The log device. See Ruby's {::Logger.new} documentation.
     def initialize(logdev = STDOUT)
       @logger = ::Logger.new(logdev)
-      @level = 0
       @padding = {}
+    end
+
+    # The indentation level to apply to log messages. It belongs to the current thread, so the calls that threads
+    # make at the same time do not change each other's indentation.
+    #
+    # @return [Integer]
+    def level
+      Thread.current[LEVEL_KEY] || 0
+    end
+
+    # @param value [Integer] the indentation level for the current thread
+    def level=(value)
+      Thread.current[LEVEL_KEY] = value
     end
 
     # Generates a log message for debugging. Returns fast if {Enumpath.verbose} is false. Accepts an optional block
@@ -32,10 +44,14 @@ module Enumpath
     def log(title)
       return unless Enumpath.verbose
 
-      append_log "#{padding}#{SEPARATOR}\n"
-      append_log "#{padding}Enumpath: #{title}\n"
-      append_log "#{padding}#{SEPARATOR}\n" if block_given?
-      log_vars(yield) if block_given?
+      pad = padding
+      message = +"#{pad}#{SEPARATOR}\n#{pad}Enumpath: #{title}\n"
+      if block_given?
+        message << "#{pad}#{SEPARATOR}\n"
+        message << vars_message(yield, pad)
+      end
+      # One write per message, so messages from threads that log at the same time do not interleave their lines
+      append_log(message)
     end
 
     private
@@ -44,13 +60,11 @@ module Enumpath
       logger << message
     end
 
-    def log_vars(vars)
-      return unless vars.is_a?(Hash)
+    def vars_message(vars, pad)
+      return '' unless vars.is_a?(Hash)
 
       label_size = vars.keys.map(&:size).max
-      vars.each do |label, value|
-        append_log "#{padding}#{label.to_s.ljust(label_size)}: #{massaged_value(value)}\n"
-      end
+      vars.map { |label, value| "#{pad}#{label.to_s.ljust(label_size)}: #{massaged_value(value)}\n" }.join
     end
 
     def massaged_value(value) # rubocop:disable Metrics/MethodLength

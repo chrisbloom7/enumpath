@@ -551,7 +551,7 @@ Enumpath: Child operator detected
     result: [{:category=>"reference", :author=>"Nigel Rees", :...
 ```
 
-You can also control verbose mode via `Enumpath.verbose = true` and `Enumpath.verbose = false`.
+You can also turn verbose mode on for every call with `Enumpath.verbose = true`. The `verbose:` option of a call overrides that for the call, and only in its own thread; `Enumpath.verbose = false` turns the default off again. Set the default once, at start up.
 
 ## Path normalization
 
@@ -560,6 +560,10 @@ When you give a string path to Enumpath it will automatically normalize it to an
 ### Normalized path caching
 
 To save a little bit of time on consecutive calls Enumpath caches the normalized version of each path. This is an implementation detail that can generally be ignored. The cache is safe to share between threads and keeps at most 1,000 paths, dropping the least recently used one when it is full, so applying many distinct dynamic paths does not grow memory without limit. If you run into trouble with it you can clear the cache with `Enumpath.path_cache.reset`.
+
+## Thread safety
+
+`Enumpath.apply` can be called from several threads (or fibers) at the same time. Each call keeps its own options (`:verbose`, `:property_resolver`, `:regexp_timeout`) and results, and the logger's indentation belongs to the thread that is logging. The two things threads share are the normalized path cache, which is guarded by a mutex (see [Normalized path caching](#normalized-path-caching)), and the logger: each log message is written in one piece, so messages from different threads do not interleave their lines. Give `Enumpath.logger.logger` a logger that is itself safe to share (Ruby's `Logger` is) and set `Enumpath.verbose` and `Enumpath.logger.logger` once, before you start threads.
 
 ## Deviations from the Original JSONPath Spec
 
