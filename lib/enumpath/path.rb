@@ -57,7 +57,7 @@ module Enumpath
 
     def apply_segments(path_segments, enum, resolved_path, nesting_level)
       segment = path_segments.first
-      remaining_path = path_segments[1..-1]
+      remaining_path = path_segments[1..]
       operator = Enumpath::Operator.detect(segment, enum)
       operator&.apply(remaining_path, enum, resolved_path) do |s, e, c|
         trace(s, e, c, nesting_level + 1)
