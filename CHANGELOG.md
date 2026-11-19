@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- A `regexp_timeout:` option on `Enumpath.apply`: the most seconds one regular expression match in a filter may take (default 1.0, or `nil` for no limit). A pattern that backtracks without end, such as `/^(a*)*\1$/`, no longer hangs the process on Ruby 3.2 and later (#60). A match that runs out of time does not match, and neither does any regular expression after it in the same call. On older Rubies the option is ignored.
+
 ## [0.2.1] - 2026-11-19
 
 ### Fixed

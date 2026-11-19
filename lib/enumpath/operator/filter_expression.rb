@@ -85,6 +85,10 @@ module Enumpath
       rescue NoMethodError
         Enumpath.log('Filter could not be evaluated!')
         false
+      rescue Enumpath::RegexpTimeout::ERROR
+        Enumpath::RegexpTimeout.expire!
+        Enumpath.log('Regular expression ran out of time!')
+        false
       end
 
       def variable_typecaster(variable) # rubocop:disable Metrics/MethodLength
@@ -99,7 +103,7 @@ module Enumpath
           variable == 'true'
         elsif (regexp = variable.to_regexp(literal: false, detect: false))
           # It quacks like a regex
-          regexp
+          Enumpath::RegexpTimeout.limit(regexp)
         else
           # Otherwise treat it as a number
           variable.to_f

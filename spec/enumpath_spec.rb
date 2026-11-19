@@ -78,5 +78,46 @@ RSpec.describe Enumpath do
     it 'raises ArgumentError for an invalid :property_resolver option' do
       expect { Enumpath.apply(path, enum, property_resolver: :bogus) }.to raise_error(ArgumentError, /:bogus/)
     end
+
+    describe 'the :regexp_timeout option' do
+      let(:hostile) { Array.new(20) { { s: "#{'a' * 28}!" } } + [{ s: 'ok' }] }
+      let(:hostile_path) { '[?(@.s =~ /^(a*)*\\1$/)]' }
+
+      it 'raises ArgumentError for an invalid value' do
+        expect { Enumpath.apply(path, enum, regexp_timeout: 0) }.to raise_error(ArgumentError, /regexp_timeout/)
+      end
+
+      it 'does not change a regular expression that matches in time' do
+        expect(Enumpath.apply('[?(@.s =~ /^o/)]', hostile, regexp_timeout: 0.5)).to eq([{ s: 'ok' }])
+      end
+
+      it 'matches normally when the limit is nil' do
+        expect(Enumpath.apply('[?(@.s =~ /^o/)]', hostile, regexp_timeout: nil)).to eq([{ s: 'ok' }])
+      end
+
+      context 'when the Ruby supports limits' do
+        before { skip 'needs Ruby 3.2 or later' unless Enumpath::RegexpTimeout::SUPPORTED }
+
+        it 'matches nothing instead of hanging when a regular expression backtracks without end' do
+          expect(Enumpath.apply(hostile_path, hostile, regexp_timeout: 0.05)).to eq([])
+        end
+
+        it 'spends at most one limit on the whole call, not one per member' do
+          started = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+          Enumpath.apply(hostile_path, hostile, regexp_timeout: 0.2)
+          expect(Process.clock_gettime(Process::CLOCK_MONOTONIC) - started).to be < 1.5
+        end
+
+        it 'still evaluates the rest of an expression after a regular expression ran out of time' do
+          result = Enumpath.apply("[?(@.s =~ /^(a*)*\\1$/ || @.s == 'ok')]", hostile, regexp_timeout: 0.05)
+          expect(result).to eq([{ s: 'ok' }])
+        end
+
+        it 'applies the limit by default' do
+          expect(Enumpath::RegexpTimeout).to receive(:with_limit).with(Enumpath::RegexpTimeout::DEFAULT).and_call_original
+          Enumpath.apply(path, enum)
+        end
+      end
+    end
   end
 end

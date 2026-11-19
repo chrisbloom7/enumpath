@@ -4,6 +4,7 @@ require 'mini_cache'
 require 'enumpath/logger'
 require 'enumpath/operator'
 require 'enumpath/path'
+require 'enumpath/regexp_timeout'
 require 'enumpath/results'
 require 'enumpath/resolver/object_inspector'
 require 'enumpath/resolver/simple'
@@ -36,13 +37,20 @@ module Enumpath
     #   behavior of version 0.1), or a callable `->(object, name) { ... }` that returns true to allow the call.
     #   Applies only to this call; a chained {Enumpath::Results#apply} uses the default unless the option is passed
     #   again. See {Enumpath::Resolver::Property}.
-    # @raise [ArgumentError] if `:property_resolver` is not one of the values above
+    # @option options [Numeric, nil] :regexp_timeout (1.0) The most seconds a regular expression in a filter may take to
+    #   match, or nil for no limit. A match that runs out of time does not match, and so do the regular expressions
+    #   after it in the same call. Needs Ruby 3.2 or later; older Rubies ignore it. See
+    #   {Enumpath::RegexpTimeout}.
+    # @raise [ArgumentError] if `:property_resolver` is not one of the values above, or `:regexp_timeout` is not nil or
+    #   a positive number
     # @return (see Enumpath::Path#apply)
     def apply(path, enum, options = {})
       logger.level = 0
       @verbose = options[:verbose] || false
       Enumpath::Resolver::Property.with_policy(options[:property_resolver]) do
-        Enumpath::Path.new(path, result_type: options[:result_type]).apply(enum)
+        Enumpath::RegexpTimeout.with_limit(options.fetch(:regexp_timeout, Enumpath::RegexpTimeout::DEFAULT)) do
+          Enumpath::Path.new(path, result_type: options[:result_type]).apply(enum)
+        end
       end
     end
 
