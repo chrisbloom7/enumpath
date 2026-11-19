@@ -30,10 +30,12 @@ module Enumpath
     # @option options [Symbol] :result_type (:value) The type of results to return, `:value` or `:path`
     # @option options [true, false] :verbose (false) Whether to enable additional output for debugging
     # @option options [Symbol, #call] :property_resolver (:safe) Which methods a path may call on an object when a
-    #   segment is not an index, key, or member: `:safe` (read-only methods only), `:none`, `:all` (any public method
-    #   that expects no arguments, the behavior of version 0.1), or a callable `->(object, name) { ... }` that returns
-    #   true to allow the call. Applies only to this call; a chained {Enumpath::Results#apply} uses the default unless
-    #   the option is passed again. See {Enumpath::Resolver::Property}.
+    #   segment is not an index, key, or member: `:safe` (read-only methods only), `:readers` (`:safe` plus public
+    #   no-argument methods written in Ruby, including those of installed gems, and ActiveModel-style `attributes`;
+    #   not read-only, for trusted data only), `:none`, `:all` (any public method that expects no arguments, the
+    #   behavior of version 0.1), or a callable `->(object, name) { ... }` that returns true to allow the call.
+    #   Applies only to this call; a chained {Enumpath::Results#apply} uses the default unless the option is passed
+    #   again. See {Enumpath::Resolver::Property}.
     # @raise [ArgumentError] if `:property_resolver` is not one of the values above
     # @return (see Enumpath::Path#apply)
     def apply(path, enum, options = {})

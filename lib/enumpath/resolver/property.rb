@@ -125,9 +125,10 @@ module Enumpath
         #
         # A callable policy can build on this check to allow more methods while keeping the safe ones:
         #
-        # @example Keep the safe defaults and also allow one method of your own
+        # @example Keep the safe defaults and allow specific methods per class
+        #   ALLOWED = { 'Invoice' => %w[total due_on], 'Customer' => %w[name email] }.freeze
         #   policy = lambda do |object, name|
-        #     Enumpath::Resolver::Property.safe?(object, name) || (object.is_a?(Invoice) && name == 'total')
+        #     Enumpath::Resolver::Property.safe?(object, name) || ALLOWED.fetch(object.class.name, []).include?(name)
         #   end
         #   Enumpath.apply('invoices.*.total', account, property_resolver: policy)
         #

@@ -100,7 +100,7 @@ Child operators match on an index, key, member, or property of the enumerable. I
 1. as an integer key or index (if the segment is integer-like),
 2. then as a string key,
 3. then as a symbol key,
-4. and finally as a public property (i.e. a public method of the target that expects no arguments), if the [`:property_resolver`](#property_resolver) option allows it. By default (`:safe`) only read-only access is allowed: allowlisted methods such as `length`, `size`, `count`, `first`, `keys` or `upcase` on core data (arrays, hashes, strings, symbols, numbers, structs, `Data` objects, `nil`, `true`, `false`), and `attr_reader`s on plain Ruby objects. A path segment like `clear`, `pop`, `sort!` or `destroy` matches nothing. Use `property_resolver: :readers` to also allow computed readers and ActiveRecord attributes on your own objects.
+4. and finally as a public property (i.e. a public method of the target that expects no arguments), if the [`:property_resolver`](#property_resolver) option allows it. By default (`:safe`) only read-only access is allowed: allowlisted methods such as `length`, `size`, `count`, `first`, `keys` or `upcase` on core data (arrays, hashes, strings, symbols, numbers, structs, `Data` objects, `nil`, `true`, `false`), and `attr_reader`s on plain Ruby objects. A path segment like `clear`, `pop`, `sort!` or `destroy` matches nothing. Use `property_resolver: :readers` to also allow computed readers and ActiveRecord attributes (this also runs methods from installed gems and is not read-only; see [`:property_resolver`](#property_resolver)).
 
 #### Operator Examples
 
