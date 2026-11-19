@@ -260,13 +260,15 @@ detected</p>
 32
 33
 34
-35</pre>
+35
+36</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/enumpath/operator.rb', line 24</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_detect'>detect</span><span class='lparen'>(</span><span class='id identifier rubyid_operator'>operator</span><span class='comma'>,</span> <span class='id identifier rubyid_enum'>enum</span><span class='rparen'>)</span> <span class='comment'># rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
-</span>  <span class='kw'>return</span> <span class='id identifier rubyid_operator'>operator</span><span class='lparen'>(</span><span class='symbol'>:Child</span><span class='comma'>,</span> <span class='id identifier rubyid_operator'>operator</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_child?'>child?</span><span class='lparen'>(</span><span class='id identifier rubyid_operator'>operator</span><span class='comma'>,</span> <span class='id identifier rubyid_enum'>enum</span><span class='rparen'>)</span>
+</span>  <span class='id identifier rubyid_child'>child</span> <span class='op'>=</span> <span class='id identifier rubyid_child'>child</span><span class='lparen'>(</span><span class='id identifier rubyid_operator'>operator</span><span class='comma'>,</span> <span class='id identifier rubyid_enum'>enum</span><span class='rparen'>)</span>
+  <span class='kw'>return</span> <span class='id identifier rubyid_child'>child</span> <span class='kw'>if</span> <span class='id identifier rubyid_child'>child</span>
   <span class='kw'>return</span> <span class='id identifier rubyid_operator'>operator</span><span class='lparen'>(</span><span class='symbol'>:Wildcard</span><span class='comma'>,</span> <span class='id identifier rubyid_operator'>operator</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_wildcard?'>wildcard?</span><span class='lparen'>(</span><span class='id identifier rubyid_operator'>operator</span><span class='rparen'>)</span>
   <span class='kw'>return</span> <span class='id identifier rubyid_operator'>operator</span><span class='lparen'>(</span><span class='symbol'>:RecursiveDescent</span><span class='comma'>,</span> <span class='id identifier rubyid_operator'>operator</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_recursive_descent?'>recursive_descent?</span><span class='lparen'>(</span><span class='id identifier rubyid_operator'>operator</span><span class='rparen'>)</span>
   <span class='kw'>return</span> <span class='id identifier rubyid_operator'>operator</span><span class='lparen'>(</span><span class='symbol'>:Union</span><span class='comma'>,</span> <span class='id identifier rubyid_operator'>operator</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_union?'>union?</span><span class='lparen'>(</span><span class='id identifier rubyid_operator'>operator</span><span class='rparen'>)</span>
@@ -287,7 +289,7 @@ detected</p>
 </div>
 
       <div id="footer">
-  Generated on Thu Nov 19 13:42:45 2026 by
+  Generated on Thu Nov 19 14:29:32 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-3.4.7).
 </div>

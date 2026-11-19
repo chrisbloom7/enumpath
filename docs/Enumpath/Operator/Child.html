@@ -190,6 +190,29 @@
 </li>
 
       
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#detect%3F-instance_method" title="#detect? (instance method)">#<strong>detect?</strong>(enum)  &#x21d2; true, false </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Whether the operator resolves against an enumerable.</p>
+</div></span>
+  
+</li>
+
+      
     </ul>
     
   
@@ -282,15 +305,13 @@ an index, key, member, or property that responds to child.</p>
 
 13
 14
-15
-16</pre>
+15</pre>
     </td>
     <td>
       <pre class="code"><span class="info file"># File 'lib/enumpath/operator/child.rb', line 13</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_detect?'>detect?</span><span class='lparen'>(</span><span class='id identifier rubyid_operator'>operator</span><span class='comma'>,</span> <span class='id identifier rubyid_enum'>enum</span><span class='rparen'>)</span>
-  <span class='op'>!</span><span class='const'><span class='object_link'><a href="../../Enumpath.html" title="Enumpath (module)">Enumpath</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Resolver.html" title="Enumpath::Resolver (module)">Resolver</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Resolver/Simple.html" title="Enumpath::Resolver::Simple (class)">Simple</a></span></span><span class='period'>.</span><span class='id identifier rubyid_resolve'><span class='object_link'><a href="../Resolver/Simple.html#resolve-class_method" title="Enumpath::Resolver::Simple.resolve (method)">resolve</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_operator'>operator</span><span class='comma'>,</span> <span class='id identifier rubyid_enum'>enum</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span> <span class='op'>||</span>
-    <span class='op'>!</span><span class='const'><span class='object_link'><a href="../../Enumpath.html" title="Enumpath (module)">Enumpath</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Resolver.html" title="Enumpath::Resolver (module)">Resolver</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Resolver/Property.html" title="Enumpath::Resolver::Property (class)">Property</a></span></span><span class='period'>.</span><span class='id identifier rubyid_resolve'><span class='object_link'><a href="../Resolver/Property.html#resolve-class_method" title="Enumpath::Resolver::Property.resolve (method)">resolve</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_operator'>operator</span><span class='comma'>,</span> <span class='id identifier rubyid_enum'>enum</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
+  <span class='op'>!</span><span class='id identifier rubyid_resolve'>resolve</span><span class='lparen'>(</span><span class='id identifier rubyid_operator'>operator</span><span class='comma'>,</span> <span class='id identifier rubyid_enum'>enum</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
 <span class='kw'>end</span></pre>
     </td>
   </tr>
@@ -445,19 +466,97 @@ not be applied then the block is not yielded.</p>
       <pre class="lines">
 
 
-27
-28
-29
-30
-31</pre>
+63
+64
+65
+66</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/enumpath/operator/child.rb', line 27</span>
+      <pre class="code"><span class="info file"># File 'lib/enumpath/operator/child.rb', line 63</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_apply'>apply</span><span class='lparen'>(</span><span class='id identifier rubyid_remaining_path'>remaining_path</span><span class='comma'>,</span> <span class='id identifier rubyid_enum'>enum</span><span class='comma'>,</span> <span class='id identifier rubyid_resolved_path'>resolved_path</span><span class='rparen'>)</span>
-  <span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../../Enumpath.html" title="Enumpath (module)">Enumpath</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Resolver.html" title="Enumpath::Resolver (module)">Resolver</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Resolver/Simple.html" title="Enumpath::Resolver::Simple (class)">Simple</a></span></span><span class='period'>.</span><span class='id identifier rubyid_resolve'><span class='object_link'><a href="../Resolver/Simple.html#resolve-class_method" title="Enumpath::Resolver::Simple.resolve (method)">resolve</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_operator'>operator</span><span class='comma'>,</span> <span class='id identifier rubyid_enum'>enum</span><span class='rparen'>)</span>
-  <span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../../Enumpath.html" title="Enumpath (module)">Enumpath</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Resolver.html" title="Enumpath::Resolver (module)">Resolver</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Resolver/Property.html" title="Enumpath::Resolver::Property (class)">Property</a></span></span><span class='period'>.</span><span class='id identifier rubyid_resolve'><span class='object_link'><a href="../Resolver/Property.html#resolve-class_method" title="Enumpath::Resolver::Property.resolve (method)">resolve</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_operator'>operator</span><span class='comma'>,</span> <span class='id identifier rubyid_enum'>enum</span><span class='rparen'>)</span> <span class='kw'>if</span> <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
+  <span class='id identifier rubyid_value'>value</span> <span class='op'>=</span> <span class='id identifier rubyid_detected_value'>detected_value</span><span class='lparen'>(</span><span class='id identifier rubyid_enum'>enum</span><span class='rparen'>)</span>
   <span class='kw'>yield</span><span class='lparen'>(</span><span class='id identifier rubyid_remaining_path'>remaining_path</span><span class='comma'>,</span> <span class='id identifier rubyid_value'>value</span><span class='comma'>,</span> <span class='id identifier rubyid_resolved_path'>resolved_path</span> <span class='op'>+</span> <span class='lbracket'>[</span><span class='id identifier rubyid_operator'>operator</span><span class='rbracket'>]</span><span class='rparen'>)</span> <span class='kw'>unless</span> <span class='id identifier rubyid_value'>value</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="detect?-instance_method">
+  
+    #<strong>detect?</strong>(enum)  &#x21d2; <tt>true</tt>, <tt>false</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Whether the operator resolves against an enumerable. The resolved value is kept, so a following <span class='object_link'><a href="#apply-instance_method" title="Enumpath::Operator::Child#apply (method)">#apply</a></span> to
+the same enumerable uses it instead of resolving the operator a second time. That matters when a property
+resolver policy lets the operator call a method, which must run once per path segment.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>enum</span>
+      
+      
+        <span class='type'>(<tt>Enumerable</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the enumerable to resolve the operator against</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>true</tt>, <tt>false</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>whether the operator resolved to a value</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+50
+51
+52
+53</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/enumpath/operator/child.rb', line 50</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_detect?'>detect?</span><span class='lparen'>(</span><span class='id identifier rubyid_enum'>enum</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_keep'>keep</span><span class='lparen'>(</span><span class='id identifier rubyid_enum'>enum</span><span class='comma'>,</span> <span class='kw'>self</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_resolve'>resolve</span><span class='lparen'>(</span><span class='id identifier rubyid_operator'>operator</span><span class='comma'>,</span> <span class='id identifier rubyid_enum'>enum</span><span class='rparen'>)</span><span class='rparen'>)</span>
+  <span class='op'>!</span><span class='ivar'>@detected_value</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
 <span class='kw'>end</span></pre>
     </td>
   </tr>
@@ -469,7 +568,7 @@ not be applied then the block is not yielded.</p>
 </div>
 
       <div id="footer">
-  Generated on Thu Nov 19 13:42:45 2026 by
+  Generated on Thu Nov 19 14:29:33 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-3.4.7).
 </div>

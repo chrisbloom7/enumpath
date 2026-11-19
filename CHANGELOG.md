@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-19
+
 ### Fixed
 
 - A child segment is resolved once. Under `property_resolver: :all` or a callable policy, a method that a segment calls (such as `pop` on an array) used to run twice, once to detect the operator and again to apply it (#51). A property repeated across the `&&` and `||` parts of one filter expression is also resolved once per member.
