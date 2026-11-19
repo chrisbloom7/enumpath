@@ -6,13 +6,13 @@
 <title>
   Module: Enumpath
   
-    &mdash; Documentation by YARD 0.9.36
+    &mdash; Documentation by YARD 0.9.45
   
 </title>
 
-  <link rel="stylesheet" href="css/style.css" type="text/css" />
+  <link rel="stylesheet" href="css/style.css" type="text/css">
 
-  <link rel="stylesheet" href="css/common.css" type="text/css" />
+  <link rel="stylesheet" href="css/common.css" type="text/css">
 
 <script type="text/javascript">
   pathId = "Enumpath";
@@ -27,6 +27,8 @@
 
   </head>
   <body>
+    <div id="main_progress" aria-hidden="true"></div>
+
     <div class="nav_wrap">
       <iframe id="nav" src="class_list.html?1"></iframe>
       <div id="resizer"></div>
@@ -78,8 +80,9 @@
   
   <dl>
     <dt>Defined in:</dt>
-    <dd>lib/enumpath.rb<span class="defines">,<br />
-  lib/enumpath/path.rb,<br /> lib/enumpath/logger.rb,<br /> lib/enumpath/results.rb,<br /> lib/enumpath/version.rb,<br /> lib/enumpath/operator.rb,<br /> lib/enumpath/operator/base.rb,<br /> lib/enumpath/operator/child.rb,<br /> lib/enumpath/operator/slice.rb,<br /> lib/enumpath/operator/union.rb,<br /> lib/enumpath/resolver/simple.rb,<br /> lib/enumpath/operator/wildcard.rb,<br /> lib/enumpath/resolver/property.rb,<br /> lib/enumpath/path/normalized_path.rb,<br /> lib/enumpath/resolver/object_inspector.rb,<br /> lib/enumpath/operator/filter_expression.rb,<br /> lib/enumpath/operator/recursive_descent.rb,<br /> lib/enumpath/operator/subscript_expression.rb</span>
+    <dd>lib/enumpath.rb<span class="defines">,<br>
+  lib/enumpath/path.rb,<br> lib/enumpath/logger.rb,<br> lib/enumpath/results.rb,<br> lib/enumpath/version.rb,<br> lib/enumpath/operator.rb,<br> lib/enumpath/operator/base.rb,<br> lib/enumpath/operator/child.rb,<br> lib/enumpath/operator/slice.rb,<br> lib/enumpath/operator/union.rb,<br> lib/enumpath/regexp_timeout.rb,<br> lib/enumpath/resolver/simple.rb,<br> lib/enumpath/operator/wildcard.rb,<br> lib/enumpath/resolver/property.rb,<br> lib/enumpath/path/normalized_path.rb,<br> lib/enumpath/resolver/object_inspector.rb,<br> lib/enumpath/operator/filter_expression.rb,<br> lib/enumpath/operator/recursive_descent.rb,<br> lib/enumpath/operator/subscript_expression.rb</span>
+
 </dd>
   </dl>
   
@@ -99,7 +102,7 @@
 <p class="children">
   
     
-      <strong class="modules">Modules:</strong> <span class='object_link'><a href="Enumpath/Operator.html" title="Enumpath::Operator (module)">Operator</a></span>, <span class='object_link'><a href="Enumpath/Resolver.html" title="Enumpath::Resolver (module)">Resolver</a></span>
+      <strong class="modules">Modules:</strong> <span class='object_link'><a href="Enumpath/Operator.html" title="Enumpath::Operator (module)">Operator</a></span>, <span class='object_link'><a href="Enumpath/RegexpTimeout.html" title="Enumpath::RegexpTimeout (module)">RegexpTimeout</a></span>, <span class='object_link'><a href="Enumpath/Resolver.html" title="Enumpath::Resolver (module)">Resolver</a></span>
     
   
     
@@ -172,7 +175,7 @@
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#apply-class_method" title="apply (class method)">.<strong>apply</strong>(path, enum, options = {})  &#x21d2; Enumpath::Results </a>
+      <a href="#apply-class_method" title="apply (class method)">.<strong>apply</strong>(path, enum, options = {})  &#x21d2; Object </a>
     
 
     
@@ -193,6 +196,7 @@
 
       
     </ul>
+    
   
 
 
@@ -241,12 +245,12 @@ Defaults to false</p>
       <pre class="lines">
 
 
-23
 24
-25</pre>
+25
+26</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/enumpath.rb', line 23</span>
+      <pre class="code"><span class="info file"># File 'lib/enumpath.rb', line 24</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_verbose'>verbose</span>
   <span class='ivar'>@verbose</span>
@@ -266,7 +270,7 @@ Defaults to false</p>
       <div class="method_details first">
   <h3 class="signature first" id="apply-class_method">
   
-    .<strong>apply</strong>(path, enum, options = {})  &#x21d2; <tt><span class='object_link'><a href="Enumpath/Results.html" title="Enumpath::Results (class)">Enumpath::Results</a></span></tt> 
+    .<strong>apply</strong>(path, enum, options = {})  &#x21d2; <tt>Object</tt> 
   
 
   
@@ -293,36 +297,6 @@ Defaults to false</p>
       
         <em class="default">(defaults to: <tt>{}</tt>)</em>
       
-      
-    </li>
-  
-    <li>
-      
-        <span class='name'>path</span>
-      
-      
-        <span class='type'>(<tt>String</tt>, <tt>Array&lt;String&gt;</tt>)</span>
-      
-      
-      
-        &mdash;
-        <div class='inline'><p>the path expression to apply to the enumerable, or an array of path segments</p>
-</div>
-      
-    </li>
-  
-    <li>
-      
-        <span class='name'>enum</span>
-      
-      
-        <span class='type'>(<tt>Enumerable</tt>)</span>
-      
-      
-      
-        &mdash;
-        <div class='inline'><p>the enumerable to apply the path to</p>
-</div>
       
     </li>
   
@@ -389,26 +363,27 @@ again. See <span class='object_link'><a href="Enumpath/Resolver/Property.html" t
           
         </li>
       
+        <li>
+          <span class="name">:regexp_timeout</span>
+          <span class="type">(<tt>Numeric</tt>, <tt>nil</tt>)</span>
+          <span class="default">
+            
+              &mdash; default:
+              <tt>1.0</tt>
+            
+          </span>
+          
+            &mdash; <div class='inline'><p>The most seconds a regular expression in a filter may take to
+match, or nil for no limit. A match that runs out of time does not match, and so do the regular expressions
+after it in the same call. Needs Ruby 3.2 or later; older Rubies ignore it. See
+<span class='object_link'><a href="Enumpath/RegexpTimeout.html" title="Enumpath::RegexpTimeout (module)">RegexpTimeout</a></span>.</p>
+</div>
+          
+        </li>
+      
     </ul>
   
 
-<p class="tag_title">Returns:</p>
-<ul class="return">
-  
-    <li>
-      
-      
-        <span class='type'>(<tt><span class='object_link'><a href="Enumpath/Results.html" title="Enumpath::Results (class)">Enumpath::Results</a></span></tt>)</span>
-      
-      
-      
-        &mdash;
-        <div class='inline'><p>an array of resolved values or paths</p>
-</div>
-      
-    </li>
-  
-</ul>
 <p class="tag_title">Raises:</p>
 <ul class="raise">
   
@@ -420,7 +395,8 @@ again. See <span class='object_link'><a href="Enumpath/Resolver/Property.html" t
       
       
         &mdash;
-        <div class='inline'><p>if <code>:property_resolver</code> is not one of the values above</p>
+        <div class='inline'><p>if <code>:property_resolver</code> is not one of the values above, or <code>:regexp_timeout</code> is not nil or
+a positive number</p>
 </div>
       
     </li>
@@ -433,22 +409,26 @@ again. See <span class='object_link'><a href="Enumpath/Resolver/Property.html" t
       <pre class="lines">
 
 
-41
-42
-43
-44
-45
-46
-47</pre>
+47
+48
+49
+50
+51
+52
+53
+54
+55</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/enumpath.rb', line 41</span>
+      <pre class="code"><span class="info file"># File 'lib/enumpath.rb', line 47</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_apply'>apply</span><span class='lparen'>(</span><span class='id identifier rubyid_path'>path</span><span class='comma'>,</span> <span class='id identifier rubyid_enum'>enum</span><span class='comma'>,</span> <span class='id identifier rubyid_options'>options</span> <span class='op'>=</span> <span class='lbrace'>{</span><span class='rbrace'>}</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_logger'>logger</span><span class='period'>.</span><span class='id identifier rubyid_level'>level</span> <span class='op'>=</span> <span class='int'>0</span>
   <span class='ivar'>@verbose</span> <span class='op'>=</span> <span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:verbose</span><span class='rbracket'>]</span> <span class='op'>||</span> <span class='kw'>false</span>
   <span class='const'><span class='object_link'><a href="" title="Enumpath (module)">Enumpath</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Enumpath/Resolver.html" title="Enumpath::Resolver (module)">Resolver</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Enumpath/Resolver/Property.html" title="Enumpath::Resolver::Property (class)">Property</a></span></span><span class='period'>.</span><span class='id identifier rubyid_with_policy'>with_policy</span><span class='lparen'>(</span><span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:property_resolver</span><span class='rbracket'>]</span><span class='rparen'>)</span> <span class='kw'>do</span>
-    <span class='const'><span class='object_link'><a href="" title="Enumpath (module)">Enumpath</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Enumpath/Path.html" title="Enumpath::Path (class)">Path</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Enumpath/Path.html#initialize-instance_method" title="Enumpath::Path#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_path'>path</span><span class='comma'>,</span> <span class='label'>result_type:</span> <span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:result_type</span><span class='rbracket'>]</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_apply'><span class='object_link'><a href="Enumpath/Path.html#apply-instance_method" title="Enumpath::Path#apply (method)">apply</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_enum'>enum</span><span class='rparen'>)</span>
+    <span class='const'><span class='object_link'><a href="" title="Enumpath (module)">Enumpath</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Enumpath/RegexpTimeout.html" title="Enumpath::RegexpTimeout (module)">RegexpTimeout</a></span></span><span class='period'>.</span><span class='id identifier rubyid_with_limit'>with_limit</span><span class='lparen'>(</span><span class='id identifier rubyid_options'>options</span><span class='period'>.</span><span class='id identifier rubyid_fetch'>fetch</span><span class='lparen'>(</span><span class='symbol'>:regexp_timeout</span><span class='comma'>,</span> <span class='const'><span class='object_link'><a href="" title="Enumpath (module)">Enumpath</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Enumpath/RegexpTimeout.html" title="Enumpath::RegexpTimeout (module)">RegexpTimeout</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Enumpath/RegexpTimeout.html#DEFAULT-constant" title="Enumpath::RegexpTimeout::DEFAULT (constant)">DEFAULT</a></span></span><span class='rparen'>)</span><span class='rparen'>)</span> <span class='kw'>do</span>
+      <span class='const'><span class='object_link'><a href="" title="Enumpath (module)">Enumpath</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Enumpath/Path.html" title="Enumpath::Path (class)">Path</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Enumpath/Path.html#initialize-instance_method" title="Enumpath::Path#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_path'>path</span><span class='comma'>,</span> <span class='label'>result_type:</span> <span class='id identifier rubyid_options'>options</span><span class='lbracket'>[</span><span class='symbol'>:result_type</span><span class='rbracket'>]</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_apply'><span class='object_link'><a href="Enumpath/Path.html#apply-instance_method" title="Enumpath::Path#apply (method)">apply</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_enum'>enum</span><span class='rparen'>)</span>
+    <span class='kw'>end</span>
   <span class='kw'>end</span>
 <span class='kw'>end</span></pre>
     </td>
@@ -461,9 +441,9 @@ again. See <span class='object_link'><a href="Enumpath/Resolver/Property.html" t
 </div>
 
       <div id="footer">
-  Generated on Thu Nov 19 02:06:25 2026 by
+  Generated on Thu Nov 19 13:42:45 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
-  0.9.36 (ruby-3.4.7).
+  0.9.45 (ruby-3.4.7).
 </div>
 
     </div>
