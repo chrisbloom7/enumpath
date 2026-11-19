@@ -17,16 +17,17 @@ Thanks for being interested in improving Enumpath! We welcome [all kinds of cont
 
 ## Measuring performance
 
-`benchmarks/baseline.rb` times a fixed set of paths and compares them with a recorded run. Before a change that
-could affect speed, and again after it, run it on the same machine (idle, same Ruby):
+`benchmarks/baseline.rb` times a fixed set of paths and compares them with an earlier run. Record a baseline on your
+machine before a change that could affect speed, then compare after it (idle machine, same Ruby both times):
 
 ```bash
-bundle exec ruby benchmarks/baseline.rb --compare benchmarks/baseline-0.2.1.json
+git switch main && bundle exec ruby benchmarks/baseline.rb --json benchmarks/baseline.json
+git switch my-branch && bundle exec ruby benchmarks/baseline.rb --compare benchmarks/baseline.json
 ```
 
-Run-to-run noise is about 1 to 4 percent, so repeat a run before trusting a smaller difference. Absolute times depend
-on the machine and Ruby, so record a new JSON (`--json FILE`) on your own machine if the committed one is far off, and
-compare the "x dig" column (each scenario as a multiple of a native `Hash#dig`) across machines.
+`benchmarks/*.json` is ignored by git: absolute times only compare cleanly on the same machine and Ruby. Run-to-run
+noise is about 1 to 4 percent, so repeat a run before trusting a smaller difference. The "x dig" column (each scenario
+as a multiple of a native `Hash#dig`) is the number to compare across machines.
 
 Changes to `.claude/` (Claude Code hooks and permissions) and `CLAUDE.md` get extra scrutiny: they run or steer Claude Code on a maintainer's machine, so `.github/CODEOWNERS` routes them to the maintainer for review.
 

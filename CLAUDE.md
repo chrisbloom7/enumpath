@@ -13,7 +13,7 @@ bundle exec rspec spec/enumpath/operator/slice_spec.rb   # one file
 BUNDLE_GEMFILE=gemfiles/rubocop.gemfile bundle exec rubocop   # lint, as CI does
 bundle exec rake yard           # regenerate docs/ (redcarpet markdown)
 bin/console                     # IRB console with the gem loaded
-bundle exec ruby benchmarks/baseline.rb --compare benchmarks/baseline-0.2.1.json   # performance vs the recorded baseline
+bundle exec ruby benchmarks/baseline.rb [--json F | --compare F]   # perf scenarios; record on main, compare on a branch
 ```
 
 `rubocop` is not in the main bundle (it needs Ruby >= 2.7); it lives in `gemfiles/rubocop.gemfile`, which the

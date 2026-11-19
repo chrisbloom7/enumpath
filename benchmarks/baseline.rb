@@ -4,8 +4,8 @@
 # the numbers recorded before it. It uses only the standard library and runs on Ruby 2.6 and up.
 #
 #   ruby benchmarks/baseline.rb                           # print a table
-#   ruby benchmarks/baseline.rb --json out.json           # also write the results as JSON
-#   ruby benchmarks/baseline.rb --compare benchmarks/baseline-0.2.1.json
+#   ruby benchmarks/baseline.rb --json out.json           # also write the results as JSON (kept out of git)
+#   ruby benchmarks/baseline.rb --compare out.json        # compare with a run recorded by --json
 #   ruby benchmarks/baseline.rb --only wildcard           # only scenarios whose name matches
 #   ruby benchmarks/baseline.rb --rounds 9 --batch 0.2    # more samples, longer batches
 #
