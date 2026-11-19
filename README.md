@@ -8,7 +8,7 @@ Enumpath lets you describe a path through nested Ruby objects as a string, using
 
 Paths are safe by default: a path can read your data but cannot call mutating or destructive methods such as `clear` or `destroy`. See [`:property_resolver`](#property_resolver) to allow more. See [Object traversal](#object-traversal) for examples, and [Alternatives](#alternatives) for when another gem is the better choice.
 
-Only accept paths from sources you trust. The default resolver stops a path from calling methods that change your data, but a hostile path can still be expensive to evaluate.
+Only accept paths from sources you trust. The default resolver stops a path from calling methods that change your data, but a hostile path can still be expensive to evaluate: a regular expression in a filter can take exponential time to match (see [Known limitations](#known-limitations)).
 
 Enumpath path expressions look like this:
 
@@ -243,6 +243,15 @@ The following are all valid subscript expressions:
 - `[(@.length - 1)]`: the subscript becomes the length of the current enumerable, minus 1
 - `[(length / 2)]`: the subscript becomes the index at half the length of the enumerable
 - `[(@.type)]`: the subscript becomes the value at the `type` key, member, or property of the enumerable
+
+An expression that cannot be evaluated against the data, such as a division by zero or a string plus a number, matches nothing instead of raising an error. So does an expression that could use an unbounded amount of CPU or memory, because the operand comes from the path. The limits are:
+
+- an integer operand must fit in 64 bits,
+- repeating a string or array with `*` may produce at most 10,000 characters or elements,
+- an integer raised to a power with `**` must produce a result of at most 1,024 bits, and
+- `%` only applies to numbers (on a string it would be `format`, which can build a huge string).
+
+These are far above anything useful for an index or a key.
 
 ## Usage Examples
 
@@ -563,7 +572,7 @@ These are tracked as issues, and contributions are welcome.
 - A negative slice step such as `[::-1]` matches nothing ([issue 44](https://github.com/chrisbloom7/enumpath/issues/44)).
 - Malformed paths are not rejected: `a[` is read as `a` ([issue 45](https://github.com/chrisbloom7/enumpath/issues/45)).
 - Recursive descent raises `SystemStackError` on data nested a few thousand levels deep ([issue 46](https://github.com/chrisbloom7/enumpath/issues/46)).
-- Subscript arithmetic with `*` and `**` can use a lot of CPU or memory, so only accept paths you trust ([issue 52](https://github.com/chrisbloom7/enumpath/issues/52)).
+- A regular expression in a filter can take exponential time to match, so only accept paths you trust ([issue 60](https://github.com/chrisbloom7/enumpath/issues/60)).
 
 ## Alternatives
 

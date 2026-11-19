@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- A subscript expression can no longer exhaust CPU or memory (#52). Integer operands must fit in 64 bits, repeating a string or array with `*` is capped at 10,000 elements, integer powers with `**` at 1,024 bits, and `%` only applies to numbers. An expression over a limit matches nothing.
+- A subscript expression that cannot be evaluated against the data, such as a division by zero or a string plus a number, matches nothing instead of raising `ZeroDivisionError`, `TypeError` or `RangeError`.
+
 ## [0.2.0] - 2026-11-19
 
 ### Fixed

@@ -8,6 +8,21 @@ module Enumpath
       ARITHMETIC_OPERATOR_REGEX = %r{(\+|-|\*\*|\*|\/|%)}
       OPERATOR_REGEX = /^\((.*)\)$/
 
+      # The operand of an arithmetic expression comes from the path, so an expression that could use an unbounded
+      # amount of CPU or memory is not evaluated and matches nothing. A subscript is an index or a key, so none of
+      # these limits get in the way of a useful expression.
+      #
+      # The widest integer operand allowed, in bits
+      MAX_OPERAND_BITS = 64
+      # The most elements or characters that repeating a string or array (`*`) may produce
+      MAX_REPEAT_SIZE = 10_000
+      # The widest result allowed for an integer raised to a power (`**`), in bits
+      MAX_POWER_BITS = 1_024
+
+      # Errors from evaluating an expression against data that does not fit it, such as a string plus a number or a
+      # division by zero. The expression matches nothing in these cases.
+      EVALUATION_ERRORS = [NoMethodError, TypeError, ArgumentError, ZeroDivisionError, RangeError].freeze
+
       class << self
         # Whether the operator matches {Enumpath::Operator::SubscriptExpression::OPERATOR_REGEX}
         #
@@ -58,18 +73,52 @@ module Enumpath
         else
           evaluate_with_operator(operator, operand, value)
         end
-      rescue NoMethodError
+      rescue *EVALUATION_ERRORS
         Enumpath.log('Subscript could not be evaluated') { { subscript: nil } }
         nil
       end
 
       def evaluate_with_operator(operator, operand, value)
         typecast_operand = variable_typecaster(operand)
+        unless within_limits?(operator, typecast_operand, value)
+          Enumpath.log('Subscript exceeds the arithmetic limits') { { operator: operator, operand: typecast_operand } }
+          return nil
+        end
+
         result = value.public_send(operator.to_sym, typecast_operand)
         Enumpath.log('Evaluated subscript') do
           { value: value, operator: operator, operand: typecast_operand, result: result }
         end
         result
+      end
+
+      # Whether evaluating `value <operator> operand` stays inside the limits above, before any work is done
+      def within_limits?(operator, operand, value)
+        return false if operand.is_a?(Integer) && operand.abs.bit_length > MAX_OPERAND_BITS
+
+        case operator
+        when '*' then repetition_within_limit?(value, operand)
+        when '**' then power_within_limit?(value, operand)
+        when '%' then value.is_a?(Numeric) # `String#%` is `format`, which can build a huge string
+        else true
+        end
+      end
+
+      # Repeating a string or array by an integer multiplies its size. (`Array#*` with a string joins instead.)
+      def repetition_within_limit?(value, operand)
+        return true unless operand.is_a?(Integer) && (value.is_a?(String) || value.is_a?(Array))
+
+        operand >= 0 && value.size * operand <= MAX_REPEAT_SIZE
+      end
+
+      # A float overflows to Infinity at once. An integer power is only allowed if its result fits in MAX_POWER_BITS,
+      # estimated as the bit length of the base times the exponent. Any other kind of number is not allowed.
+      def power_within_limit?(value, operand)
+        case value
+        when Integer then operand.is_a?(Integer) && value.abs.bit_length * operand.abs <= MAX_POWER_BITS
+        when Float then true
+        else false
+        end
       end
 
       def variable_typecaster(variable)
