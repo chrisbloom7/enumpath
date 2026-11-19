@@ -38,11 +38,13 @@ than adding new entries).
 
 - `docs/` is generated YARD output and is committed. Never hand-edit it; change the YARD comments in
   `lib/` and run `bundle exec rake yard`.
-- CI (`.github/workflows/ruby.yml`) runs the specs on Ruby 2.6 to 3.4 plus a rubocop `lint` job; the `ci-gate`
-  job aggregates them. The gemspec requires Ruby `>= 2.6.0`; avoid syntax newer than 2.6.
+- CI (`.github/workflows/ruby.yml`) runs the specs on Ruby 2.6 to 4.0 (plus an allowed-failure `ruby-head`) and a rubocop
+  `lint` job; the `ci-gate` job aggregates them. The gemspec requires Ruby `>= 2.6.0`; avoid syntax newer than 2.6.
 - `Gemfile.lock` is pinned to Bundler 2.4.22 (the last Bundler that supports Ruby 2.6); regenerate it with
   `bundle` commands, never by hand (the `block-generated-files.sh` hook refuses edits). Do not touch it or
-  `lib/enumpath/version.rb` outside a dependency bump or release.
+  `lib/enumpath/version.rb` outside a dependency bump or release. The lock is for Ruby 2.6 to 3.4 only: on Ruby 4.0+
+  Bundler 4 would switch to the locked 2.4.22 and the old rake in it needs `ostruct` (gone in 4.0), so the 4.0 and
+  `ruby-head` CI jobs `rm Gemfile.lock` and resolve fresh. Locally on Ruby 4.0, delete (or copy away) the lock too.
 - Releases use the `release-enumpath` skill (`.claude/skills/release-enumpath/SKILL.md`), an overlay on the
   shared `chrisbloom7-development:release` skill (install it from `chrisbloom7/ai-tools` first). Never run
   `rake release`; publishing to rubygems.org is always an explicit request.
