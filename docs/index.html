@@ -6,7 +6,7 @@
 <title>
   File: README
   
-    &mdash; Documentation by YARD 0.9.26
+    &mdash; Documentation by YARD 0.9.36
   
 </title>
 
@@ -59,11 +59,15 @@
 
       <div id="content"><div id='filecontents'><h1 id="enumpath">Enumpath</h1>
 
-<p>A JSONPath-compatible library for safely navigating nested Ruby objects using path expressions.</p>
+<p>Navigate nested Ruby objects with JSONPath-style path expressions, safely by default.</p>
 
 <h2 id="introduction">Introduction</h2>
 
-<p>Enumpath is an implementation of the <a href="http://goessner.net/articles/JsonPath/">JSONPath</a> spec for Ruby objects, plus some added sugar. It&#39;s like Ruby&#39;s native <code>Enumerable#dig</code> method, but fancier. It is designed for situations where you need to provide a dynamic way of describing a complex path through nested enumerable objects. This makes it exceptionally well suited for flexible ETL (Extract, Transform, Load) processes by allowing you to define paths through your data in a simple, easily readable, easily storable syntax.</p>
+<p>Enumpath lets you describe a path through nested Ruby objects as a string, using <a href="http://goessner.net/articles/JsonPath/">JSONPath</a>-style syntax, and pull out whatever it matches. It works on the data you actually have in memory: hashes with symbol, string or integer keys, arrays, <code>Struct</code>s, plain Ruby objects and <code>OpenStruct</code>s, in any mix. It is like Ruby&#39;s native <code>dig</code>, but a path is a plain string that can use wildcards, filters, slices and recursive descent, so it can live in configuration or a database and change without a deploy. (<code>dig(*keys)</code> also takes keys at runtime, but only as a fixed chain: it can&#39;t say &quot;every item&quot; or &quot;items where the price is over 100&quot;.) That makes it a good fit for flexible ETL (Extract, Transform, Load) processes and anywhere else a path should be data instead of code.</p>
+
+<p>Paths are safe by default: a path can read your data but cannot call mutating or destructive methods such as <code>clear</code> or <code>destroy</code>. See <a href="#property_resolver"><code>:property_resolver</code></a> to allow more. See <a href="#object-traversal">Object traversal</a> for examples, and <a href="#alternatives">Alternatives</a> for when another gem is the better choice.</p>
+
+<p>Only accept paths from sources you trust. The default resolver stops a path from calling methods that change your data, but a hostile path can still be expensive to evaluate.</p>
 
 <p>Enumpath path expressions look like this:</p>
 
@@ -80,15 +84,15 @@ pets..name
 pets.cats.-1
 </code></pre>
 
-<p>Enumpath has the following benefits over vanilla <code>Enumerable#dig</code>:</p>
+<p>Enumpath has the following benefits over vanilla <code>dig</code>:</p>
 
 <ul>
 <li>Paths can be described as simple strings</li>
-<li>It&#39;s smart enough to figure out which path segments are integer indexes versus symbolic keys versus string keys</li>
+<li>It&#39;s smart enough to figure out which path segments are integer indexes versus symbolic keys versus string keys versus struct members versus object readers</li>
 <li>It enables the use of wildcard, recursive descent, filter, subscript, union, and slice operators to describe complex paths through the data</li>
 </ul>
 
-<p>Like <code>Enumerable#dig</code>, Enumpath protects against missing path segments and returns safely if the full path cannot be resolved.</p>
+<p>Like <code>dig</code>, Enumpath protects against missing path segments and returns safely if the full path cannot be resolved.</p>
 
 <h2 id="installation">Installation</h2>
 
@@ -131,6 +135,59 @@ pets.cats.-1
 <blockquote>
 <p>This is a thoughtful deviation from the original JSONPath spec which would return <code>false</code> on no matches.</p>
 </blockquote>
+
+<h2 id="object-traversal">Object traversal</h2>
+
+<p>The same path syntax works on whatever shape your data has. These examples are mirrored by <code>spec/integration_tests/object_traversal_spec.rb</code>, so they stay accurate.</p>
+
+<p>A hash with symbol keys, using a wildcard and a filter:</p>
+
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_order'>order</span> <span class='op'>=</span> <span class='lbrace'>{</span> <span class='label'>customer:</span> <span class='lbrace'>{</span> <span class='label'>name:</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>Ada</span><span class='tstring_end'>&#39;</span></span> <span class='rbrace'>}</span><span class='comma'>,</span> <span class='label'>items:</span> <span class='lbracket'>[</span><span class='lbrace'>{</span> <span class='label'>sku:</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>A1</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='label'>qty:</span> <span class='int'>2</span> <span class='rbrace'>}</span><span class='comma'>,</span> <span class='lbrace'>{</span> <span class='label'>sku:</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>B2</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='label'>qty:</span> <span class='int'>1</span> <span class='rbrace'>}</span><span class='rbracket'>]</span> <span class='rbrace'>}</span>
+<span class='const'><span class='object_link'><a href="Enumpath.html" title="Enumpath (module)">Enumpath</a></span></span><span class='period'>.</span><span class='id identifier rubyid_apply'><span class='object_link'><a href="Enumpath.html#apply-class_method" title="Enumpath.apply (method)">apply</a></span></span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>items.*.sku</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_order'>order</span><span class='rparen'>)</span>             <span class='comment'># =&gt; [&quot;A1&quot;, &quot;B2&quot;]
+</span><span class='const'><span class='object_link'><a href="Enumpath.html" title="Enumpath (module)">Enumpath</a></span></span><span class='period'>.</span><span class='id identifier rubyid_apply'><span class='object_link'><a href="Enumpath.html#apply-class_method" title="Enumpath.apply (method)">apply</a></span></span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>items[?(@.qty &gt; 1)].sku</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_order'>order</span><span class='rparen'>)</span> <span class='comment'># =&gt; [&quot;A1&quot;]
+</span></code></pre>
+
+<p>A <code>Struct</code> inside a hash, with a relative index:</p>
+
+<pre class="code ruby"><code class="ruby"><span class='const'>Point</span> <span class='op'>=</span> <span class='const'>Struct</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='symbol'>:x</span><span class='comma'>,</span> <span class='symbol'>:y</span><span class='rparen'>)</span>
+<span class='id identifier rubyid_route'>route</span> <span class='op'>=</span> <span class='lbrace'>{</span> <span class='label'>stops:</span> <span class='lbracket'>[</span><span class='const'>Point</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='int'>1</span><span class='comma'>,</span> <span class='int'>2</span><span class='rparen'>)</span><span class='comma'>,</span> <span class='const'>Point</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='int'>3</span><span class='comma'>,</span> <span class='int'>4</span><span class='rparen'>)</span><span class='rbracket'>]</span> <span class='rbrace'>}</span>
+<span class='const'><span class='object_link'><a href="Enumpath.html" title="Enumpath (module)">Enumpath</a></span></span><span class='period'>.</span><span class='id identifier rubyid_apply'><span class='object_link'><a href="Enumpath.html#apply-class_method" title="Enumpath.apply (method)">apply</a></span></span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>stops.*.x</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_route'>route</span><span class='rparen'>)</span>  <span class='comment'># =&gt; [1, 3]
+</span><span class='const'><span class='object_link'><a href="Enumpath.html" title="Enumpath (module)">Enumpath</a></span></span><span class='period'>.</span><span class='id identifier rubyid_apply'><span class='object_link'><a href="Enumpath.html#apply-class_method" title="Enumpath.apply (method)">apply</a></span></span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>stops.-1.y</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_route'>route</span><span class='rparen'>)</span> <span class='comment'># =&gt; [4]
+</span></code></pre>
+
+<p>A plain Ruby object. Under the default <code>:safe</code> policy its <code>attr_reader</code>s resolve, and so do read-only methods such as <code>length</code> on the values they return:</p>
+
+<pre class="code ruby"><code class="ruby"><span class='kw'>class</span> <span class='const'>Author</span>
+  <span class='id identifier rubyid_attr_reader'>attr_reader</span> <span class='symbol'>:name</span><span class='comma'>,</span> <span class='symbol'>:books</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_name'>name</span><span class='comma'>,</span> <span class='id identifier rubyid_books'>books</span><span class='rparen'>)</span>
+    <span class='ivar'>@name</span> <span class='op'>=</span> <span class='id identifier rubyid_name'>name</span>
+    <span class='ivar'>@books</span> <span class='op'>=</span> <span class='id identifier rubyid_books'>books</span>
+  <span class='kw'>end</span>
+
+  <span class='kw'>def</span> <span class='id identifier rubyid_label'>label</span>
+    <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_name'>name</span><span class='embexpr_end'>}</span><span class='tstring_content'> (</span><span class='embexpr_beg'>#{</span><span class='id identifier rubyid_books'>books</span><span class='period'>.</span><span class='id identifier rubyid_length'>length</span><span class='embexpr_end'>}</span><span class='tstring_content'> books)</span><span class='tstring_end'>&quot;</span></span>
+  <span class='kw'>end</span>
+<span class='kw'>end</span>
+
+<span class='id identifier rubyid_library'>library</span> <span class='op'>=</span> <span class='lbrace'>{</span> <span class='label'>authors:</span> <span class='lbracket'>[</span><span class='const'>Author</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>Le Guin</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='qwords_beg'>%w[</span><span class='tstring_content'>Earthsea</span><span class='words_sep'> </span><span class='tstring_content'>Dispossessed</span><span class='tstring_end'>]</span></span><span class='rparen'>)</span><span class='comma'>,</span> <span class='const'>Author</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>Butler</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='qwords_beg'>%w[</span><span class='tstring_content'>Kindred</span><span class='tstring_end'>]</span></span><span class='rparen'>)</span><span class='rbracket'>]</span> <span class='rbrace'>}</span>
+<span class='const'><span class='object_link'><a href="Enumpath.html" title="Enumpath (module)">Enumpath</a></span></span><span class='period'>.</span><span class='id identifier rubyid_apply'><span class='object_link'><a href="Enumpath.html#apply-class_method" title="Enumpath.apply (method)">apply</a></span></span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>authors.*.name</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_library'>library</span><span class='rparen'>)</span>         <span class='comment'># =&gt; [&quot;Le Guin&quot;, &quot;Butler&quot;]
+</span><span class='const'><span class='object_link'><a href="Enumpath.html" title="Enumpath (module)">Enumpath</a></span></span><span class='period'>.</span><span class='id identifier rubyid_apply'><span class='object_link'><a href="Enumpath.html#apply-class_method" title="Enumpath.apply (method)">apply</a></span></span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>authors.0.books.length</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_library'>library</span><span class='rparen'>)</span> <span class='comment'># =&gt; [2]
+</span></code></pre>
+
+<p>A computed reader such as <code>label</code> is a method you wrote, not an <code>attr_reader</code>, so <code>:safe</code> does not call it. Ask for it with <code>property_resolver: :readers</code>, which also runs methods from installed gems and is not read-only, so use it on data you trust:</p>
+
+<pre class="code ruby"><code class="ruby"><span class='const'><span class='object_link'><a href="Enumpath.html" title="Enumpath (module)">Enumpath</a></span></span><span class='period'>.</span><span class='id identifier rubyid_apply'><span class='object_link'><a href="Enumpath.html#apply-class_method" title="Enumpath.apply (method)">apply</a></span></span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>authors.*.label</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_library'>library</span><span class='rparen'>)</span> <span class='comment'># =&gt; []
+</span><span class='const'><span class='object_link'><a href="Enumpath.html" title="Enumpath (module)">Enumpath</a></span></span><span class='period'>.</span><span class='id identifier rubyid_apply'><span class='object_link'><a href="Enumpath.html#apply-class_method" title="Enumpath.apply (method)">apply</a></span></span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>authors.*.label</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_library'>library</span><span class='comma'>,</span> <span class='label'>property_resolver:</span> <span class='symbol'>:readers</span><span class='rparen'>)</span>
+<span class='comment'># =&gt; [&quot;Le Guin (2 books)&quot;, &quot;Butler (1 books)&quot;]
+</span></code></pre>
+
+<p>An <code>OpenStruct</code>:</p>
+
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_require'>require</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>ostruct</span><span class='tstring_end'>&#39;</span></span>
+<span class='id identifier rubyid_config'>config</span> <span class='op'>=</span> <span class='const'>OpenStruct</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='label'>db:</span> <span class='const'>OpenStruct</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='label'>host:</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>localhost</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='label'>port:</span> <span class='int'>5432</span><span class='rparen'>)</span><span class='rparen'>)</span>
+<span class='const'><span class='object_link'><a href="Enumpath.html" title="Enumpath (module)">Enumpath</a></span></span><span class='period'>.</span><span class='id identifier rubyid_apply'><span class='object_link'><a href="Enumpath.html#apply-class_method" title="Enumpath.apply (method)">apply</a></span></span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>db.host</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_config'>config</span><span class='rparen'>)</span> <span class='comment'># =&gt; [&quot;localhost&quot;]
+</span></code></pre>
 
 <h2 id="operator-reference">Operator Reference</h2>
 
@@ -195,7 +252,7 @@ pets.cats.-1
 <li>as an integer key or index (if the segment is integer-like),</li>
 <li>then as a string key,</li>
 <li>then as a symbol key,</li>
-<li>and finally as a public property (i.e. a public method of the target that expects no arguments)</li>
+<li>and finally as a public property (i.e. a public method of the target that expects no arguments), if the <a href="#property_resolver"><code>:property_resolver</code></a> option allows it. By default (<code>:safe</code>) only read-only access is allowed: allowlisted methods such as <code>length</code>, <code>size</code>, <code>count</code>, <code>first</code>, <code>keys</code> or <code>upcase</code> on core data (arrays, hashes, strings, symbols, numbers, structs, <code>Data</code> objects, <code>nil</code>, <code>true</code>, <code>false</code>), and <code>attr_reader</code>s on plain Ruby objects. A path segment like <code>clear</code>, <code>pop</code>, <code>sort!</code> or <code>destroy</code> matches nothing. Use <code>property_resolver: :readers</code> to also allow computed readers and ActiveRecord attributes (this also runs methods from installed gems and is not read-only; see <a href="#property_resolver"><code>:property_resolver</code></a>).</li>
 </ol>
 
 <h4 id="operator-examples">Operator Examples</h4>
@@ -486,6 +543,72 @@ pets.cats.-1
 
 <p>Each returned path is a valid path expression that can be used in calls to <code>Enumpath.apply</code>. If you want to be explicit about returning values instead of paths you can specify that with the option <code>result_type: :value</code>.</p>
 
+<h3 id="property_resolver">:property_resolver</h3>
+
+<p>When a path segment is not an index, key, or struct or <code>Data</code> member, Enumpath can resolve it by calling a method on the object (step 4 of the <a href="#child-operator">child operator</a>). Wildcards, filters and recursive descent also use this option when they need the keys of an object that is not an array, hash, struct or <code>Data</code> object (they call its <code>to_h</code> only if the option allows it). The <code>:property_resolver</code> option controls what a path is allowed to call:</p>
+
+<table><thead>
+<tr>
+<th>value</th>
+<th>what resolves</th>
+<th>read-only?</th>
+</tr>
+</thead><tbody>
+<tr>
+<td><code>:safe</code> (default)</td>
+<td>allowlisted read-only methods on core data, <code>attr_reader</code>s on plain objects</td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>:readers</code></td>
+<td><code>:safe</code>, plus public no-argument methods written in Ruby, including installed gems (Ruby&#39;s built-in and standard library methods excluded), and ActiveModel-style <code>attributes</code></td>
+<td>no</td>
+</tr>
+<tr>
+<td><code>:none</code></td>
+<td>nothing; only indexes, keys and members</td>
+<td>yes</td>
+</tr>
+<tr>
+<td><code>:all</code></td>
+<td>any public method that expects no arguments (the behavior before this option existed)</td>
+<td>no</td>
+</tr>
+<tr>
+<td>a callable</td>
+<td>whatever the callable allows</td>
+<td>up to you</td>
+</tr>
+</tbody></table>
+
+<ul>
+<li><code>:safe</code> (the default): read-only access. On core data (arrays, hashes, strings, symbols, numbers, structs, <code>Data</code> objects, <code>nil</code>, <code>true</code>, <code>false</code>) Enumpath calls a fixed allowlist of non-mutating methods such as <code>length</code>, <code>size</code>, <code>count</code>, <code>first</code>, <code>last</code>, <code>min</code>, <code>max</code>, <code>sum</code>, <code>keys</code>, <code>values</code>, <code>to_a</code>, <code>to_h</code>, <code>to_s</code>, <code>empty?</code>, <code>zero?</code>, <code>upcase</code> or <code>strip</code>, and only when the receiver&#39;s class does not override them. On plain Ruby objects it reads instance variables that have a public reader of the same name (<code>attr_reader</code>s); the instance variable is read directly, so the method itself never runs. Names ending in <code>!</code> or <code>=</code> are never called, and neither is any method that requires arguments.</li>
+<li><code>:readers</code>: everything <code>:safe</code> allows, plus, on objects that are not core data, any public method that expects no arguments and is written in Ruby, except Ruby&#39;s built-in methods, methods in the Ruby standard library directory, and a short denylist of persistence verbs (<code>destroy</code>, <code>delete</code>, <code>save</code>, <code>update</code>, <code>reload</code>, <code>touch</code>, <code>delete_all</code>, <code>destroy_all</code>, <code>toggle</code>). It also reads the keys of an ActiveModel-style <code>attributes</code> Hash. So computed readers like <code>full_name</code>, <code>attr_reader</code>s and ActiveRecord columns like <code>email</code> work. Methods implemented in C (core classes, <code>StringIO</code>, C-extension gems) are never called; for objects of C-extension classes use a callable or <code>:all</code>. Core data is treated exactly like <code>:safe</code>. <strong>This is not read-only.</strong> It includes methods from installed gems, including default and bundled gems such as Logger and CSV, and ActiveModel or ActiveRecord: for example <code>Logger#close</code> would run, and so would a model method like <code>archive</code> or <code>cancel</code>. The denylist is a safety net, not a guarantee. Use <code>:readers</code> for data you trust or objects you built; for untrusted paths use <code>:safe</code> or a callable.</li>
+<li><code>:none</code>: never call methods.</li>
+<li><code>:all</code>: call any public method that expects no arguments. This is how Enumpath behaved before this option existed, and it lets a path run methods such as <code>clear</code>, <code>pop</code>, <code>sort!</code> or <code>destroy</code>. Only use it with paths you trust.</li>
+<li>a callable, such as a lambda: called with the object and the method name (a String). The method is called only if it returns true. The callable has full control: none of the checks above are applied, so call <code>Enumpath::Resolver::Property.safe?(object, name)</code> or <code>.reader?(object, name)</code> from it if you want to keep them and allow more.</li>
+</ul>
+
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_party'>party</span> <span class='op'>=</span> <span class='lbrace'>{</span> <span class='label'>food:</span> <span class='qwords_beg'>%w[</span><span class='tstring_content'>pizza</span><span class='words_sep'> </span><span class='tstring_content'>tacos</span><span class='tstring_end'>]</span></span> <span class='rbrace'>}</span>
+<span class='const'><span class='object_link'><a href="Enumpath.html" title="Enumpath (module)">Enumpath</a></span></span><span class='period'>.</span><span class='id identifier rubyid_apply'><span class='object_link'><a href="Enumpath.html#apply-class_method" title="Enumpath.apply (method)">apply</a></span></span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>food.pop</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_party'>party</span><span class='rparen'>)</span> <span class='comment'># =&gt; [] and party is unchanged
+</span><span class='const'><span class='object_link'><a href="Enumpath.html" title="Enumpath (module)">Enumpath</a></span></span><span class='period'>.</span><span class='id identifier rubyid_apply'><span class='object_link'><a href="Enumpath.html#apply-class_method" title="Enumpath.apply (method)">apply</a></span></span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>food.length</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_party'>party</span><span class='rparen'>)</span> <span class='comment'># =&gt; [2]
+</span><span class='const'><span class='object_link'><a href="Enumpath.html" title="Enumpath (module)">Enumpath</a></span></span><span class='period'>.</span><span class='id identifier rubyid_apply'><span class='object_link'><a href="Enumpath.html#apply-class_method" title="Enumpath.apply (method)">apply</a></span></span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>food.length</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_party'>party</span><span class='comma'>,</span> <span class='label'>property_resolver:</span> <span class='symbol'>:none</span><span class='rparen'>)</span> <span class='comment'># =&gt; []
+</span>
+<span class='comment'># ActiveRecord models you trust: computed readers and columns
+</span><span class='const'><span class='object_link'><a href="Enumpath.html" title="Enumpath (module)">Enumpath</a></span></span><span class='period'>.</span><span class='id identifier rubyid_apply'><span class='object_link'><a href="Enumpath.html#apply-class_method" title="Enumpath.apply (method)">apply</a></span></span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>[?(@.published)].title</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='const'>Post</span><span class='period'>.</span><span class='id identifier rubyid_all'>all</span><span class='period'>.</span><span class='id identifier rubyid_to_a'>to_a</span><span class='comma'>,</span> <span class='label'>property_resolver:</span> <span class='symbol'>:readers</span><span class='rparen'>)</span>
+
+<span class='comment'># Recommended for objects you do not control: keep the safe defaults and allow specific methods per class
+</span><span class='const'>ALLOWED</span> <span class='op'>=</span> <span class='lbrace'>{</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>Invoice</span><span class='tstring_end'>&#39;</span></span> <span class='op'>=&gt;</span> <span class='qwords_beg'>%w[</span><span class='tstring_content'>total</span><span class='words_sep'> </span><span class='tstring_content'>due_on</span><span class='tstring_end'>]</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>Customer</span><span class='tstring_end'>&#39;</span></span> <span class='op'>=&gt;</span> <span class='qwords_beg'>%w[</span><span class='tstring_content'>name</span><span class='words_sep'> </span><span class='tstring_content'>email</span><span class='tstring_end'>]</span></span> <span class='rbrace'>}</span><span class='period'>.</span><span class='id identifier rubyid_freeze'>freeze</span>
+<span class='id identifier rubyid_policy'>policy</span> <span class='op'>=</span> <span class='id identifier rubyid_lambda'>lambda</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='id identifier rubyid_name'>name</span><span class='op'>|</span>
+  <span class='const'><span class='object_link'><a href="Enumpath.html" title="Enumpath (module)">Enumpath</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Enumpath/Resolver.html" title="Enumpath::Resolver (module)">Resolver</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Enumpath/Resolver/Property.html" title="Enumpath::Resolver::Property (class)">Property</a></span></span><span class='period'>.</span><span class='id identifier rubyid_safe?'><span class='object_link'><a href="Enumpath/Resolver/Property.html#safe%3F-class_method" title="Enumpath::Resolver::Property.safe? (method)">safe?</a></span></span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='id identifier rubyid_name'>name</span><span class='rparen'>)</span> <span class='op'>||</span> <span class='const'>ALLOWED</span><span class='period'>.</span><span class='id identifier rubyid_fetch'>fetch</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='comma'>,</span> <span class='lbracket'>[</span><span class='rbracket'>]</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_include?'>include?</span><span class='lparen'>(</span><span class='id identifier rubyid_name'>name</span><span class='rparen'>)</span>
+<span class='kw'>end</span>
+<span class='const'><span class='object_link'><a href="Enumpath.html" title="Enumpath (module)">Enumpath</a></span></span><span class='period'>.</span><span class='id identifier rubyid_apply'><span class='object_link'><a href="Enumpath.html#apply-class_method" title="Enumpath.apply (method)">apply</a></span></span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>invoices.*.total</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_account'>account</span><span class='comma'>,</span> <span class='label'>property_resolver:</span> <span class='id identifier rubyid_policy'>policy</span><span class='rparen'>)</span>
+</code></pre>
+
+<p>The option applies to a single call. A chained <code>results.apply(...)</code> uses the default unless you pass the option again. Any other value raises an <code>ArgumentError</code>.</p>
+
+<p>To decide whether an object has a method, Enumpath asks Ruby (<code>respond_to?</code> and <code>method</code>), which calls the object&#39;s <code>respond_to_missing?</code> if it defines one. So even under <code>:safe</code>, a path can run a little of your application&#39;s code that way.</p>
+
 <h3 id="verbose">:verbose</h3>
 
 <p>Seeing how your path expression is being applied to an enumerable can be helpful in understanding the path expression syntax. Enumpath has a built-in logger to assist with this. It can be enabled by simply passing <code>verbose: true</code> as an option on <code>Enumpath.apply</code>. By default this will log debugging information to STDOUT, however you can provide your own logger.</p>
@@ -553,9 +676,63 @@ Enumpath: Child operator detected
 <li><p>The original JSONPath spec did not include support for using logical operators to chain expressions in filter expression operators. This addition was inspired by <a href="https://skarlso.github.io/2017/05/28/replace-eval-with-object-send-and-a-parser/">Gergely Brautigam&#39;s</a> work on <a href="https://github.com/joshbuddy/jsonpath">joshbuddy/jsonpath</a></p></li>
 </ol>
 
+<h2 id="alternatives">Alternatives</h2>
+
+<p>Enumpath is not the only JSONPath library for Ruby, and for some data it is not the best one:</p>
+
+<ul>
+<li><a href="https://github.com/jg-rp/ruby-json-p3"><code>json_p3</code></a> follows <a href="https://www.rfc-editor.org/rfc/rfc9535">RFC 9535</a> (the JSONPath standard) and works on parsed JSON only, by design. It is the standards-compliant choice and faster than Enumpath (about 2 to 4 times in a benchmark on a 10,000-element store example).</li>
+<li><a href="https://github.com/joshbuddy/jsonpath"><code>jsonpath</code></a> is the long-standing de facto Ruby gem. It was about as fast as Enumpath in the same benchmark.</li>
+<li>Enumpath is <strong>not</strong> RFC 9535 compliant. It implements the original JSONPath spec with some deviations (see <a href="#deviations-from-the-original-jsonpath-spec">above</a>).</li>
+</ul>
+
+<p>If your data is parsed JSON with string keys, either alternative works and <code>json_p3</code> is the standards-compliant, faster choice. Enumpath is for data that is not plain JSON, in particular symbol keys (<code>jsonpath</code> loses track of objects nested inside a symbol-keyed Hash) and paths that should only be allowed to read, not call arbitrary methods (see <a href="#property_resolver"><code>:property_resolver</code></a>). The same queries behave like this across the three gems (checked with <code>jsonpath</code> 1.1.5 and <code>json_p3</code> 1.0.1 on Ruby 3.4):</p>
+
+<table><thead>
+<tr>
+<th>data</th>
+<th>Enumpath</th>
+<th><code>jsonpath</code></th>
+<th><code>json_p3</code></th>
+</tr>
+</thead><tbody>
+<tr>
+<td>Hash and Array with string keys</td>
+<td>works</td>
+<td>works</td>
+<td>works</td>
+</tr>
+<tr>
+<td>Hash with symbol keys</td>
+<td>works</td>
+<td>no match</td>
+<td>no match</td>
+</tr>
+<tr>
+<td><code>Struct</code></td>
+<td>works</td>
+<td>works for top-level members; no match once a <code>Struct</code> is inside a symbol-keyed Hash</td>
+<td>no match</td>
+</tr>
+<tr>
+<td>Plain Ruby object with readers</td>
+<td>works (<code>attr_reader</code>s under <code>:safe</code>, computed readers under <code>:readers</code>)</td>
+<td>works (it calls any method), except inside a symbol-keyed Hash</td>
+<td>no match</td>
+</tr>
+<tr>
+<td><code>OpenStruct</code></td>
+<td>works</td>
+<td>works, except inside a symbol-keyed Hash</td>
+<td>no match</td>
+</tr>
+</tbody></table>
+
+<p>If you only need a fixed path into data you already know, plain <code>dig</code> is simpler and much faster (about 50 times faster than Enumpath on a simple path).</p>
+
 <h2 id="requirements">Requirements</h2>
 
-<p>Enumpath requires Ruby 2.3.0 or higher.</p>
+<p>Enumpath requires Ruby 2.6.0 or higher.</p>
 
 <h2 id="development">Development</h2>
 
@@ -598,9 +775,9 @@ Enumpath: Child operator detected
 </div></div>
 
       <div id="footer">
-  Generated on Wed Jun  2 20:26:04 2021 by
-  <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
-  0.9.26 (ruby-2.6.5).
+  Generated on Thu Nov 19 01:17:42 2026 by
+  <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.9.36 (ruby-3.4.7).
 </div>
 
     </div>
