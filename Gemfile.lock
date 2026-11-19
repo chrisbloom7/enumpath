@@ -2,7 +2,7 @@ PATH
   remote: .
   specs:
     enumpath (0.3.0)
-      logger (>= 1.4)
+      logger (>= 1.4, < 3)
       mini_cache (~> 1.1.0)
       to_regexp (~> 0.2.1)
 
