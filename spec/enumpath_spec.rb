@@ -8,17 +8,28 @@ RSpec.describe Enumpath do
   end
 
   describe '.log' do
-    it 'sends log messages to .logger' do
-      expect(Enumpath.logger).to receive(:log).with('LOG!')
-      Enumpath.log('LOG!')
+    context 'when verbose mode is off' do
+      it 'does not touch .logger, or evaluate the block' do
+        expect(Enumpath.logger).not_to receive(:log)
+        expect { |block| Enumpath.log('LOG!', &block) }.not_to yield_control
+      end
     end
 
-    context 'with a block' do
-      it 'sends the block to .logger' do
-        expect(Enumpath.logger).to receive(:log).with('LOG!') do |&block|
-          expect(block).to be_a_kind_of(Proc)
+    context 'when verbose mode is on' do
+      before { Enumpath.verbose = true }
+
+      it 'sends log messages to .logger' do
+        expect(Enumpath.logger).to receive(:log).with('LOG!')
+        Enumpath.log('LOG!')
+      end
+
+      context 'with a block' do
+        it 'sends the block to .logger' do
+          expect(Enumpath.logger).to receive(:log).with('LOG!') do |&block|
+            expect(block).to be_a_kind_of(Proc)
+          end
+          Enumpath.log('LOG!') { 'BLOCK!' }
         end
-        Enumpath.log('LOG!') { 'BLOCK!' }
       end
     end
   end
@@ -33,16 +44,28 @@ RSpec.describe Enumpath do
     let(:path) { '$' }
     let(:enum) { {} }
 
-    it 'can toggle on verbose mode' do
-      Enumpath.verbose = false
-      Enumpath.apply(path, enum, verbose: true)
-      expect(Enumpath.verbose).to be_truthy
-    end
+    describe 'the :verbose option' do
+      let(:seen) { [] }
+      let(:probe) { ->(_object, _name) { seen << Enumpath.verbose && false } }
 
-    it 'can toggle off verbose mode' do
-      Enumpath.verbose = true
-      Enumpath.apply(path, enum, verbose: false)
-      expect(Enumpath.verbose).to be_falsey
+      it 'turns verbose mode on for the call only' do
+        Enumpath.apply('x', Object.new, verbose: true, property_resolver: probe)
+        expect(seen).to eq([true])
+        expect(Enumpath.verbose).to be(false)
+      end
+
+      it 'turns verbose mode off for the call only, even when it is on by default' do
+        Enumpath.verbose = true
+        Enumpath.apply('x', Object.new, verbose: false, property_resolver: probe)
+        expect(seen).to eq([false])
+        expect(Enumpath.verbose).to be(true)
+      end
+
+      it 'uses Enumpath.verbose when the call has no :verbose option' do
+        Enumpath.verbose = true
+        Enumpath.apply('x', Object.new, property_resolver: probe)
+        expect(seen).to eq([true])
+      end
     end
 
     it 'passes the path argument through to Enumpath::Path#new' do

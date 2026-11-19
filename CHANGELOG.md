@@ -7,8 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- `Enumpath.apply` is safe to call from several threads at once (#12). The `:verbose` option and the logger's indentation level used to be process-wide, so one thread's call could switch verbose mode on or off, or change the indentation, for the others; both are now per call and per thread. A log message is written to the logger in one piece, so threads no longer interleave the lines of a message. The logger and the path cache are created when Enumpath loads instead of on first use.
+- `Enumpath.verbose = true` now works as the README describes: it is the default for calls that do not pass `verbose:`. Before, every `apply` call reset it to its own `verbose:` option, so the setter had no effect on calls. The `verbose:` option now applies to its call only: `Enumpath.verbose` is no longer left on after `apply(path, enum, verbose: true)`.
+
 ### Changed
 
+- Evaluating a path with verbose mode off is about 20% faster, because the debug log calls no longer build a block for the logger when nothing is logged.
 - Enumpath no longer depends on the unmaintained `mini_cache` and `to_regexp` gems (#47). Normalized paths are cached in a small built-in cache that is safe to share between threads and keeps at most 1,000 paths (least recently used dropped first); it used to grow without limit. `Enumpath.path_cache` now returns an `Enumpath::PathCache` with `get`, `set`, `get_or_set` and `reset`.
 - Regular expressions in filters are parsed by Enumpath itself. A regular expression that is not valid now matches nothing instead of raising `RegexpError`, and the flags `e` and `s` (which already raised `ArgumentError` on Ruby 3.3 and later) are no longer accepted. `i`, `m`, `x`, `n` and `u` still work, as do `/pattern/` and `%r{pattern}`.
 - Requiring Enumpath no longer adds `String#to_regexp` and `Regexp#to_regexp`, which came from the `to_regexp` gem. Code that relied on them needs its own dependency.

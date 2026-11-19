@@ -17,4 +17,7 @@ RSpec.configure do |config|
   config.before(:suite) do
     Enumpath.logger.logger = ::Logger.new('/dev/null')
   end
+
+  # Enumpath.verbose is a process-wide default, so a spec that turns it on must not leave it on
+  config.after { Enumpath.verbose = false }
 end
