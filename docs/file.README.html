@@ -299,7 +299,7 @@ pets.cats.-1
 
 <p>Syntax: <code>[child1,child2,...]</code></p>
 
-<p>The union operator combines the results of two or more child operators. There is no limit to the number of child operators you can specify in a single union. Each child operator is separated by a comma (<code>,</code>). White space is stripped from around each child operator. Child operators can optionally be wrapped in single quotes. Bracket notation is not supporter in this context.</p>
+<p>The union operator combines the results of two or more child operators. There is no limit to the number of child operators you can specify in a single union. Each child operator is separated by a comma (<code>,</code>). White space is stripped from around each child operator. Child operators can optionally be wrapped in single quotes. Bracket notation is not supported in this context.</p>
 
 <p>The following are all valid union operators:</p>
 
@@ -322,7 +322,7 @@ pets.cats.-1
 <li><code>[?(isbn)]</code>: equivalent to the previous example</li>
 <li><code>[?(@.price == 8)]</code>: any member whose <code>price</code> value is equal to 8</li>
 <li><code>[?(@.price == 8 || @.price == 10)]</code>: members with a <code>price</code> of 8 <em>or</em> 10</li>
-<li><code>[?(@.price &gt; 2 &amp;&amp; @.price &lt; 10)]</code>: members with a <code>price</code> greater than 8 <em>and</em> less than 10</li>
+<li><code>[?(@.price &gt; 2 &amp;&amp; @.price &lt; 10)]</code>: members with a <code>price</code> greater than 2 <em>and</em> less than 10</li>
 <li><code>[?(@.name =~ /bob/i || @.name == &#39;Mark&#39;)]</code>: any member whose <code>name</code> matches the regex <code>/bob/i</code> or equals <code>&#39;Mark&#39;</code></li>
 </ul>
 
@@ -334,9 +334,9 @@ pets.cats.-1
 
 <p>Syntax: <code>[(expression)]</code></p>
 
-<p>A subscript expression is made up of a singe expression that consists of a child operator (<code>@.child</code> or <code>child</code>; the leading <code>@.</code> is optional), plus an optional pair of arithmetic operator and operand. The arithmetic operator can be any one of <code>+</code>, <code>-</code>, <code>**</code>, <code>*</code>, <code>/</code>, or <code>%</code>. The operand can be a string (<code>&#39;some string&#39;</code>), symbol (<code>:some_symbol</code>), or numeric value (<code>10</code> or <code>1.0</code>). The expression is evaluated and the result becomes the subscript. If an operator and operand are not included in an expression then the value located at the child operator is used as the subscript. If the subscript represents a valid child path for the enumerable, the value of that member will be passed along for further processing of the path.</p>
+<p>A subscript expression is made up of a single expression that consists of a child operator (<code>@.child</code> or <code>child</code>; the leading <code>@.</code> is optional), plus an optional pair of arithmetic operator and operand. The arithmetic operator can be any one of <code>+</code>, <code>-</code>, <code>**</code>, <code>*</code>, <code>/</code>, or <code>%</code>. The operand can be a string (<code>&#39;some string&#39;</code>), symbol (<code>:some_symbol</code>), or numeric value (<code>10</code> or <code>1.0</code>). The expression is evaluated and the result becomes the subscript. If an operator and operand are not included in an expression then the value located at the child operator is used as the subscript. If the subscript represents a valid child path for the enumerable, the value of that member will be passed along for further processing of the path.</p>
 
-<p>The following are all valid filter expressions:</p>
+<p>The following are all valid subscript expressions:</p>
 
 <ul>
 <li><code>[(@.length - 1)]</code>: the subscript becomes the length of the current enumerable, minus 1</li>
@@ -656,7 +656,7 @@ Enumpath: Child operator detected
 
 <h2 id="path-normalization">Path normalization</h2>
 
-<p>When you give a string path to Enumpath it will automatically normalize it to an array of path segments. You can also pass it an array of path segments to avoid the normalization, for instance if the normalization process is having trouble parsing your path, or you happen to have a pre-normalized path already. For example the path <code>[&#39;pets&#39;]..[?(@.age &gt; 10)].name</code> is represented in normalized form as <code>[&#39;pets&#39;, &#39;..&#39;, &#39;?(@.age &gt; 10)&#39;, &#39;name&#39;]</code>. For the most part you should stick with string paths and let Enumpath normalize on its own.</p>
+<p>When you give a string path to Enumpath it will automatically normalize it to an array of path segments. You can also pass it an array of path segments to avoid the normalization, for instance if the normalization process is having trouble parsing your path, or you happen to have a pre-normalized path already. For example the path <code>[&#39;pets&#39;]..[?(@.age &gt; 10)].name</code> is represented in normalized form as <code>[&#39;pets&#39;, &#39;..&#39;, &#39;?(@.age &gt; 10)&#39;, &#39;name&#39;]</code>. The segments of an array path are converted to strings and the array is used as given, without normalizing or caching it. A path that is neither a String nor an Array raises an <code>ArgumentError</code>. For the most part you should stick with string paths and let Enumpath normalize on its own.</p>
 
 <h3 id="normalized-path-caching">Normalized path caching</h3>
 
@@ -672,9 +672,23 @@ Enumpath: Child operator detected
 </span><span class='const'><span class='object_link'><a href="Enumpath.html" title="Enumpath (module)">Enumpath</a></span></span><span class='period'>.</span><span class='id identifier rubyid_apply'><span class='object_link'><a href="Enumpath.html#apply-class_method" title="Enumpath.apply (method)">apply</a></span></span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>$..book.-1</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_store_info'>store_info</span><span class='rparen'>)</span>
 <span class='const'><span class='object_link'><a href="Enumpath.html" title="Enumpath (module)">Enumpath</a></span></span><span class='period'>.</span><span class='id identifier rubyid_apply'><span class='object_link'><a href="Enumpath.html#apply-class_method" title="Enumpath.apply (method)">apply</a></span></span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>$..book[-1]</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_store_info'>store_info</span><span class='rparen'>)</span>
 </code></pre></li>
-<li><p>The original implementations of JSONPath allowed unchecked evaluation of filter and subscript expressions. Enumpath limits those expressions to a reasonable subset of operations as detailed in the <a href="#operator-reference">Operator Reference</a> section and uses <code>public_send</code> rather than <code>eval</code> to resolve expressions as necessary.</p></li>
+<li><p>The original implementations of JSONPath allowed unchecked evaluation of filter and subscript expressions. Enumpath limits those expressions to a reasonable subset of operations as detailed in the <a href="#operator-reference">Operator Reference</a> section. It never uses <code>eval</code>: the comparison and arithmetic operators are called by name from a fixed list, and a path can only call methods on your data as the <a href="#property_resolver"><code>:property_resolver</code></a> option allows (read-only by default).</p></li>
 <li><p>The original JSONPath spec did not include support for using logical operators to chain expressions in filter expression operators. This addition was inspired by <a href="https://skarlso.github.io/2017/05/28/replace-eval-with-object-send-and-a-parser/">Gergely Brautigam&#39;s</a> work on <a href="https://github.com/joshbuddy/jsonpath">joshbuddy/jsonpath</a></p></li>
 </ol>
+
+<h2 id="known-limitations">Known limitations</h2>
+
+<p>These are tracked as issues, and contributions are welcome.</p>
+
+<ul>
+<li>A quoted bracket child cannot contain a dot: <code>[&#39;a.b&#39;]</code> matches nothing (<a href="https://github.com/chrisbloom7/enumpath/issues/41">issue 41</a>).</li>
+<li><code>&amp;&amp;</code> and <code>||</code> inside a quoted string in a filter expression split the expression (<a href="https://github.com/chrisbloom7/enumpath/issues/42">issue 42</a>).</li>
+<li>A key whose value is <code>nil</code> returns the same empty result as a missing key (<a href="https://github.com/chrisbloom7/enumpath/issues/43">issue 43</a>).</li>
+<li>A negative slice step such as <code>[::-1]</code> matches nothing (<a href="https://github.com/chrisbloom7/enumpath/issues/44">issue 44</a>).</li>
+<li>Malformed paths are not rejected: <code>a[</code> is read as <code>a</code> (<a href="https://github.com/chrisbloom7/enumpath/issues/45">issue 45</a>).</li>
+<li>Recursive descent raises <code>SystemStackError</code> on data nested a few thousand levels deep (<a href="https://github.com/chrisbloom7/enumpath/issues/46">issue 46</a>).</li>
+<li>Subscript arithmetic with <code>*</code> and <code>**</code> can use a lot of CPU or memory, so only accept paths you trust (<a href="https://github.com/chrisbloom7/enumpath/issues/52">issue 52</a>).</li>
+</ul>
 
 <h2 id="alternatives">Alternatives</h2>
 
@@ -775,7 +789,7 @@ Enumpath: Child operator detected
 </div></div>
 
       <div id="footer">
-  Generated on Thu Nov 19 01:17:42 2026 by
+  Generated on Thu Nov 19 01:40:41 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.36 (ruby-3.4.7).
 </div>
