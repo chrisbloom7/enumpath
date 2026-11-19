@@ -10,13 +10,14 @@ Gem::Specification.new do |spec|
   spec.license       = 'Apache-2.0'
   spec.summary       = 'A JSONPath-compatible library for navigating nested Ruby objects using path expressions'
   spec.description = <<~DESC
-    Enumpath is an implementation of the JSONPath spec for Ruby objects,
-    plus some added sugar. It's like Ruby's native Enumerable#dig method,
-    but fancier. It is designed for situations where you need to provide
-    a dynamic way of describing a complex path through nested enumerable
-    objects. This makes it exceptionally well suited for flexible ETL
-    (Extract, Transform, Load) processes by allowing you to define paths
-    through your data in a simple, easily readable, easily storable syntax.
+    Enumpath navigates nested Ruby objects with JSONPath-style path expressions
+    written as plain strings. It works on the data you actually have in memory:
+    hashes with symbol, string or integer keys, arrays, Structs, plain objects
+    and OpenStructs, in any mix. It is like Ruby's native dig, but a path can use
+    wildcards, filters, slices, unions and recursive descent, so it can live in
+    configuration or a database and change without a deploy. Paths are safe by
+    default: a path can read your data but cannot call mutating methods such as
+    clear or destroy. Only accept paths from sources you trust.
   DESC
   spec.authors       = ['Chris Bloom']
   spec.email         = ['chrisbloom7@gmail.com']
