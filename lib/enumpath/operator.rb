@@ -22,7 +22,8 @@ module Enumpath
       # @return an instance of a subclass of Enumpath::Operator based on what was detected, or nil if nothing was
       #   detected
       def detect(operator, enum) # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
-        return operator(:Child, operator) if child?(operator, enum)
+        child = child(operator, enum)
+        return child if child
         return operator(:Wildcard, operator) if wildcard?(operator)
         return operator(:RecursiveDescent, operator) if recursive_descent?(operator)
         return operator(:Union, operator) if union?(operator)
@@ -36,8 +37,11 @@ module Enumpath
 
       private
 
-      def child?(operator, enum)
-        Enumpath::Operator::Child.detect?(operator, enum)
+      # The Child instance has already resolved the operator against the enum, and keeps the value for #apply
+      def child(operator, enum)
+        child = Enumpath::Operator::Child.detect(operator, enum)
+        Enumpath.log('Child operator detected') if child
+        child
       end
 
       def wildcard?(operator)

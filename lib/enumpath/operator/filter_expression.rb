@@ -41,32 +41,38 @@ module Enumpath
       def apply_to_key(key, expressions, remaining_path, enum, resolved_path)
         value = Enumpath::Resolver::Simple.resolve(key, enum)
         Enumpath.log('Applying filter to key') { { key: key, enum: value } }
-        return unless pass?(expressions.dup, value)
+        return unless pass?(expressions.dup, value, expressions.size > 1 ? {} : nil)
 
         Enumpath.log('Applying filtered key') { { 'filtered key': key, 'filtered enum': value } }
         yield(remaining_path, value, resolved_path + [key.to_s])
       end
 
-      def pass?(expressions, enum)
-        running_result = evaluate(expressions.shift, enum)
+      # `resolved` (nil when there is a single expression) holds each property already resolved for this member, so a
+      # property repeated across the logical expressions is resolved (and any method it calls is run) once
+      def pass?(expressions, enum, resolved)
+        running_result = evaluate(expressions.shift, enum, resolved)
         Enumpath.log('Initial result') { { result: running_result } }
         while expressions.any?
           logical_operator, expression = expressions.shift(2)
-          running_result = evaluate(expression, enum, logical_operator, running_result)
+          running_result = evaluate(expression, enum, resolved, logical_operator, running_result)
           Enumpath.log('Running result') { { result: running_result } }
         end
         running_result
       end
 
-      def evaluate(expression, enum, logical_operator = nil, running_result = nil)
+      def evaluate(expression, enum, resolved, logical_operator = nil, running_result = nil)
         property, operator, operand = expression.split(COMPARISON_OPERATOR_REGEX).map(&:strip)
-        value = resolve(property, enum)
+        value = resolved ? resolve_once(resolved, property, enum) : resolve(property, enum)
         expression_result = test(operator, operand, value)
         Enumpath.log('Evaluated filter') do
           { property => value, operator: operator, operand: operand, result: expression_result,
             logical_operator: logical_operator }.compact
         end
         running_result(logical_operator, running_result, expression_result)
+      end
+
+      def resolve_once(resolved, property, enum)
+        resolved.fetch(property) { resolved[property] = resolve(property, enum) }
       end
 
       def resolve(property, enum)

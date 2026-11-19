@@ -23,6 +23,27 @@ RSpec.describe Enumpath::Operator::Child do
     end
   end
 
+  describe '#detect?' do
+    let(:enum) { { name: 'Ted' } }
+
+    it 'returns whether the operator resolves against the enum' do
+      expect(instance.detect?(enum)).to be(true)
+      expect(instance.detect?({})).to be(false)
+    end
+
+    it 'lets a following #apply reuse the resolved value instead of resolving again' do
+      allow(Enumpath::Resolver::Simple).to receive(:resolve).and_call_original
+      instance.detect?(enum)
+      expect { |block| instance.apply([], enum, [], &block) }.to yield_with_args([], 'Ted', ['name'])
+      expect(Enumpath::Resolver::Simple).to have_received(:resolve).once
+    end
+
+    it 'resolves again in #apply for a different enum' do
+      instance.detect?(enum)
+      expect { |block| instance.apply([], { name: 'Barry' }, [], &block) }.to yield_with_args([], 'Barry', ['name'])
+    end
+  end
+
   describe '#apply' do
     let(:remaining_path) { [] }
     let(:enum) { { name: name } }
