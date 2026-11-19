@@ -306,12 +306,12 @@ syntax and examples</p>
       <pre class="lines">
 
 
-19
-20
-21</pre>
+17
+18
+19</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/enumpath/operator/filter_expression.rb', line 19</span>
+      <pre class="code"><span class="info file"># File 'lib/enumpath/operator/filter_expression.rb', line 17</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_detect?'>detect?</span><span class='lparen'>(</span><span class='id identifier rubyid_operator'>operator</span><span class='rparen'>)</span>
   <span class='op'>!</span><span class='lparen'>(</span><span class='id identifier rubyid_operator'>operator</span> <span class='op'>=~</span> <span class='const'><span class='object_link'><a href="#OPERATOR_REGEX-constant" title="Enumpath::Operator::FilterExpression::OPERATOR_REGEX (constant)">OPERATOR_REGEX</a></span></span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
@@ -469,15 +469,15 @@ the filter</p>
       <pre class="lines">
 
 
+30
+31
 32
 33
 34
-35
-36
-37</pre>
+35</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/enumpath/operator/filter_expression.rb', line 32</span>
+      <pre class="code"><span class="info file"># File 'lib/enumpath/operator/filter_expression.rb', line 30</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_apply'>apply</span><span class='lparen'>(</span><span class='id identifier rubyid_remaining_path'>remaining_path</span><span class='comma'>,</span> <span class='id identifier rubyid_enum'>enum</span><span class='comma'>,</span> <span class='id identifier rubyid_resolved_path'>resolved_path</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='id identifier rubyid_block'>block</span><span class='rparen'>)</span>
   <span class='const'><span class='object_link'><a href="../../Enumpath.html" title="Enumpath (module)">Enumpath</a></span></span><span class='period'>.</span><span class='id identifier rubyid_log'>log</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>Evaluating filter expression</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='lbrace'>{</span> <span class='label'>expression:</span> <span class='id identifier rubyid_operator'>operator</span><span class='comma'>,</span> <span class='label'>to:</span> <span class='id identifier rubyid_enum'>enum</span> <span class='rbrace'>}</span> <span class='rbrace'>}</span>
@@ -495,7 +495,7 @@ the filter</p>
 </div>
 
       <div id="footer">
-  Generated on Thu Nov 19 14:29:33 2026 by
+  Generated on Thu Nov 19 16:01:20 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-3.4.7).
 </div>

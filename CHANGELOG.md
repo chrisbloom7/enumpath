@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-19
+
 ### Fixed
 
 - `Enumpath.apply` is safe to call from several threads at once (#12). The `:verbose` option and the logger's indentation level used to be process-wide, so one thread's call could switch verbose mode on or off, or change the indentation, for the others; both are now per call and per thread. A log message is written to the logger in one piece, so threads no longer interleave the lines of a message. The logger and the path cache are created when Enumpath loads instead of on first use.
