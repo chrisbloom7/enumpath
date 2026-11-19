@@ -11,9 +11,21 @@ module Enumpath
         # @param operator (see Enumpath::Operator::Base.detect?)
         # @return (see Enumpath::Operator::Base.detect?)
         def detect?(operator, enum)
-          !Enumpath::Resolver::Simple.resolve(operator, enum).nil? ||
-            !Enumpath::Resolver::Property.resolve(operator, enum).nil?
+          new(operator).detect?(enum)
         end
+      end
+
+      # Whether the operator resolves against an enumerable. The resolved value is kept, so a following {#apply} to
+      # the same enumerable uses it instead of resolving the operator a second time. That matters when a property
+      # resolver policy lets the operator call a method, which must run once per path segment.
+      #
+      # @param enum [Enumerable] the enumerable to resolve the operator against
+      # @return [true, false] whether the operator resolved to a value
+      def detect?(enum)
+        @detected = true
+        @detected_enum = enum
+        @detected_value = resolve(enum)
+        !@detected_value.nil?
       end
 
       # Resolves a child operator against an enumerable. If the child operator matches a index, key, member, or
@@ -25,9 +37,25 @@ module Enumpath
       # @yieldparam enum [Enumerable] the resolved value of the enumerable
       # @yieldparam resolved_path [Array] resolved_path plus the child operator
       def apply(remaining_path, enum, resolved_path)
+        value = detected_value(enum)
+        yield(remaining_path, value, resolved_path + [operator]) unless value.nil?
+      end
+
+      private
+
+      # The value kept by {#detect?} if it was for this enumerable (used once), otherwise a fresh resolution
+      def detected_value(enum)
+        return resolve(enum) unless @detected && @detected_enum.equal?(enum)
+
+        value = @detected_value
+        @detected = @detected_enum = @detected_value = nil
+        value
+      end
+
+      def resolve(enum)
         value = Enumpath::Resolver::Simple.resolve(operator, enum)
         value = Enumpath::Resolver::Property.resolve(operator, enum) if value.nil?
-        yield(remaining_path, value, resolved_path + [operator]) unless value.nil?
+        value
       end
     end
   end

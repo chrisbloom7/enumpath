@@ -335,4 +335,64 @@ RSpec.describe 'Property resolution policies' do
       expect(Timeout.timeout(5) { thread.value }).to eq(['label for widget'])
     end
   end
+
+  describe 'resolving each property once (#51)' do
+    let(:counter_class) do
+      Class.new do
+        attr_reader :calls
+
+        def initialize
+          @calls = Hash.new(0)
+        end
+
+        def tick
+          @calls[:tick] += 1
+        end
+
+        def label
+          @calls[:label] += 1
+          'x'
+        end
+      end
+    end
+    let(:object) { counter_class.new }
+    let(:allow_all) { ->(_object, _name) { true } }
+
+    %i[all callable].each do |policy|
+      context "under #{policy}" do
+        let(:resolver) { policy == :all ? :all : allow_all }
+
+        it 'runs a method once for a child segment' do
+          expect(Enumpath.apply('tick', object, property_resolver: resolver)).to eq([1])
+          expect(object.calls[:tick]).to eq(1)
+        end
+
+        it 'does not mutate the receiver twice for Array#pop' do
+          array = [1, 2]
+          expect(Enumpath.apply('pop', array, property_resolver: resolver)).to eq([2])
+          expect(array).to eq([1])
+        end
+
+        it 'runs a method once per segment for a nested child' do
+          expect(Enumpath.apply('a.tick', { a: object }, property_resolver: resolver)).to eq([1])
+          expect(object.calls[:tick]).to eq(1)
+        end
+
+        it 'runs a property once per element for a filter expression' do
+          Enumpath.apply('[?(@.label)]', [object], property_resolver: resolver)
+          expect(object.calls[:label]).to eq(1)
+        end
+
+        it 'runs a property once per element when a filter expression repeats it' do
+          Enumpath.apply("[?(@.label == 'x' && @.label != 'y')]", [object], property_resolver: resolver)
+          expect(object.calls[:label]).to eq(1)
+        end
+
+        it 'runs a property once for a subscript expression' do
+          Enumpath.apply('[(@.tick)]', object, property_resolver: resolver)
+          expect(object.calls[:tick]).to eq(1)
+        end
+      end
+    end
+  end
 end
