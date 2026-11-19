@@ -7,7 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- A `property_resolver:` option on `Enumpath.apply` that controls which methods a path may call: `:safe` (the default), `:none`, `:all`, or a callable that receives the object and the method name.
+
 ### Changed
+
+- **BREAKING:** Paths only call read-only methods by default (`property_resolver: :safe`). A segment like `clear`, `pop`, `sort!` or `destroy` used to call that method and mutate the data; it now matches nothing. Custom methods on your own objects (other than `attr_reader`s) and on subclasses of core classes no longer resolve. Pass `property_resolver: :all` to restore the old behavior, or a callable to allow specific methods.
+- `Enumpath.apply` no longer removes the `:verbose` and `:result_type` keys from the options hash you pass in.
 
 - The published gem now contains only `lib/`, `LICENSE` and `README.md`. It used to ship the whole repository, including the generated `docs/`.
 - RubyGems.org now requires multi-factor authentication to publish the gem (`rubygems_mfa_required`).

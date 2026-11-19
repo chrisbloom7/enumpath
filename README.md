@@ -100,7 +100,7 @@ Child operators match on an index, key, member, or property of the enumerable. I
 1. as an integer key or index (if the segment is integer-like),
 2. then as a string key,
 3. then as a symbol key,
-4. and finally as a public property (i.e. a public method of the target that expects no arguments)
+4. and finally as a public property (i.e. a public method of the target that expects no arguments), if the [`:property_resolver`](#property_resolver) option allows it. By default only read-only methods are called: allowlisted methods such as `length`, `size`, `count`, `first`, `keys` or `upcase` on core data (arrays, hashes, strings, symbols, numbers, structs, `nil`, `true`, `false`), and `attr_reader`s on plain Ruby objects. A path segment like `clear`, `pop`, `sort!` or `destroy` matches nothing.
 
 #### Operator Examples
 
@@ -382,6 +382,28 @@ Enumpath.apply("food.*", party, result_type: :path) # => ["$['food'][0]", "$['fo
 ```
 
 Each returned path is a valid path expression that can be used in calls to `Enumpath.apply`. If you want to be explicit about returning values instead of paths you can specify that with the option `result_type: :value`.
+
+### :property_resolver
+
+When a path segment is not an index, key, or struct member, Enumpath can resolve it by calling a method on the object (step 4 of the [child operator](#child-operator)). The `:property_resolver` option controls which methods a path is allowed to call:
+
+- `:safe` (the default): only read-only methods. On core data (arrays, hashes, strings, symbols, numbers, structs, `nil`, `true`, `false`) that is a fixed allowlist of non-mutating methods such as `length`, `size`, `count`, `first`, `last`, `min`, `max`, `sum`, `keys`, `values`, `to_a`, `to_h`, `to_s`, `empty?`, `zero?`, `upcase` or `strip`, and only Ruby's own implementations of them. On plain Ruby objects it is `attr_reader`s (public methods named after an instance variable). Names ending in `!` or `=` are never called, and neither is any method that requires arguments.
+- `:none`: never call methods.
+- `:all`: call any public method that expects no arguments. This is how Enumpath behaved before this option existed, and it lets a path run methods such as `clear`, `pop`, `sort!` or `destroy`. Only use it with paths you trust.
+- a callable, such as a lambda: called with the object and the method name (a String). The method is called only if it returns true. The callable has full control: the `:safe` checks are not applied.
+
+```ruby
+party = { food: %w[pizza tacos] }
+Enumpath.apply('food.pop', party) # => [] and party is unchanged
+Enumpath.apply('food.length', party) # => [2]
+Enumpath.apply('food.length', party, property_resolver: :none) # => []
+
+# Allow ActiveRecord attribute readers, for example
+readers = ->(object, name) { object.is_a?(ActiveRecord::Base) && object.class.attribute_names.include?(name) }
+Enumpath.apply('author.name', post, property_resolver: readers)
+```
+
+The option applies to a single call. A chained `results.apply(...)` uses the default unless you pass the option again. Any other value raises an `ArgumentError`.
 
 ### :verbose
 
