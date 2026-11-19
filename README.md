@@ -559,7 +559,7 @@ Enumpath is not the only JSONPath library for Ruby, and for some data it is not 
 
 - [`json_p3`][json-p3] follows [RFC 9535][rfc-9535] (the JSONPath standard) and works on parsed JSON only, by design. It is the standards-compliant choice and faster than Enumpath (about 2 to 4 times in a benchmark on a 10,000-element store example).
 - [`jsonpath`][jsonpath-gh] is the long-standing de facto Ruby gem. It was about as fast as Enumpath in the same benchmark.
-- Enumpath is **not** RFC 9535 compliant. It implements the original JSONPath spec with some deviations (see [below](#deviations-from-the-original-jsonpath-spec)).
+- Enumpath is **not** RFC 9535 compliant. It implements the original JSONPath spec with some deviations (see [above](#deviations-from-the-original-jsonpath-spec)).
 
 If your data is parsed JSON with string keys, either alternative works and `json_p3` is the standards-compliant, faster choice. Enumpath is for data that is not plain JSON, in particular symbol keys (`jsonpath` loses track of objects nested inside a symbol-keyed Hash) and paths that should only be allowed to read, not call arbitrary methods (see [`:property_resolver`](#property_resolver)). The same queries behave like this across the three gems (checked with `jsonpath` 1.1.5 and `json_p3` 1.0.1 on Ruby 3.4):
 
