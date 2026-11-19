@@ -29,13 +29,14 @@ Gem::Specification.new do |spec|
   spec.homepage      = 'https://github.com/chrisbloom7/enumpath'
   spec.metadata['rubygems_mfa_required'] = 'true'
 
-  # Enumerable#dig was added in Ruby 2.3.0
-  spec.required_ruby_version = '>= 2.3.0'
+  # CI tests Ruby 2.6 and newer
+  spec.required_ruby_version = '>= 2.6.0'
 
+  # No longer a default gem as of Ruby 4.0
+  spec.add_dependency 'logger', '>= 1.4'
   spec.add_dependency 'mini_cache', '~> 1.1.0'
   spec.add_dependency 'to_regexp', '~> 0.2.1'
 
-  spec.add_development_dependency 'bundler', '~> 2.2'
   spec.add_development_dependency 'null-logger', '~> 0.1'
   spec.add_development_dependency 'pry-byebug', '~> 3.9'
   spec.add_development_dependency 'rake', '~> 13.0'

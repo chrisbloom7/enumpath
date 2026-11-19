@@ -7,8 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Support for Ruby 4.0: `logger` is now declared as a runtime dependency, since it is no longer a default gem there.
+
 ### Changed
 
+- **Breaking:** the minimum supported Ruby version is now 2.6.0 (was 2.3.0). Ruby 2.3 to 2.5 are no longer supported; CI only ever tested 2.6 and up.
 - The published gem now contains only `lib/`, `LICENSE` and `README.md`. It used to ship the whole repository, including the generated `docs/`.
 - RubyGems.org now requires multi-factor authentication to publish the gem (`rubygems_mfa_required`).
 - The API documentation is generated with Redcarpet and lives in `docs/`.

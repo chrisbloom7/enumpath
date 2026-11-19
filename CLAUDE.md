@@ -39,7 +39,7 @@ than adding new entries).
 - `docs/` is generated YARD output and is committed. Never hand-edit it; change the YARD comments in
   `lib/` and run `bundle exec rake yard`.
 - CI (`.github/workflows/ruby.yml`) runs the specs on Ruby 2.6 to 3.4 plus a rubocop `lint` job; the `ci-gate`
-  job aggregates them. The gemspec says `>= 2.3.0` but CI only tests 2.6 and up; avoid syntax newer than 2.6.
+  job aggregates them. The gemspec requires Ruby `>= 2.6.0`; avoid syntax newer than 2.6.
 - `Gemfile.lock` is pinned to Bundler 2.4.22 (the last Bundler that supports Ruby 2.6); regenerate it with
   `bundle` commands, never by hand (the `block-generated-files.sh` hook refuses edits). Do not touch it or
   `lib/enumpath/version.rb` outside a dependency bump or release.
