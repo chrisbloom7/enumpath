@@ -1,10 +1,12 @@
 # Enumpath
 
-A JSONPath-compatible library for safely navigating nested Ruby objects using path expressions.
+Navigate nested Ruby objects with JSONPath-style path expressions, safely by default.
 
 ## Introduction
 
-Enumpath is an implementation of the [JSONPath][jsonpath] spec for Ruby objects, plus some added sugar. It's like Ruby's native `Enumerable#dig` method, but fancier. It is designed for situations where you need to provide a dynamic way of describing a complex path through nested enumerable objects. This makes it exceptionally well suited for flexible ETL (Extract, Transform, Load) processes by allowing you to define paths through your data in a simple, easily readable, easily storable syntax.
+Enumpath lets you describe a path through nested Ruby objects as a string, using [JSONPath][jsonpath]-style syntax, and pull out whatever it matches. It works on the data you actually have in memory: hashes with symbol, string or integer keys, arrays, `Struct`s, plain Ruby objects and `OpenStruct`s, in any mix. It is like Ruby's native `dig`, but with wildcards, filters, slices and recursive descent, and with paths you can store and change at runtime. That makes it a good fit for flexible ETL (Extract, Transform, Load) processes and anywhere else a path needs to live in configuration instead of code.
+
+Paths are safe by default: a path can read your data but cannot call mutating or destructive methods such as `clear` or `destroy`. See [`:property_resolver`](#property_resolver) to allow more. See [Object traversal](#object-traversal) for examples, and [Alternatives](#alternatives) for when another gem is the better choice.
 
 Enumpath path expressions look like this:
 
@@ -22,13 +24,13 @@ pets..name
 pets.cats.-1
 ```
 
-Enumpath has the following benefits over vanilla `Enumerable#dig`:
+Enumpath has the following benefits over vanilla `dig`:
 
 - Paths can be described as simple strings
-- It's smart enough to figure out which path segments are integer indexes versus symbolic keys versus string keys
+- It's smart enough to figure out which path segments are integer indexes versus symbolic keys versus string keys versus struct members versus object readers
 - It enables the use of wildcard, recursive descent, filter, subscript, union, and slice operators to describe complex paths through the data
 
-Like `Enumerable#dig`, Enumpath protects against missing path segments and returns safely if the full path cannot be resolved.
+Like `dig`, Enumpath protects against missing path segments and returns safely if the full path cannot be resolved.
 
 ## Installation
 
@@ -75,6 +77,64 @@ Enumpath.apply("drinks.*", party) # => []
 ```
 
 > This is a thoughtful deviation from the original JSONPath spec which would return `false` on no matches.
+
+## Object traversal
+
+The same path syntax works on whatever shape your data has. These examples are run by `spec/integration_tests/object_traversal_spec.rb`, so they stay accurate.
+
+A hash with symbol keys, using a wildcard and a filter:
+
+```ruby
+order = { customer: { name: 'Ada' }, items: [{ sku: 'A1', qty: 2 }, { sku: 'B2', qty: 1 }] }
+Enumpath.apply('items.*.sku', order)             # => ["A1", "B2"]
+Enumpath.apply('items[?(@.qty > 1)].sku', order) # => ["A1"]
+```
+
+A `Struct` inside a hash, with a relative index:
+
+```ruby
+Point = Struct.new(:x, :y)
+route = { stops: [Point.new(1, 2), Point.new(3, 4)] }
+Enumpath.apply('stops.*.x', route)  # => [1, 3]
+Enumpath.apply('stops.-1.y', route) # => [4]
+```
+
+A plain Ruby object. Under the default `:safe` policy its `attr_reader`s resolve, and so do read-only methods such as `length` on the values they return:
+
+```ruby
+class Author
+  attr_reader :name, :books
+
+  def initialize(name, books)
+    @name = name
+    @books = books
+  end
+
+  def label
+    "#{name} (#{books.length} books)"
+  end
+end
+
+library = { authors: [Author.new('Le Guin', %w[Earthsea Dispossessed]), Author.new('Butler', %w[Kindred])] }
+Enumpath.apply('authors.*.name', library)         # => ["Le Guin", "Butler"]
+Enumpath.apply('authors.0.books.length', library) # => [2]
+```
+
+A computed reader such as `label` is a method you wrote, not an `attr_reader`, so `:safe` does not call it. Ask for it with `property_resolver: :readers`, which also runs methods from installed gems and is not read-only, so use it on data you trust:
+
+```ruby
+Enumpath.apply('authors.*.label', library) # => []
+Enumpath.apply('authors.*.label', library, property_resolver: :readers)
+# => ["Le Guin (2 books)", "Butler (1 books)"]
+```
+
+An `OpenStruct`:
+
+```ruby
+require 'ostruct'
+config = OpenStruct.new(db: OpenStruct.new(host: 'localhost', port: 5432))
+Enumpath.apply('db.host', config) # => ["localhost"]
+```
 
 ## Operator Reference
 
@@ -489,7 +549,28 @@ To save a little bit of time on consecutive calls Enumpath caches the normalized
     ```
 
 3. The original implementations of JSONPath allowed unchecked evaluation of filter and subscript expressions. Enumpath limits those expressions to a reasonable subset of operations as detailed in the [Operator Reference](#operator-reference) section and uses `public_send` rather than `eval` to resolve expressions as necessary.
-4. The original JSONPath spec did not include support for using logical operators to chain expressions in filter expression operators. This addition was inspired by [Gergely Brautigam's][replace-eval-with-object-send-and-a-parser] work on [joshbuddy/jsonpath][jsonpath-gh]
+4. The original JSONPath spec did not include support for using logical operators to chain expressions in filter expression operators. This addition was inspired by [Gergely Brautigam's][rfc-9535]: https://www.rfc-editor.org/rfc/rfc9535
+[replace-eval-with-object-send-and-a-parser] work on [joshbuddy/jsonpath][jsonpath-gh]
+
+## Alternatives
+
+Enumpath is not the only JSONPath library for Ruby, and for some data it is not the best one:
+
+- [`json_p3`][json-p3] follows [RFC 9535][rfc-9535] (the JSONPath standard) and works on parsed JSON only, by design. It is the standards-compliant choice and faster than Enumpath (about 2 to 4 times in a benchmark on a 10,000-element store example).
+- [`jsonpath`][jsonpath-gh] is the long-standing de facto Ruby gem. It was about as fast as Enumpath in the same benchmark.
+- Enumpath is **not** RFC 9535 compliant. It implements the original JSONPath spec with some deviations (see [below](#deviations-from-the-original-jsonpath-spec)).
+
+If your data is parsed JSON with string keys, either alternative works and `json_p3` is the standards-compliant, faster choice. Enumpath is for data that is not plain JSON. The same queries behave like this across the three gems (checked with `jsonpath` 1.1.5 and `json_p3` 1.0.1 on Ruby 3.4):
+
+data | Enumpath | `jsonpath` | `json_p3`
+--- | --- | --- | ---
+Hash and Array with string keys | works | works | works
+Hash with symbol keys | works | no match | no match
+`Struct` | works | works for top-level members; no match once a `Struct` is inside a symbol-keyed Hash | no match
+Plain Ruby object with readers | works (`attr_reader`s under `:safe`, computed readers under `:readers`) | no match | no match
+`OpenStruct` | works | no match | no match
+
+If you only need a fixed path into data you already know, plain `dig` is simpler and much faster (about 50 times faster than Enumpath on a simple path).
 
 ## Requirements
 
@@ -540,6 +621,7 @@ Enumpath is based on [Stefan Goessner's JSONPath spec][jsonpath], and was inspir
 [hound-badge-image]: https://img.shields.io/badge/Reviewed_by-Hound-8E64B0.svg
 [hound]: https://houndci.com
 [jsonpath-gh]: https://github.com/joshbuddy/jsonpath
+[json-p3]: https://github.com/jg-rp/ruby-json-p3
 [jsonpath]: http://goessner.net/articles/JsonPath/
 [keypath-ruby]: https://github.com/nickcharlton/keypath-ruby
 [replace-eval-with-object-send-and-a-parser]: https://skarlso.github.io/2017/05/28/replace-eval-with-object-send-and-a-parser/
