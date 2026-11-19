@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-19
+
 ### Added
 
 - A `property_resolver:` option on `Enumpath.apply` that controls which methods a path may call: `:safe` (the default), `:readers` (also any public no-argument method written in Ruby, including those of installed gems, and ActiveModel-style attributes; not read-only, for trusted data only), `:none`, `:all`, or a callable that receives the object and the method name.
