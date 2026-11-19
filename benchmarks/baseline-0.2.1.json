@@ -1,0 +1,123 @@
+{
+  "meta": {
+    "ruby": "ruby 3.4.7 (2025-10-08 revision 7a5688e2a2) +PRISM [arm64-darwin23]",
+    "platform": "arm64-darwin23",
+    "enumpath": "0.2.1",
+    "git_sha": "5e9d626",
+    "recorded_at": "2026-11-19T14:43:15Z"
+  },
+  "results": {
+    "child_short": {
+      "median_us": 5.479248045503482,
+      "min_us": 5.396972653670673,
+      "iterations": 8192,
+      "matches": 1,
+      "times_dig": 89.97585174120495
+    },
+    "child_deep": {
+      "median_us": 9.28100587316294,
+      "min_us": 9.192138634261937,
+      "iterations": 4096,
+      "matches": 1,
+      "times_dig": 152.40529385017607
+    },
+    "index": {
+      "median_us": 7.037231455342408,
+      "min_us": 7.010620123537592,
+      "iterations": 8192,
+      "matches": 1,
+      "times_dig": 115.55981566011585
+    },
+    "bracket_notation": {
+      "median_us": 7.103393556917581,
+      "min_us": 7.045166029229222,
+      "iterations": 8192,
+      "matches": 1,
+      "times_dig": 116.64627704911969
+    },
+    "wildcard_small": {
+      "median_us": 22.21142574398982,
+      "min_us": 21.882324290345423,
+      "iterations": 2048,
+      "matches": 4,
+      "times_dig": 364.7383606482396
+    },
+    "recursive_small": {
+      "median_us": 48.61523439103621,
+      "min_us": 47.959960966181825,
+      "iterations": 1024,
+      "matches": 4,
+      "times_dig": 798.3206975857692
+    },
+    "slice_small": {
+      "median_us": 17.078857410979253,
+      "min_us": 17.011230454500037,
+      "iterations": 4096,
+      "matches": 2,
+      "times_dig": 280.4554073036576
+    },
+    "union_small": {
+      "median_us": 15.730712902950472,
+      "min_us": 15.667480454339966,
+      "iterations": 4096,
+      "matches": 2,
+      "times_dig": 258.31725086818426
+    },
+    "subscript_small": {
+      "median_us": 16.174804727597802,
+      "min_us": 16.010498029572773,
+      "iterations": 4096,
+      "matches": 1,
+      "times_dig": 265.60977346291156
+    },
+    "filter_small": {
+      "median_us": 75.7343750592554,
+      "min_us": 74.31250014633406,
+      "iterations": 512,
+      "matches": 4,
+      "times_dig": 1243.6496478082365
+    },
+    "filter_regex_small": {
+      "median_us": 37.973632743160124,
+      "min_us": 37.7871092496207,
+      "iterations": 1024,
+      "matches": 1,
+      "times_dig": 623.572782505703
+    },
+    "wildcard_large": {
+      "median_us": 34841.999993659556,
+      "min_us": 34566.99999514967,
+      "iterations": 2,
+      "matches": 10000,
+      "times_dig": 572147.6012332108
+    },
+    "recursive_large": {
+      "median_us": 61126.000015065074,
+      "min_us": 60688.99994716048,
+      "iterations": 1,
+      "matches": 10001,
+      "times_dig": 1003762.5362483495
+    },
+    "filter_large": {
+      "median_us": 91947.00000807643,
+      "min_us": 91363.99999260902,
+      "iterations": 1,
+      "matches": 4000,
+      "times_dig": 1509880.474851738
+    },
+    "slice_large": {
+      "median_us": 12576.500012073666,
+      "min_us": 12529.750005342066,
+      "iterations": 4,
+      "matches": 3333,
+      "times_dig": 206521.2764803063
+    },
+    "native_dig": {
+      "median_us": 0.06089687332178073,
+      "min_us": 0.06022834786456599,
+      "iterations": 1048576,
+      "matches": 1,
+      "times_dig": 1.0
+    }
+  }
+}
