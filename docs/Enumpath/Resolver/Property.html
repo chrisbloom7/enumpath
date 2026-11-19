@@ -6,7 +6,7 @@
 <title>
   Class: Enumpath::Resolver::Property
   
-    &mdash; Documentation by YARD 0.9.26
+    &mdash; Documentation by YARD 0.9.36
   
 </title>
 
@@ -101,7 +101,29 @@
 
 <h2>Overview</h2><div class="docstring">
   <div class="discussion">
-    <p>A utility for resolving a string as a property of an object</p>
+    <p>A utility for resolving a string as a property (a public method that expects no arguments) of an object.</p>
+
+<p>Which properties resolve is decided by a property resolver policy, set with the <code>:property_resolver</code> option of
+<span class='object_link'><a href="../../Enumpath.html#apply-class_method" title="Enumpath.apply (method)">Enumpath.apply</a></span>:</p>
+
+<ul>
+<li><code>:safe</code> (the default): read-only access only. See <span class='object_link'><a href="#safe%3F-class_method" title="Enumpath::Resolver::Property.safe? (method)">Property.safe?</a></span>.</li>
+<li><code>:readers</code>: <code>:safe</code>, plus public methods written in Ruby (including those of installed gems) and
+ActiveModel-style <code>attributes</code>. See <span class='object_link'><a href="#reader%3F-class_method" title="Enumpath::Resolver::Property.reader? (method)">Property.reader?</a></span>. This runs application and gem code and is not read-only.</li>
+<li><code>:none</code>: never call methods. Indexes, keys and Struct or Data members still resolve through
+<span class='object_link'><a href="Simple.html" title="Enumpath::Resolver::Simple (class)">Simple</a></span>.</li>
+<li><code>:all</code>: call any public method that expects no arguments. This was the behavior of version 0.1 and lets a
+path run mutating or destructive methods such as <code>clear</code>, <code>pop</code> or <code>destroy</code>. Only use it with trusted paths.</li>
+<li>a callable (anything that responds to <code>call</code>, such as a lambda): called as <code>callable.call(object, name)</code> with
+the property name as a String; the method is called only when it returns a truthy value. The callable has
+full control: none of the checks of the other policies are applied. It can call <span class='object_link'><a href="#safe%3F-class_method" title="Enumpath::Resolver::Property.safe? (method)">Property.safe?</a></span> or <span class='object_link'><a href="#reader%3F-class_method" title="Enumpath::Resolver::Property.reader? (method)">Property.reader?</a></span> to
+build on them.</li>
+</ul>
+
+<p>The policy for the current <span class='object_link'><a href="../../Enumpath.html#apply-class_method" title="Enumpath.apply (method)">Enumpath.apply</a></span> call is kept in a fiber-local variable (<code>Thread.current</code>), so it
+reaches every operator without being passed through each one, and calls running in other threads or fibers do
+not see it. Outside of <span class='object_link'><a href="../../Enumpath.html#apply-class_method" title="Enumpath.apply (method)">Enumpath.apply</a></span>, and in a chained <span class='object_link'><a href="../Results.html#apply-instance_method" title="Enumpath::Results#apply (method)">Enumpath::Results#apply</a></span> that does not pass the
+option again, the default (<code>:safe</code>) applies.</p>
 
 
   </div>
@@ -110,6 +132,172 @@
   
 
 </div>
+  
+    <h2>
+      Constant Summary
+      <small><a href="#" class="constants_summary_toggle">collapse</a></small>
+    </h2>
+
+    <dl class="constants">
+      
+        <dt id="POLICIES-constant" class="">POLICIES =
+          <div class="docstring">
+  <div class="discussion">
+    <p>The policies accepted by the <code>:property_resolver</code> option, besides a callable</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div>
+        </dt>
+        <dd><pre class="code"><span class='qsymbols_beg'>%i[</span><span class='tstring_content'>safe</span><span class='words_sep'> </span><span class='tstring_content'>readers</span><span class='words_sep'> </span><span class='tstring_content'>none</span><span class='words_sep'> </span><span class='tstring_content'>all</span><span class='tstring_end'>]</span></span><span class='period'>.</span><span class='id identifier rubyid_freeze'>freeze</span></pre></dd>
+      
+        <dt id="DEFAULT_POLICY-constant" class="">DEFAULT_POLICY =
+          <div class="docstring">
+  <div class="discussion">
+    <p>The policy used when none is given</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div>
+        </dt>
+        <dd><pre class="code"><span class='symbol'>:safe</span></pre></dd>
+      
+        <dt id="IDENTIFIER-constant" class="">IDENTIFIER =
+          <div class="docstring">
+  <div class="discussion">
+    <p>Property names <code>:safe</code> and <code>:readers</code> will consider: plain identifiers, optionally ending in <code>?</code>. Names ending
+in <code>!</code> or <code>=</code>, operators and constant-like names are never called.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div>
+        </dt>
+        <dd><pre class="code"><span class='tstring'><span class='regexp_beg'>/</span><span class='tstring_content'>\A[a-z_][A-Za-z0-9_]*\??\z</span><span class='regexp_end'>/</span></span><span class='period'>.</span><span class='id identifier rubyid_freeze'>freeze</span></pre></dd>
+      
+        <dt id="SAFE_METHODS-constant" class="">SAFE_METHODS =
+          <div class="docstring">
+  <div class="discussion">
+    <p>Read-only methods <code>:safe</code> calls on <span class='object_link'><a href="#SAFE_RECEIVERS-constant" title="Enumpath::Resolver::Property::SAFE_RECEIVERS (constant)">SAFE_RECEIVERS</a></span>. Each returns a new value and leaves the receiver
+unchanged in Ruby&#39;s own implementation. Mutating methods (<code>clear</code>, <code>pop</code>, <code>shift</code>, <code>delete</code>, <code>freeze</code>, any <code>!</code>
+method) are deliberately absent.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div>
+        </dt>
+        <dd><pre class="code"><span class='qwords_beg'>%w[</span><span class='words_sep'>
+</span><span class='words_sep'>  </span><span class='tstring_content'>length</span><span class='words_sep'> </span><span class='tstring_content'>size</span><span class='words_sep'> </span><span class='tstring_content'>count</span><span class='words_sep'> </span><span class='tstring_content'>empty?</span><span class='words_sep'> </span><span class='tstring_content'>any?</span><span class='words_sep'> </span><span class='tstring_content'>all?</span><span class='words_sep'> </span><span class='tstring_content'>none?</span><span class='words_sep'> </span><span class='tstring_content'>one?</span><span class='words_sep'>
+</span><span class='words_sep'>  </span><span class='tstring_content'>first</span><span class='words_sep'> </span><span class='tstring_content'>last</span><span class='words_sep'> </span><span class='tstring_content'>min</span><span class='words_sep'> </span><span class='tstring_content'>max</span><span class='words_sep'> </span><span class='tstring_content'>minmax</span><span class='words_sep'> </span><span class='tstring_content'>sum</span><span class='words_sep'>
+</span><span class='words_sep'>  </span><span class='tstring_content'>keys</span><span class='words_sep'> </span><span class='tstring_content'>values</span><span class='words_sep'> </span><span class='tstring_content'>entries</span><span class='words_sep'> </span><span class='tstring_content'>to_a</span><span class='words_sep'> </span><span class='tstring_content'>to_h</span><span class='words_sep'>
+</span><span class='words_sep'>  </span><span class='tstring_content'>reverse</span><span class='words_sep'> </span><span class='tstring_content'>compact</span><span class='words_sep'> </span><span class='tstring_content'>sort</span><span class='words_sep'> </span><span class='tstring_content'>uniq</span><span class='words_sep'> </span><span class='tstring_content'>flatten</span><span class='words_sep'>
+</span><span class='words_sep'>  </span><span class='tstring_content'>to_s</span><span class='words_sep'> </span><span class='tstring_content'>to_sym</span><span class='words_sep'> </span><span class='tstring_content'>to_i</span><span class='words_sep'> </span><span class='tstring_content'>to_f</span><span class='words_sep'> </span><span class='tstring_content'>to_r</span><span class='words_sep'> </span><span class='tstring_content'>to_c</span><span class='words_sep'>
+</span><span class='words_sep'>  </span><span class='tstring_content'>nil?</span><span class='words_sep'> </span><span class='tstring_content'>zero?</span><span class='words_sep'> </span><span class='tstring_content'>nonzero?</span><span class='words_sep'> </span><span class='tstring_content'>positive?</span><span class='words_sep'> </span><span class='tstring_content'>negative?</span><span class='words_sep'> </span><span class='tstring_content'>even?</span><span class='words_sep'> </span><span class='tstring_content'>odd?</span><span class='words_sep'> </span><span class='tstring_content'>finite?</span><span class='words_sep'> </span><span class='tstring_content'>infinite?</span><span class='words_sep'> </span><span class='tstring_content'>integer?</span><span class='words_sep'>
+</span><span class='words_sep'>  </span><span class='tstring_content'>abs</span><span class='words_sep'> </span><span class='tstring_content'>floor</span><span class='words_sep'> </span><span class='tstring_content'>ceil</span><span class='words_sep'> </span><span class='tstring_content'>round</span><span class='words_sep'> </span><span class='tstring_content'>truncate</span><span class='words_sep'> </span><span class='tstring_content'>next</span><span class='words_sep'> </span><span class='tstring_content'>pred</span><span class='words_sep'> </span><span class='tstring_content'>succ</span><span class='words_sep'>
+</span><span class='words_sep'>  </span><span class='tstring_content'>upcase</span><span class='words_sep'> </span><span class='tstring_content'>downcase</span><span class='words_sep'> </span><span class='tstring_content'>capitalize</span><span class='words_sep'> </span><span class='tstring_content'>swapcase</span><span class='words_sep'> </span><span class='tstring_content'>strip</span><span class='words_sep'> </span><span class='tstring_content'>lstrip</span><span class='words_sep'> </span><span class='tstring_content'>rstrip</span><span class='words_sep'> </span><span class='tstring_content'>chomp</span><span class='words_sep'> </span><span class='tstring_content'>chop</span><span class='words_sep'> </span><span class='tstring_content'>bytesize</span><span class='words_sep'>
+</span><span class='tstring_end'>]</span></span><span class='period'>.</span><span class='id identifier rubyid_freeze'>freeze</span></pre></dd>
+      
+        <dt id="SAFE_RECEIVERS-constant" class="">SAFE_RECEIVERS =
+          <div class="docstring">
+  <div class="discussion">
+    <p>The plain data classes on which <code>:safe</code> calls <span class='object_link'><a href="#SAFE_METHODS-constant" title="Enumpath::Resolver::Property::SAFE_METHODS (constant)">SAFE_METHODS</a></span>. Other objects that define methods with the same
+names (an IO, an Enumerator, a database relation, a custom collection) could run arbitrary code or consume
+input. Range is left out because methods like <code>sum</code> and <code>sort</code> never return on an endless range.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div>
+        </dt>
+        <dd><pre class="code"><span class='lparen'>(</span><span class='lbracket'>[</span><span class='const'>Array</span><span class='comma'>,</span> <span class='const'>Hash</span><span class='comma'>,</span> <span class='const'>String</span><span class='comma'>,</span> <span class='const'>Symbol</span><span class='comma'>,</span> <span class='const'>Numeric</span><span class='comma'>,</span> <span class='const'>NilClass</span><span class='comma'>,</span> <span class='const'>TrueClass</span><span class='comma'>,</span> <span class='const'>FalseClass</span><span class='comma'>,</span> <span class='const'>Struct</span><span class='rbracket'>]</span> <span class='op'>+</span>
+<span class='lbracket'>[</span><span class='const'><span class='object_link'><a href="Simple.html" title="Enumpath::Resolver::Simple (class)">Simple</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Simple.html#DATA_CLASS-constant" title="Enumpath::Resolver::Simple::DATA_CLASS (constant)">DATA_CLASS</a></span></span><span class='rbracket'>]</span><span class='period'>.</span><span class='id identifier rubyid_compact'>compact</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_freeze'>freeze</span></pre></dd>
+      
+        <dt id="CORE_OWNERS-constant" class="">CORE_OWNERS =
+          <div class="docstring">
+  <div class="discussion">
+    <p>Modules whose implementation of a <span class='object_link'><a href="#SAFE_METHODS-constant" title="Enumpath::Resolver::Property::SAFE_METHODS (constant)">SAFE_METHODS</a></span> name is trusted. A subclass of a <span class='object_link'><a href="#SAFE_RECEIVERS-constant" title="Enumpath::Resolver::Property::SAFE_RECEIVERS (constant)">SAFE_RECEIVERS</a></span> class that
+overrides one of these methods is not trusted.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div>
+        </dt>
+        <dd><pre class="code"><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="#SAFE_RECEIVERS-constant" title="Enumpath::Resolver::Property::SAFE_RECEIVERS (constant)">SAFE_RECEIVERS</a></span></span> <span class='op'>+</span> <span class='lbracket'>[</span><span class='const'>Kernel</span><span class='comma'>,</span> <span class='const'>Comparable</span><span class='comma'>,</span> <span class='const'>Enumerable</span><span class='comma'>,</span> <span class='const'>Integer</span><span class='comma'>,</span> <span class='const'>Float</span><span class='comma'>,</span> <span class='const'>Rational</span><span class='comma'>,</span> <span class='const'>Complex</span><span class='rbracket'>]</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_freeze'>freeze</span></pre></dd>
+      
+        <dt id="CORE_CLASSES-constant" class="">CORE_CLASSES =
+          <div class="docstring">
+  <div class="discussion">
+    <p>Instances of these classes are core objects: their instance variables never make a property resolvable, and
+<code>:readers</code> treats them exactly like <code>:safe</code>. Modules and classes are included because their instance
+variables are usually internal state (memoized values, configuration), not data.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div>
+        </dt>
+        <dd><pre class="code"><span class='lparen'>(</span><span class='const'><span class='object_link'><a href="#SAFE_RECEIVERS-constant" title="Enumpath::Resolver::Property::SAFE_RECEIVERS (constant)">SAFE_RECEIVERS</a></span></span> <span class='op'>+</span> <span class='lbracket'>[</span><span class='const'>Range</span><span class='comma'>,</span> <span class='const'>Module</span><span class='comma'>,</span> <span class='const'>Proc</span><span class='comma'>,</span> <span class='const'>Method</span><span class='comma'>,</span> <span class='const'>UnboundMethod</span><span class='comma'>,</span> <span class='const'>IO</span><span class='comma'>,</span> <span class='const'>Enumerator</span><span class='comma'>,</span> <span class='const'>Thread</span><span class='rbracket'>]</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_freeze'>freeze</span></pre></dd>
+      
+        <dt id="READERS_DENYLIST-constant" class="">READERS_DENYLIST =
+          <div class="docstring">
+  <div class="discussion">
+    <p>Common persistence verbs <code>:readers</code> refuses to call even when the object&#39;s class defines them. This is a
+safety net for ActiveRecord-style models, not a guarantee: <code>:readers</code> still runs any other public method that
+expects no arguments.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div>
+        </dt>
+        <dd><pre class="code"><span class='qwords_beg'>%w[</span><span class='tstring_content'>destroy</span><span class='words_sep'> </span><span class='tstring_content'>delete</span><span class='words_sep'> </span><span class='tstring_content'>save</span><span class='words_sep'> </span><span class='tstring_content'>update</span><span class='words_sep'> </span><span class='tstring_content'>reload</span><span class='words_sep'> </span><span class='tstring_content'>touch</span><span class='words_sep'> </span><span class='tstring_content'>delete_all</span><span class='words_sep'> </span><span class='tstring_content'>destroy_all</span><span class='words_sep'> </span><span class='tstring_content'>toggle</span><span class='tstring_end'>]</span></span><span class='period'>.</span><span class='id identifier rubyid_freeze'>freeze</span></pre></dd>
+      
+        <dt id="THREAD_KEY-constant" class="">THREAD_KEY =
+          <div class="docstring">
+  <div class="discussion">
+    <p>The <code>Thread.current</code> key that holds the policy for the current <span class='object_link'><a href="../../Enumpath.html#apply-class_method" title="Enumpath.apply (method)">Enumpath.apply</a></span> call</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+
+</div>
+        </dt>
+        <dd><pre class="code"><span class='symbol'>:enumpath_property_resolver</span></pre></dd>
+      
+    </dl>
+  
+
 
 
 
@@ -127,7 +315,7 @@
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#resolve-class_method" title="resolve (class method)">.<strong>resolve</strong>(property, object)  &#x21d2; Object </a>
+      <a href="#current_policy-class_method" title="current_policy (class method)">.<strong>current_policy</strong>  &#x21d2; Symbol, #call </a>
     
 
     
@@ -141,7 +329,76 @@
   
 
   
-    <span class="summary_desc"><div class='inline'><p>Attempts to resolve a string as a property of an object.</p>
+    <span class="summary_desc"><div class='inline'><p>The policy for the current <span class='object_link'><a href="../../Enumpath.html#apply-class_method" title="Enumpath.apply (method)">Enumpath.apply</a></span> call in this thread or fiber.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#reader%3F-class_method" title="reader? (class method)">.<strong>reader?</strong>(object, name)  &#x21d2; true, false </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Whether the <code>:readers</code> policy resolves a property of an object.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#resolve-class_method" title="resolve (class method)">.<strong>resolve</strong>(property, object, policy = current_policy)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Attempts to resolve a string as a property of an object, as the policy allows.</p>
+</div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#safe%3F-class_method" title="safe? (class method)">.<strong>safe?</strong>(object, name)  &#x21d2; true, false </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Whether the <code>:safe</code> policy resolves a property of an object.</p>
 </div></span>
   
 </li>
@@ -157,9 +414,9 @@
 
     
       <div class="method_details first">
-  <h3 class="signature first" id="resolve-class_method">
+  <h3 class="signature first" id="current_policy-class_method">
   
-    .<strong>resolve</strong>(property, object)  &#x21d2; <tt>Object</tt> 
+    .<strong>current_policy</strong>  &#x21d2; <tt>Symbol</tt>, <tt>#call</tt> 
   
 
   
@@ -167,8 +424,175 @@
   
 </h3><div class="docstring">
   <div class="discussion">
-    <p>Attempts to resolve a string as a property of an object. In this context a property is a public method that
-expects no arguments.</p>
+    <p>The policy for the current <span class='object_link'><a href="../../Enumpath.html#apply-class_method" title="Enumpath.apply (method)">Enumpath.apply</a></span> call in this thread or fiber</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Symbol</tt>, <tt>#call</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the current policy, or <span class='object_link'><a href="#DEFAULT_POLICY-constant" title="Enumpath::Resolver::Property::DEFAULT_POLICY (constant)">DEFAULT_POLICY</a></span> when none is set</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+90
+91
+92</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/enumpath/resolver/property.rb', line 90</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_current_policy'>current_policy</span>
+  <span class='const'>Thread</span><span class='period'>.</span><span class='id identifier rubyid_current'>current</span><span class='lbracket'>[</span><span class='const'><span class='object_link'><a href="#THREAD_KEY-constant" title="Enumpath::Resolver::Property::THREAD_KEY (constant)">THREAD_KEY</a></span></span><span class='rbracket'>]</span> <span class='op'>||</span> <span class='const'><span class='object_link'><a href="#DEFAULT_POLICY-constant" title="Enumpath::Resolver::Property::DEFAULT_POLICY (constant)">DEFAULT_POLICY</a></span></span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="reader?-class_method">
+  
+    .<strong>reader?</strong>(object, name)  &#x21d2; <tt>true</tt>, <tt>false</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Whether the <code>:readers</code> policy resolves a property of an object. Core objects (see <span class='object_link'><a href="#CORE_CLASSES-constant" title="Enumpath::Resolver::Property::CORE_CLASSES (constant)">CORE_CLASSES</a></span>) are
+treated exactly like <span class='object_link'><a href="#safe%3F-class_method" title="Enumpath::Resolver::Property.safe? (method)">safe?</a></span>. For any other object, either</p>
+
+<ul>
+<li>the name is a plain identifier (see <span class='object_link'><a href="#IDENTIFIER-constant" title="Enumpath::Resolver::Property::IDENTIFIER (constant)">IDENTIFIER</a></span>), not in <span class='object_link'><a href="#READERS_DENYLIST-constant" title="Enumpath::Resolver::Property::READERS_DENYLIST (constant)">READERS_DENYLIST</a></span>, and the object publicly
+responds to it with a method that expects no arguments and is written in Ruby outside of Ruby itself (see
+<span class='object_link'>ObjectInspector.application_method?</span>), so computed readers like <code>full_name</code> work; or</li>
+<li>the object has an ActiveModel-style <code>attributes</code> method (no arguments, written in Ruby outside of Ruby
+itself) that returns a Hash with the name as a String key, so attributes like <code>email</code> work even before
+their reader methods are defined; or</li>
+<li><span class='object_link'><a href="#safe%3F-class_method" title="Enumpath::Resolver::Property.safe? (method)">safe?</a></span> allows it.</li>
+</ul>
+
+<p>In short, <code>:readers</code> runs any public method that expects no arguments and is written in Ruby, except Ruby&#39;s
+built-in methods, methods in the Ruby standard library directory, and <span class='object_link'><a href="#READERS_DENYLIST-constant" title="Enumpath::Resolver::Property::READERS_DENYLIST (constant)">READERS_DENYLIST</a></span>. Methods
+implemented in C (core classes, StringIO, C-extension gems) are never called; objects of C-extension classes
+need a callable policy or <code>:all</code>. Methods from installed gems are called, including default and bundled gems
+such as Logger and CSV, and ActiveModel or ActiveRecord: for example <code>Logger#close</code> would run.</p>
+
+<p>So <code>:readers</code> is not read-only. Use it for data you trust or objects you built. For untrusted paths use
+<code>:safe</code>, or a callable that builds on <span class='object_link'><a href="#safe%3F-class_method" title="Enumpath::Resolver::Property.safe? (method)">safe?</a></span> with a per-class allowlist.</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>object</span>
+      
+      
+        <span class='type'>(<tt>Object</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the object to read from</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>name</span>
+      
+      
+        <span class='type'>(<tt>String</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the property name</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>true</tt>, <tt>false</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+167
+168
+169
+170
+171</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/enumpath/resolver/property.rb', line 167</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_reader?'>reader?</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='id identifier rubyid_name'>name</span><span class='rparen'>)</span>
+  <span class='op'>!</span><span class='id identifier rubyid_reader_access'>reader_access</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='id identifier rubyid_name'>name</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
+<span class='kw'>rescue</span> <span class='const'>StandardError</span>
+  <span class='kw'>false</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="resolve-class_method">
+  
+    .<strong>resolve</strong>(property, object, policy = current_policy)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Attempts to resolve a string as a property of an object, as the policy allows</p>
 
 
   </div>
@@ -207,6 +631,23 @@ expects no arguments.</p>
       
     </li>
   
+    <li>
+      
+        <span class='name'>policy</span>
+      
+      
+        <span class='type'>(<tt>Symbol</tt>, <tt>#call</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>current_policy</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>the property resolver policy to apply; defaults to <span class='object_link'><a href="#current_policy-class_method" title="Enumpath::Resolver::Property.current_policy (method)">current_policy</a></span></p>
+</div>
+      
+    </li>
+  
 </ul>
 
 <p class="tag_title">Returns:</p>
@@ -220,7 +661,7 @@ expects no arguments.</p>
       
       
         
-        <div class='inline'><p>the resolved property value, or nil if it could not be resolved</p>
+        <div class='inline'><p>the resolved property value, or nil if it could not be resolved or the policy does not allow it</p>
 </div>
       
     </li>
@@ -233,21 +674,144 @@ expects no arguments.</p>
       <pre class="lines">
 
 
-14
-15
-16
-17
-18
-19</pre>
+81
+82
+83
+84
+85</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/enumpath/resolver/property.rb', line 14</span>
+      <pre class="code"><span class="info file"># File 'lib/enumpath/resolver/property.rb', line 81</span>
 
-<span class='kw'>def</span> <span class='id identifier rubyid_resolve'>resolve</span><span class='lparen'>(</span><span class='id identifier rubyid_property'>property</span><span class='comma'>,</span> <span class='id identifier rubyid_object'>object</span><span class='rparen'>)</span>
-  <span class='comment'># TODO: return if Enumpath.disable_property_resolver
-</span>  <span class='id identifier rubyid_object'>object</span><span class='period'>.</span><span class='id identifier rubyid_public_send'>public_send</span><span class='lparen'>(</span><span class='id identifier rubyid_property'>property</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_to_sym'>to_sym</span><span class='rparen'>)</span>
-<span class='kw'>rescue</span> <span class='const'>ArgumentError</span><span class='comma'>,</span> <span class='const'>NoMethodError</span>
+<span class='kw'>def</span> <span class='id identifier rubyid_resolve'>resolve</span><span class='lparen'>(</span><span class='id identifier rubyid_property'>property</span><span class='comma'>,</span> <span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='id identifier rubyid_policy'>policy</span> <span class='op'>=</span> <span class='id identifier rubyid_current_policy'>current_policy</span><span class='rparen'>)</span>
+  <span class='id identifier rubyid_access'>access</span><span class='lparen'>(</span><span class='id identifier rubyid_policy'>policy</span><span class='comma'>,</span> <span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='id identifier rubyid_property'>property</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='rparen'>)</span><span class='op'>&amp;.</span><span class='id identifier rubyid_call'>call</span>
+<span class='kw'>rescue</span> <span class='const'>ArgumentError</span><span class='comma'>,</span> <span class='const'>NoMethodError</span><span class='comma'>,</span> <span class='const'>TypeError</span><span class='comma'>,</span> <span class='const'>RangeError</span>
   <span class='kw'>nil</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="safe?-class_method">
+  
+    .<strong>safe?</strong>(object, name)  &#x21d2; <tt>true</tt>, <tt>false</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Whether the <code>:safe</code> policy resolves a property of an object. All of these must hold:</p>
+
+<ul>
+<li>the name is a plain identifier (see <span class='object_link'><a href="#IDENTIFIER-constant" title="Enumpath::Resolver::Property::IDENTIFIER (constant)">IDENTIFIER</a></span>);</li>
+<li>the object publicly responds to it and the method has no required arguments;</li>
+<li>and either
+
+<ul>
+<li>the name is in <span class='object_link'><a href="#SAFE_METHODS-constant" title="Enumpath::Resolver::Property::SAFE_METHODS (constant)">SAFE_METHODS</a></span>, the object is one of <span class='object_link'><a href="#SAFE_RECEIVERS-constant" title="Enumpath::Resolver::Property::SAFE_RECEIVERS (constant)">SAFE_RECEIVERS</a></span>, and the method is Ruby&#39;s own
+(owned by one of <span class='object_link'><a href="#CORE_OWNERS-constant" title="Enumpath::Resolver::Property::CORE_OWNERS (constant)">CORE_OWNERS</a></span>, not overridden), in which case the method is called; or</li>
+<li>the object is not one of <span class='object_link'><a href="#CORE_CLASSES-constant" title="Enumpath::Resolver::Property::CORE_CLASSES (constant)">CORE_CLASSES</a></span> and has an instance variable of the same name (<code>@name</code> for
+<code>name</code>), as an attr_reader on a plain Ruby object does. In that case the instance variable is read
+directly and the method itself is never called, so a method that merely shares its name with an
+instance variable cannot run.</li>
+</ul></li>
+</ul>
+
+<p>Struct and Data members are not handled here: they resolve as members through <span class='object_link'><a href="Simple.html" title="Enumpath::Resolver::Simple (class)">Simple</a></span>.</p>
+
+<p>A callable policy can build on this check to allow more methods while keeping the safe ones:</p>
+
+
+  </div>
+</div>
+<div class="tags">
+  
+  <div class="examples">
+    <p class="tag_title">Examples:</p>
+    
+      
+        <p class="example_title"><div class='inline'><p>Keep the safe defaults and allow specific methods per class</p>
+</div></p>
+      
+      <pre class="example code"><code><span class='const'>ALLOWED</span> <span class='op'>=</span> <span class='lbrace'>{</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>Invoice</span><span class='tstring_end'>&#39;</span></span> <span class='op'>=&gt;</span> <span class='qwords_beg'>%w[</span><span class='tstring_content'>total</span><span class='words_sep'> </span><span class='tstring_content'>due_on</span><span class='tstring_end'>]</span></span><span class='comma'>,</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>Customer</span><span class='tstring_end'>&#39;</span></span> <span class='op'>=&gt;</span> <span class='qwords_beg'>%w[</span><span class='tstring_content'>name</span><span class='words_sep'> </span><span class='tstring_content'>email</span><span class='tstring_end'>]</span></span> <span class='rbrace'>}</span><span class='period'>.</span><span class='id identifier rubyid_freeze'>freeze</span>
+<span class='id identifier rubyid_policy'>policy</span> <span class='op'>=</span> <span class='id identifier rubyid_lambda'>lambda</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='id identifier rubyid_name'>name</span><span class='op'>|</span>
+  <span class='const'><span class='object_link'><a href="../../Enumpath.html" title="Enumpath (module)">Enumpath</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="../Resolver.html" title="Enumpath::Resolver (module)">Resolver</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="" title="Enumpath::Resolver::Property (class)">Property</a></span></span><span class='period'>.</span><span class='id identifier rubyid_safe?'>safe?</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='id identifier rubyid_name'>name</span><span class='rparen'>)</span> <span class='op'>||</span> <span class='const'>ALLOWED</span><span class='period'>.</span><span class='id identifier rubyid_fetch'>fetch</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span><span class='period'>.</span><span class='id identifier rubyid_name'>name</span><span class='comma'>,</span> <span class='lbracket'>[</span><span class='rbracket'>]</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_include?'>include?</span><span class='lparen'>(</span><span class='id identifier rubyid_name'>name</span><span class='rparen'>)</span>
+<span class='kw'>end</span>
+<span class='const'><span class='object_link'><a href="../../Enumpath.html" title="Enumpath (module)">Enumpath</a></span></span><span class='period'>.</span><span class='id identifier rubyid_apply'><span class='object_link'><a href="../../Enumpath.html#apply-class_method" title="Enumpath.apply (method)">apply</a></span></span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>invoices.*.total</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_account'>account</span><span class='comma'>,</span> <span class='label'>property_resolver:</span> <span class='id identifier rubyid_policy'>policy</span><span class='rparen'>)</span></code></pre>
+    
+  </div>
+<p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>object</span>
+      
+      
+        <span class='type'>(<tt>Object</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the object to read from</p>
+</div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>name</span>
+      
+      
+        <span class='type'>(<tt>String</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the property name</p>
+</div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>true</tt>, <tt>false</tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+138
+139
+140
+141
+142</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/enumpath/resolver/property.rb', line 138</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_safe?'>safe?</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='id identifier rubyid_name'>name</span><span class='rparen'>)</span>
+  <span class='op'>!</span><span class='id identifier rubyid_safe_access'>safe_access</span><span class='lparen'>(</span><span class='id identifier rubyid_object'>object</span><span class='comma'>,</span> <span class='id identifier rubyid_name'>name</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span>
+<span class='kw'>rescue</span> <span class='const'>StandardError</span>
+  <span class='kw'>false</span>
 <span class='kw'>end</span></pre>
     </td>
   </tr>
@@ -259,9 +823,9 @@ expects no arguments.</p>
 </div>
 
       <div id="footer">
-  Generated on Wed Jun  2 20:26:04 2021 by
-  <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
-  0.9.26 (ruby-2.6.5).
+  Generated on Thu Nov 19 01:17:42 2026 by
+  <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.9.36 (ruby-3.4.7).
 </div>
 
     </div>
