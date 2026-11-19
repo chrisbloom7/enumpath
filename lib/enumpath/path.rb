@@ -11,7 +11,8 @@ module Enumpath
     # @return [Enumpath::Results] the current results array
     attr_reader :results
 
-    # @param path [String, Array<String>] the path expression to apply to the enumerable
+    # @param path [String, Array<String>] the path expression to apply to the enumerable, or an array of path segments
+    # @raise [ArgumentError] if the path is neither a String nor an Array
     # @param result_type (see Enumpath::Results#initialize)
     def initialize(path, result_type: nil)
       @path = path
@@ -68,8 +69,14 @@ module Enumpath
       @cache ||= Enumpath.path_cache
     end
 
+    # String paths are normalized once and cached. An array is already a list of path segments, so it only has its
+    # segments converted to strings and never touches the cache.
     def normalize!
-      @path = cache.get_or_set(@path) { Enumpath::Path::NormalizedPath.new(@path) }
+      @path = case @path
+              when String then cache.get_or_set(@path) { Enumpath::Path::NormalizedPath.new(@path) }
+              when Array then Enumpath::Path::NormalizedPath.new(@path.map(&:to_s))
+              else raise ArgumentError, 'path must be a String or an Array of path segments'
+              end
     end
   end
 end
