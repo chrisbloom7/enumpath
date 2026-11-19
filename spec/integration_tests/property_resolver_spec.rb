@@ -130,6 +130,14 @@ RSpec.describe 'Property resolution policies' do
       expect(Enumpath.apply('length', [1], property_resolver: policy)).to eq([])
     end
 
+    it 'can build on the :safe checks' do
+      policy = ->(object, name) { Enumpath::Resolver::Property.safe?(object, name) || name == 'label' }
+      objects = [poro_class.new('widget')]
+      expect(Enumpath.apply('length', objects, property_resolver: policy)).to eq([1])
+      expect(Enumpath.apply('0.label', objects, property_resolver: policy)).to eq(['label for widget'])
+      expect(Enumpath.apply('0.destroy', objects, property_resolver: policy)).to eq([])
+    end
+
     it 'skips the identifier and arity checks' do
       policy = ->(_object, _name) { true }
       expect(Enumpath.apply('[?(@.zero?)]', [0, 1], property_resolver: policy)).to eq([0])

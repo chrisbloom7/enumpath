@@ -390,7 +390,7 @@ When a path segment is not an index, key, or struct member, Enumpath can resolve
 - `:safe` (the default): only read-only methods. On core data (arrays, hashes, strings, symbols, numbers, structs, `nil`, `true`, `false`) that is a fixed allowlist of non-mutating methods such as `length`, `size`, `count`, `first`, `last`, `min`, `max`, `sum`, `keys`, `values`, `to_a`, `to_h`, `to_s`, `empty?`, `zero?`, `upcase` or `strip`, and only Ruby's own implementations of them. On plain Ruby objects it is `attr_reader`s (public methods named after an instance variable). Names ending in `!` or `=` are never called, and neither is any method that requires arguments.
 - `:none`: never call methods.
 - `:all`: call any public method that expects no arguments. This is how Enumpath behaved before this option existed, and it lets a path run methods such as `clear`, `pop`, `sort!` or `destroy`. Only use it with paths you trust.
-- a callable, such as a lambda: called with the object and the method name (a String). The method is called only if it returns true. The callable has full control: the `:safe` checks are not applied.
+- a callable, such as a lambda: called with the object and the method name (a String). The method is called only if it returns true. The callable has full control: the `:safe` checks are not applied, so call `Enumpath::Resolver::Property.safe?(object, name)` from it if you want to keep them and allow more.
 
 ```ruby
 party = { food: %w[pizza tacos] }
@@ -398,9 +398,13 @@ Enumpath.apply('food.pop', party) # => [] and party is unchanged
 Enumpath.apply('food.length', party) # => [2]
 Enumpath.apply('food.length', party, property_resolver: :none) # => []
 
-# Allow ActiveRecord attribute readers, for example
-readers = ->(object, name) { object.is_a?(ActiveRecord::Base) && object.class.attribute_names.include?(name) }
-Enumpath.apply('author.name', post, property_resolver: readers)
+# Keep the safe defaults and also allow ActiveRecord attribute readers
+readers = lambda do |object, name|
+  Enumpath::Resolver::Property.safe?(object, name) ||
+    (object.is_a?(ActiveRecord::Base) && object.class.attribute_names.include?(name))
+end
+posts = Post.all.to_a
+Enumpath.apply('[?(@.published)].title', posts, property_resolver: readers)
 ```
 
 The option applies to a single call. A chained `results.apply(...)` uses the default unless you pass the option again. Any other value raises an `ArgumentError`.

@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **BREAKING:** Paths only call read-only methods by default (`property_resolver: :safe`). A segment like `clear`, `pop`, `sort!` or `destroy` used to call that method and mutate the data; it now matches nothing. Custom methods on your own objects (other than `attr_reader`s) and on subclasses of core classes no longer resolve. Pass `property_resolver: :all` to restore the old behavior, or a callable to allow specific methods.
+- **BREAKING:** Paths only call read-only methods by default (`property_resolver: :safe`). A segment like `clear`, `pop`, `sort!` or `destroy` used to call that method and mutate the data; it now matches nothing. Custom methods on your own objects (other than `attr_reader`s) and on subclasses of core classes no longer resolve, nor do members of `Data` objects or methods on ranges, sets, enumerators and IO objects (for example `Enumpath.apply('first', 1..5)`). Pass `property_resolver: :all` to restore the old behavior, or a callable to allow specific methods.
 - `Enumpath.apply` no longer removes the `:verbose` and `:result_type` keys from the options hash you pass in.
 
 - The published gem now contains only `lib/`, `LICENSE` and `README.md`. It used to ship the whole repository, including the generated `docs/`.

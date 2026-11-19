@@ -116,6 +116,15 @@ module Enumpath
         #
         # Struct members are not handled here: they resolve as members through {Resolver::Simple}.
         #
+        # A callable policy can build on this check to allow more methods while keeping the safe ones:
+        #
+        # @example Keep the safe defaults and also allow ActiveRecord attribute readers
+        #   readers = lambda do |object, name|
+        #     Enumpath::Resolver::Property.safe?(object, name) ||
+        #       (object.is_a?(ActiveRecord::Base) && object.class.attribute_names.include?(name))
+        #   end
+        #   Enumpath.apply('[?(@.published)].title', posts, property_resolver: readers)
+        #
         # @param object [Object] the object to call the method on
         # @param name [String] the method name
         # @return [true, false]
