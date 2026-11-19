@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require 'set'
+require 'stringio'
+
 RSpec.describe Enumpath::Resolver::Property do
   describe '.resolve' do
     context 'properties' do
@@ -283,6 +286,76 @@ RSpec.describe Enumpath::Resolver::Property do
       it 'can be composed in a callable with .reader?' do
         expect(described_class.reader?(person, 'full_name')).to be(true)
         expect(described_class.reader?(person, 'save')).to be(false)
+      end
+
+      it 'resolves attr_readers and methods made with define_method' do
+        object = Class.new do
+          attr_reader :name
+
+          define_method(:shout) { name.upcase }
+
+          def initialize
+            @name = 'ada'
+          end
+        end.new
+        expect(described_class.resolve('name', object, :readers)).to eq('ada')
+        expect(described_class.resolve('shout', object, :readers)).to eq('ADA')
+      end
+
+      it 'does not call denylisted bulk persistence verbs' do
+        model = Class.new do
+          %w[delete_all destroy_all toggle].each { |verb| define_method(verb) { raise "#{verb} should not be called" } }
+        end.new
+        %w[delete_all destroy_all toggle].each do |name|
+          expect(described_class.resolve(name, model, :readers)).to be_nil
+        end
+      end
+
+      context 'with core and standard library objects' do
+        it 'does not mutate a Time' do
+          time = Time.utc(2020, 1, 1)
+          expect(described_class.resolve('localtime', time, :readers)).to be_nil
+          expect(time).to be_utc
+        end
+
+        it 'does not clear a Set' do
+          set = Set[1, 2]
+          expect(described_class.resolve('clear', set, :readers)).to be_nil
+          expect(set).to eq(Set[1, 2])
+        end
+
+        it 'does not pop a Queue' do
+          queue = Thread::Queue.new
+          queue << 1
+          expect(described_class.resolve('pop', queue, :readers)).to be_nil
+          expect(queue.size).to eq(1)
+        end
+
+        it 'does not lock a Mutex' do
+          mutex = Mutex.new
+          expect { expect(described_class.resolve('lock', mutex, :readers)).to be_nil }.not_to raise_error
+          expect(mutex).not_to be_locked
+        end
+
+        it 'does not read a StringIO' do
+          io = StringIO.new('data')
+          expect(described_class.resolve('read', io, :readers)).to be_nil
+          expect(io.pos).to eq(0)
+        end
+
+        it 'does not use an attributes method that Ruby itself defines' do
+          # attributes is Enumerable#to_h, implemented in C, so it is never called
+          collection = Class.new do
+            include Enumerable
+            alias_method :attributes, :to_h
+
+            def each
+              yield ['email', 'a@example.com']
+            end
+          end.new
+          expect(described_class.resolve('email', collection, :readers)).to be_nil
+          expect(described_class.reader?(Set[1], 'attributes')).to be(false)
+        end
       end
     end
 

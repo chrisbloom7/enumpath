@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'rbconfig'
+
 module Enumpath
   module Resolver
     # Helpers for inspecting an object without trusting it. Kernel methods are called through
@@ -12,6 +14,9 @@ module Enumpath
       KERNEL = %i[is_a? respond_to? method instance_variable_defined? instance_variable_get].map do |name|
         [name, Kernel.instance_method(name)]
       end.to_h.freeze
+
+      # Ruby's own library directory. Methods defined in files under it belong to Ruby's standard library.
+      RUBY_LIBRARY_DIR = File.join(RbConfig::CONFIG['rubylibdir'], '')
 
       module_function
 
@@ -32,6 +37,20 @@ module Enumpath
         method unless method.parameters.any? { |type, _| %i[req keyreq].include?(type) }
       rescue NameError, TypeError
         nil
+      end
+
+      # Whether a method is application code: written in Ruby (it has a source location, so it is not implemented in
+      # C) and not part of Ruby itself (not in Ruby's prelude, `<internal:...>`, nor in Ruby's own library directory).
+      # attr_readers and methods made with `define_method` or `class_eval` count as application code.
+      #
+      # @param method [Method, nil]
+      # @return [true, false]
+      def application_method?(method)
+        location = method&.source_location
+        return false if location.nil?
+
+        file = location.first.to_s
+        !file.start_with?('<internal:') && !file.start_with?(RUBY_LIBRARY_DIR)
       end
 
       # Whether the object is an instance of any of the classes. Objects that do not include Kernel count as a match,

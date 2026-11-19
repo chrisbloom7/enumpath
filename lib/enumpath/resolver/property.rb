@@ -63,14 +63,10 @@ module Enumpath
       # variables are usually internal state (memoized values, configuration), not data.
       CORE_CLASSES = (SAFE_RECEIVERS + [Range, Module, Proc, Method, UnboundMethod, IO, Enumerator, Thread]).freeze
 
-      # Methods defined by these modules are never called by `:readers` on a plain object (`freeze`, `dup`,
-      # `instance_variables` and so on)
-      CORE_MODULES = (CORE_OWNERS + CORE_CLASSES + [Object, BasicObject]).uniq.freeze
-
       # Common persistence verbs `:readers` refuses to call even when the object's class defines them. This is a
       # safety net for ActiveRecord-style models, not a guarantee: `:readers` still runs any other public method that
       # expects no arguments.
-      READERS_DENYLIST = %w[destroy delete save update reload touch].freeze
+      READERS_DENYLIST = %w[destroy delete save update reload touch delete_all destroy_all toggle].freeze
 
       # The `Thread.current` key that holds the policy for the current {Enumpath.apply} call
       THREAD_KEY = :enumpath_property_resolver
@@ -148,12 +144,17 @@ module Enumpath
         # treated exactly like {.safe?}. For any other object, either
         #
         # - the name is a plain identifier (see {IDENTIFIER}), not in {READERS_DENYLIST}, and the object publicly
-        #   responds to it with a method that expects no arguments and is defined by a class or module that is not
-        #   part of Ruby's core (see {CORE_MODULES}), so computed readers like `full_name` work; or
-        # - the object has an ActiveModel-style `attributes` method (defined outside Ruby's core, no arguments) that
-        #   returns a Hash with the name as a String key, so attributes like `email` work even before their reader
-        #   methods are defined; or
+        #   responds to it with a method that expects no arguments and is written in Ruby outside of Ruby itself (see
+        #   {ObjectInspector.application_method?}), so computed readers like `full_name` work; or
+        # - the object has an ActiveModel-style `attributes` method (no arguments, written in Ruby outside of Ruby
+        #   itself) that returns a Hash with the name as a String key, so attributes like `email` work even before
+        #   their reader methods are defined; or
         # - {.safe?} allows it.
+        #
+        # `:readers` only runs methods written in Ruby, and never Ruby's own: methods implemented in C (core classes,
+        # standard library C extensions such as StringIO, and C-extension gems) and methods in Ruby's own library
+        # directory (such as Set on older Rubies) are never called. Objects of C-extension classes need a callable
+        # policy or `:all`.
         #
         # This calls methods of your application's classes and is therefore not read-only: a method like
         # `archive` or `cancel` that is public and expects no arguments will run. {READERS_DENYLIST} is a safety net
@@ -201,14 +202,14 @@ module Enumpath
 
         def app_method_access(object, name)
           method = ObjectInspector.public_method_without_required_args(object, name)
-          return if method.nil? || CORE_MODULES.include?(method.owner)
+          return unless ObjectInspector.application_method?(method)
 
           -> { object.public_send(name.to_sym) }
         end
 
         def attribute_access(object, name)
           method = ObjectInspector.public_method_without_required_args(object, 'attributes')
-          return if method.nil? || CORE_MODULES.include?(method.owner)
+          return unless ObjectInspector.application_method?(method)
 
           attributes = object.public_send(:attributes)
           -> { attributes[name] } if attributes.is_a?(Hash) && attributes.key?(name)
