@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- The `logger` dependency is now `>= 1.4, < 3` (it was `>= 1.4`), so `gem build` no longer warns about an open-ended dependency. Enumpath only uses `Logger.new` and `<<`, and `logger` has been 1.x since 2017.
+
 ## [0.3.0] - 2026-11-19
 
 ### Fixed
