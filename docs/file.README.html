@@ -329,7 +329,7 @@ pets.cats.-1
 </ul>
 
 <blockquote>
-<p>Regular expression operands are safely parsed using the <code>to_regexp</code> gem</p>
+<p>Regular expression operands (<code>/pattern/flags</code> or <code>%r{pattern}flags</code>, with the flags <code>i</code>, <code>m</code>, <code>x</code>, <code>n</code> and <code>u</code>) are parsed as text and never evaluated as Ruby code. A regular expression that is not valid matches nothing.</p>
 </blockquote>
 
 <h3 id="subscript-expression-operator">Subscript expression operator</h3>
@@ -677,7 +677,7 @@ Enumpath: Child operator detected
     result: [{:category=&gt;&quot;reference&quot;, :author=&gt;&quot;Nigel Rees&quot;, :...
 </code></pre>
 
-<p>You can also control verbose mode via <code>Enumpath.verbose = true</code> and <code>Enumpath.verbose = false</code>.</p>
+<p>You can also turn verbose mode on for every call with <code>Enumpath.verbose = true</code>. The <code>verbose:</code> option of a call overrides that for the call, and only in its own thread; <code>Enumpath.verbose = false</code> turns the default off again. Set the default once, at start up.</p>
 
 <h2 id="path-normalization">Path normalization</h2>
 
@@ -685,7 +685,11 @@ Enumpath: Child operator detected
 
 <h3 id="normalized-path-caching">Normalized path caching</h3>
 
-<p>To save a little bit of time on consecutive calls Enumpath caches the normalized version of each path. This is an implementation detail that can generally be ignored but if you run into trouble with it you can clear the cache with <code>Enumpath.path_cache.reset</code>.</p>
+<p>To save a little bit of time on consecutive calls Enumpath caches the normalized version of each path. This is an implementation detail that can generally be ignored. The cache is safe to share between threads and keeps at most 1,000 paths, dropping the least recently used one when it is full, so applying many distinct dynamic paths does not grow memory without limit. If you run into trouble with it you can clear the cache with <code>Enumpath.path_cache.reset</code>.</p>
+
+<h2 id="thread-safety">Thread safety</h2>
+
+<p><code>Enumpath.apply</code> can be called from several threads (or fibers) at the same time. Each call keeps its own options (<code>:verbose</code>, <code>:property_resolver</code>, <code>:regexp_timeout</code>) and results, and the logger&#39;s indentation belongs to the thread that is logging. The two things threads share are the normalized path cache, which is guarded by a mutex (see <a href="#normalized-path-caching">Normalized path caching</a>), and the logger: each log message is written in one piece, so messages from different threads do not interleave their lines. Give <code>Enumpath.logger.logger</code> a logger that is itself safe to share (Ruby&#39;s <code>Logger</code> is) and set <code>Enumpath.verbose</code> and <code>Enumpath.logger.logger</code> once, before you start threads.</p>
 
 <h2 id="deviations-from-the-original-jsonpath-spec">Deviations from the Original JSONPath Spec</h2>
 
@@ -814,7 +818,7 @@ Enumpath: Child operator detected
 </div></div>
 
       <div id="footer">
-  Generated on Thu Nov 19 14:29:32 2026 by
+  Generated on Thu Nov 19 16:01:20 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.45 (ruby-3.4.7).
 </div>
