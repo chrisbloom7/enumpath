@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
-require 'mini_cache'
 require 'enumpath/logger'
 require 'enumpath/operator'
 require 'enumpath/path'
+require 'enumpath/path_cache'
+require 'enumpath/regexp_parser'
 require 'enumpath/regexp_timeout'
 require 'enumpath/results'
 require 'enumpath/resolver/object_inspector'
@@ -70,12 +71,12 @@ module Enumpath
       block_given? ? logger.log(title, &-> { yield }) : logger.log(title)
     end
 
-    # A lightweight in-memory cache for caching normalized path expressions
+    # A bounded in-memory cache for normalized path expressions that threads can share
     #
     # @private
-    # @return [MiniCache::Store]
+    # @return [Enumpath::PathCache]
     def path_cache
-      @path_cache ||= MiniCache::Store.new
+      @path_cache ||= Enumpath::PathCache.new
     end
   end
 end

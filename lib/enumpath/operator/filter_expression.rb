@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'to_regexp'
-
 module Enumpath
   module Operator
     # Implements JSONPath filter expression operator syntax. See {file:README.md#label-Filter+expression+operator} for
@@ -86,14 +84,26 @@ module Enumpath
       def test(operator, operand, value)
         return (value ? true : false) if operator.nil? || operand.nil?
 
-        typecast_operand = variable_typecaster(operand)
-        value.public_send(operator.to_sym, typecast_operand) ? true : false
-      rescue NoMethodError
-        Enumpath.log('Filter could not be evaluated!')
-        false
+        matching_nothing_on_error do
+          value.public_send(operator.to_sym, variable_typecaster(operand)) ? true : false
+        end
+      end
+
+      # A comparison that cannot be evaluated, or a regular expression that is not valid or ran out of time, does not
+      # match
+      def matching_nothing_on_error
+        yield
       rescue Enumpath::RegexpTimeout::ERROR
         Enumpath::RegexpTimeout.expire!
-        Enumpath.log('Regular expression ran out of time!')
+        no_match('Regular expression ran out of time!')
+      rescue RegexpError
+        no_match('Regular expression is not valid!')
+      rescue NoMethodError
+        no_match('Filter could not be evaluated!')
+      end
+
+      def no_match(reason)
+        Enumpath.log(reason)
         false
       end
 
@@ -107,7 +117,7 @@ module Enumpath
         elsif variable =~ /true|false|nil/i
           # It quacks like an unquoted boolean operator
           variable == 'true'
-        elsif (regexp = variable.to_regexp(literal: false, detect: false))
+        elsif (regexp = Enumpath::RegexpParser.parse(variable))
           # It quacks like a regex
           Enumpath::RegexpTimeout.limit(regexp)
         else

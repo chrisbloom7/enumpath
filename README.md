@@ -230,7 +230,7 @@ The following are all valid filter expressions:
 - `[?(@.price > 2 && @.price < 10)]`: members with a `price` greater than 2 _and_ less than 10
 - `[?(@.name =~ /bob/i || @.name == 'Mark')]`: any member whose `name` matches the regex `/bob/i` or equals `'Mark'`
 
-> Regular expression operands are safely parsed using the `to_regexp` gem
+> Regular expression operands (`/pattern/flags` or `%r{pattern}flags`, with the flags `i`, `m`, `x`, `n` and `u`) are parsed as text and never evaluated as Ruby code. A regular expression that is not valid matches nothing.
 
 ### Subscript expression operator
 
@@ -559,7 +559,7 @@ When you give a string path to Enumpath it will automatically normalize it to an
 
 ### Normalized path caching
 
-To save a little bit of time on consecutive calls Enumpath caches the normalized version of each path. This is an implementation detail that can generally be ignored but if you run into trouble with it you can clear the cache with `Enumpath.path_cache.reset`.
+To save a little bit of time on consecutive calls Enumpath caches the normalized version of each path. This is an implementation detail that can generally be ignored. The cache is safe to share between threads and keeps at most 1,000 paths, dropping the least recently used one when it is full, so applying many distinct dynamic paths does not grow memory without limit. If you run into trouble with it you can clear the cache with `Enumpath.path_cache.reset`.
 
 ## Deviations from the Original JSONPath Spec
 
