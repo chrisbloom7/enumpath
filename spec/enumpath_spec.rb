@@ -76,7 +76,7 @@ RSpec.describe Enumpath do
     end
 
     it 'raises ArgumentError for an invalid :property_resolver option' do
-      expect { Enumpath.apply(path, enum, property_resolver: :readers) }.to raise_error(ArgumentError, /:readers/)
+      expect { Enumpath.apply(path, enum, property_resolver: :bogus) }.to raise_error(ArgumentError, /:bogus/)
     end
   end
 end

@@ -99,6 +99,131 @@ RSpec.describe 'Property resolution policies' do
       expect(Enumpath.apply('owners.0.name', object)).to eq(['Kate'])
       expect(Enumpath.apply('owners.length', object)).to eq([1])
     end
+
+    it 'does not run a method that shares its name with an instance variable' do
+      account = Class.new do
+        attr_reader :balance
+
+        def initialize
+          @balance = 100
+          @withdraw = 50
+        end
+
+        def withdraw
+          @balance -= @withdraw
+        end
+      end.new
+      expect(Enumpath.apply('withdraw', account)).to eq([50])
+      expect(Enumpath.apply('[?(@.withdraw)]', [account])).to eq([account])
+      expect(account.balance).to eq(100)
+    end
+
+    it 'does not mutate data through filter or subscript expressions' do
+      arrays = [[1, 2], [3]]
+      expect(Enumpath.apply('[?(@.pop)]', arrays)).to eq([])
+      expect(Enumpath.apply('[?(@.pop == 2)]', arrays)).to eq([])
+      expect(arrays).to eq([[1, 2], [3]])
+      hash = { a: 1 }
+      expect(Enumpath.apply('[(@.clear)]', hash)).to eq([])
+      expect(Enumpath.apply('[(clear)]', [hash])).to eq([])
+      expect(hash).to eq(a: 1)
+    end
+
+    context 'when iterating over objects with a custom to_h' do
+      let(:calls) { [] }
+      let(:object) do
+        log = calls
+        Class.new do
+          define_method(:to_h) do
+            log << :to_h
+            { a: 1 }
+          end
+        end.new
+      end
+
+      it 'does not call it for wildcards, filters or recursive descent' do
+        expect(Enumpath.apply('*', object)).to eq([])
+        expect(Enumpath.apply('[?(@)]', object)).to eq([])
+        expect(Enumpath.apply('..a', { x: object })).to eq([])
+        expect(calls).to be_empty
+      end
+
+      it 'calls it under :all as before' do
+        Enumpath.apply('*', object, property_resolver: :all)
+        expect(calls).to eq([:to_h])
+      end
+    end
+
+    it 'does not consume an Enumerator when iterating over it' do
+      consumed = []
+      enumerator = Enumerator.new do |yielder|
+        consumed << 1
+        yielder << [:a, 1]
+      end
+      expect(Enumpath.apply('*', enumerator)).to eq([])
+      expect(Enumpath.apply('[?(@)]', enumerator)).to eq([])
+      expect(Enumpath.apply('..a', [enumerator])).to eq([])
+      expect(consumed).to be_empty
+    end
+
+    if Enumpath::Resolver::Simple::DATA_CLASS
+      it 'resolves and iterates Data members like Struct members' do
+        point = Enumpath::Resolver::Simple::DATA_CLASS.define(:x, :y).new(x: 1, y: 2)
+        expect(Enumpath.apply('x', point)).to eq([1])
+        expect(Enumpath.apply('*', point)).to eq([1, 2])
+        expect(Enumpath.apply('x', point, property_resolver: :none)).to eq([1])
+      end
+    end
+  end
+
+  describe 'property_resolver: :readers' do
+    let(:model_class) do
+      Class.new do
+        attr_reader :saved
+
+        def initialize(attributes)
+          @attributes = attributes
+          @saved = false
+        end
+
+        def attributes
+          @attributes.dup
+        end
+
+        def display_name
+          "#{attributes['name']} <#{attributes['email']}>"
+        end
+
+        def save
+          @saved = true
+        end
+
+        def destroy
+          raise 'destroy should not be called'
+        end
+      end
+    end
+    let(:users) { [model_class.new('name' => 'Ada', 'email' => 'ada@example.com')] }
+
+    it 'resolves computed readers and attributes' do
+      expect(Enumpath.apply('*.display_name', users, property_resolver: :readers)).to eq(['Ada <ada@example.com>'])
+      expect(Enumpath.apply('0.email', users, property_resolver: :readers)).to eq(['ada@example.com'])
+      expect(Enumpath.apply('[?(@.email =~ /example/)].display_name', users, property_resolver: :readers))
+        .to eq(['Ada <ada@example.com>'])
+    end
+
+    it 'does not call persistence verbs' do
+      expect(Enumpath.apply('0.save', users, property_resolver: :readers)).to eq([])
+      expect(Enumpath.apply('0.destroy', users, property_resolver: :readers)).to eq([])
+      expect(users.first.saved).to be(false)
+    end
+
+    it 'does not call core mutators' do
+      array = [3, 1, 2]
+      %w[pop shift clear sort! freeze].each { |name| Enumpath.apply(name, array, property_resolver: :readers) }
+      expect(array).to eq([3, 1, 2])
+      expect(array).not_to be_frozen
+    end
   end
 
   describe 'property_resolver: :all' do
@@ -157,7 +282,7 @@ RSpec.describe 'Property resolution policies' do
 
   describe 'invalid property_resolver values' do
     it 'raises ArgumentError' do
-      expect { Enumpath.apply('length', [], property_resolver: :readers) }
+      expect { Enumpath.apply('length', [], property_resolver: :bogus) }
         .to raise_error(ArgumentError, /property_resolver/)
       expect { Enumpath.apply('length', [], property_resolver: 'all') }.to raise_error(ArgumentError)
     end

@@ -62,22 +62,37 @@ module Enumpath
       private
 
       # Returns a set of keys, member names, or indices for a given enumerable. Useful for operators that need to
-      # iterate over each member of an enumerable. If the object is an array then it will return an array of indexes.
-      # If the object can be converted to a hash (Hash, Struct, or anything responding to {#to_h}) then it will be
-      # forced to a hash and the hash keys will be returned. For all other objects, an empty array will be returned.
+      # iterate over each member of an enumerable.
+      #
+      # - Arrays return their indexes, Hashes their keys, and Structs and Data objects their member names. These are
+      #   read through Ruby's own implementations, so a subclass that overrides them is not called.
+      # - Any other object returns the keys of its `to_h`, but only if the current property resolver policy (see
+      #   {Enumpath::Resolver::Property}) allows calling `to_h` and it returns a Hash. Under the default `:safe`
+      #   policy a plain object's own `to_h` is never called, so iterating over it cannot run its code or consume an
+      #   Enumerator.
+      # - Everything else returns an empty array.
       #
       # @param enum [Enumerable] the object to detect keys, member names, or indices on.
       # @return [Array] a set of keys, member names, or indices for the object, or an empty set if they could not be
       #   determined.
       def keys(enum)
-        # Arrays
-        return (0...enum.length).to_a if enum.is_a?(Array)
+        core_keys = core_keys(enum)
+        return core_keys unless core_keys.nil?
 
-        # Other Enumerables
-        return enum.to_h.keys if enum.respond_to?(:to_h)
+        hash = Enumpath::Resolver::Property.resolve('to_h', enum)
+        hash.is_a?(Hash) ? hash.keys : []
+      end
 
-        # Fallback
-        []
+      def core_keys(enum)
+        if enum.is_a?(Array)
+          (0...Array.instance_method(:length).bind(enum).call).to_a
+        elsif enum.is_a?(Hash)
+          Hash.instance_method(:keys).bind(enum).call
+        elsif enum.is_a?(Struct)
+          Struct.instance_method(:members).bind(enum).call
+        elsif Enumpath::Resolver::Simple.data?(enum)
+          Enumpath::Resolver::Simple.data_members(enum)
+        end
       end
     end
   end
