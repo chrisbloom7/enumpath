@@ -8,7 +8,7 @@ Enumpath lets you describe a path through nested Ruby objects as a string, using
 
 Paths are safe by default: a path can read your data but cannot call mutating or destructive methods such as `clear` or `destroy`. See [`:property_resolver`](#property_resolver) to allow more. See [Object traversal](#object-traversal) for examples, and [Alternatives](#alternatives) for when another gem is the better choice.
 
-Only accept paths from sources you trust. The default resolver stops a path from calling methods that change your data, but a hostile path can still be expensive to evaluate: a regular expression in a filter can take exponential time to match (see [Known limitations](#known-limitations)).
+Only accept paths from sources you trust. The default resolver stops a path from calling methods that change your data, but a hostile path can still be expensive to evaluate: on Ruby 3.1 and earlier a regular expression in a filter can take exponential time to match (see [`:regexp_timeout`](#regexp_timeout) and [Known limitations](#known-limitations)).
 
 Enumpath path expressions look like this:
 
@@ -493,6 +493,19 @@ The option applies to a single call. A chained `results.apply(...)` uses the def
 
 To decide whether an object has a method, Enumpath asks Ruby (`respond_to?` and `method`), which calls the object's `respond_to_missing?` if it defines one. So even under `:safe`, a path can run a little of your application's code that way.
 
+### :regexp_timeout
+
+A regular expression in a [filter expression](#filter-expression-operator) comes from the path, and some patterns take exponential time to match even a short string. A pattern with a backreference such as `/^(a*)*\1$/` does so on every Ruby version, and a pattern such as `/^(a+)+$/` does on Ruby 3.1 and earlier. The `:regexp_timeout` option is the most seconds one match may take. The default is 1 second; pass `nil` for no limit.
+
+```ruby
+posts = [{ title: "aaaaaaaaaaaaaaaaaaaaaaaaaaaa!" }]
+Enumpath.apply("[?(@.title =~ /^(a*)*\\1$/)]", posts, regexp_timeout: 0.1) # => [], after 0.1 seconds
+```
+
+A match that runs out of time does not match, and neither does any regular expression after it in the same call, so a path that hits the limit costs at most one limit in total, however much data it is applied to. The rest of the expression is still evaluated, so `@.title =~ /.../ || @.draft == true` can still match through the second half. An invalid value (not `nil` or a positive number) raises an `ArgumentError`.
+
+This needs Ruby 3.2 or later, which added the `timeout` argument to `Regexp.new`. On older Rubies the option is accepted and ignored, and a hostile pattern can still hang the process, so only accept paths from sources you trust. The option applies to a single call; a chained `results.apply(...)` uses the default limit unless you pass the option again.
+
 ### :verbose
 
 Seeing how your path expression is being applied to an enumerable can be helpful in understanding the path expression syntax. Enumpath has a built-in logger to assist with this. It can be enabled by simply passing `verbose: true` as an option on `Enumpath.apply`. By default this will log debugging information to STDOUT, however you can provide your own logger.
@@ -572,7 +585,7 @@ These are tracked as issues, and contributions are welcome.
 - A negative slice step such as `[::-1]` matches nothing ([issue 44](https://github.com/chrisbloom7/enumpath/issues/44)).
 - Malformed paths are not rejected: `a[` is read as `a` ([issue 45](https://github.com/chrisbloom7/enumpath/issues/45)).
 - Recursive descent raises `SystemStackError` on data nested a few thousand levels deep ([issue 46](https://github.com/chrisbloom7/enumpath/issues/46)).
-- A regular expression in a filter can take exponential time to match, so only accept paths you trust ([issue 60](https://github.com/chrisbloom7/enumpath/issues/60)).
+- On Ruby 3.1 and earlier a regular expression in a filter can take exponential time to match, so only accept paths you trust. Ruby 3.2 and later stop it with [`:regexp_timeout`](#regexp_timeout) ([issue 60](https://github.com/chrisbloom7/enumpath/issues/60)).
 
 ## Alternatives
 
