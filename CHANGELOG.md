@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Enumpath no longer depends on the unmaintained `mini_cache` and `to_regexp` gems (#47). Normalized paths are cached in a small built-in cache that is safe to share between threads and keeps at most 1,000 paths (least recently used dropped first); it used to grow without limit. `Enumpath.path_cache` now returns an `Enumpath::PathCache` with `get`, `set`, `get_or_set` and `reset`.
+- Regular expressions in filters are parsed by Enumpath itself. A regular expression that is not valid now matches nothing instead of raising `RegexpError`, and the flags `e` and `s` (which already raised `ArgumentError` on Ruby 3.3 and later) are no longer accepted. `i`, `m`, `x`, `n` and `u` still work, as do `/pattern/` and `%r{pattern}`.
+- Requiring Enumpath no longer adds `String#to_regexp` and `Regexp#to_regexp`, which came from the `to_regexp` gem. Code that relied on them needs its own dependency.
 - The `logger` dependency is now `>= 1.4, < 3` (it was `>= 1.4`), so `gem build` no longer warns about an open-ended dependency. Enumpath only uses `Logger.new` and `<<`, and `logger` has been 1.x since 2017.
 
 ## [0.3.0] - 2026-11-19

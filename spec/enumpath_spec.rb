@@ -24,8 +24,8 @@ RSpec.describe Enumpath do
   end
 
   describe '.path_cache' do
-    it 'is an instance of MiniCache::Store' do
-      expect(Enumpath.path_cache).to be_a(MiniCache::Store)
+    it 'is an instance of Enumpath::PathCache' do
+      expect(Enumpath.path_cache).to be_a(Enumpath::PathCache)
     end
   end
 

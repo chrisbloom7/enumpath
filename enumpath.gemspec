@@ -35,8 +35,6 @@ Gem::Specification.new do |spec|
 
   # No longer a default gem as of Ruby 4.0. The upper bound keeps RubyGems from warning about an open-ended dependency.
   spec.add_dependency 'logger', '>= 1.4', '< 3'
-  spec.add_dependency 'mini_cache', '~> 1.1.0'
-  spec.add_dependency 'to_regexp', '~> 0.2.1'
 
   spec.add_development_dependency 'null-logger', '~> 0.1'
   spec.add_development_dependency 'pry-byebug', '~> 3.9'

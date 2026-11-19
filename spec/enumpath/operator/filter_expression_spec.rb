@@ -122,6 +122,30 @@ RSpec.describe Enumpath::Operator::FilterExpression do
           end
         end
 
+        context 'when the regular expression uses the %r{} form with flags' do
+          let(:operator) { '?(@.author =~ %r{^nigel}i)' }
+
+          it 'yields to the given block for the matching member' do
+            expect { |block| subject[block] }.to yield_successive_args([remaining_path, enum[0], resolved_path + ['0']])
+          end
+        end
+
+        context 'when the regular expression is not valid' do
+          let(:operator) { '?(@.author =~ /(/)' }
+
+          it 'matches nothing instead of raising' do
+            expect { |block| subject[block] }.not_to yield_control
+          end
+
+          context 'with `!~`' do
+            let(:operator) { '?(@.author !~ /(/)' }
+
+            it 'matches nothing instead of raising' do
+              expect { |block| subject[block] }.not_to yield_control
+            end
+          end
+        end
+
         context 'when the operator is `!~`' do
           let(:operator) { '?(@.author !~ /w/i)' }
 
