@@ -39,10 +39,8 @@ module Enumpath
 
       # The Child instance has already resolved the operator against the enum, and keeps the value for #apply
       def child(operator, enum)
-        child = Enumpath::Operator::Child.new(operator)
-        return unless child.detect?(enum)
-
-        Enumpath.log('Child operator detected')
+        child = Enumpath::Operator::Child.detect(operator, enum)
+        Enumpath.log('Child operator detected') if child
         child
       end
 

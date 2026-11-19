@@ -11,8 +11,34 @@ module Enumpath
         # @param operator (see Enumpath::Operator::Base.detect?)
         # @return (see Enumpath::Operator::Base.detect?)
         def detect?(operator, enum)
-          new(operator).detect?(enum)
+          !resolve(operator, enum).nil?
         end
+
+        # Like {.detect?}, but returns a Child that keeps the value it resolved for {#apply}, or nil if the operator
+        # does not resolve. Nothing is allocated for a segment that is not a child.
+        #
+        # @private
+        # @param operator (see Enumpath::Operator::Base.detect?)
+        # @param enum [Enumerable] the enumerable to resolve the operator against
+        # @return [Enumpath::Operator::Child, nil]
+        def detect(operator, enum)
+          value = resolve(operator, enum)
+          new(operator).tap { |child| child.keep(enum, value) } unless value.nil?
+        end
+
+        # @private
+        def resolve(operator, enum)
+          value = Enumpath::Resolver::Simple.resolve(operator, enum)
+          value = Enumpath::Resolver::Property.resolve(operator, enum) if value.nil?
+          value
+        end
+      end
+
+      # @private
+      def keep(enum, value)
+        @detected = true
+        @detected_enum = enum
+        @detected_value = value
       end
 
       # Whether the operator resolves against an enumerable. The resolved value is kept, so a following {#apply} to
@@ -22,9 +48,7 @@ module Enumpath
       # @param enum [Enumerable] the enumerable to resolve the operator against
       # @return [true, false] whether the operator resolved to a value
       def detect?(enum)
-        @detected = true
-        @detected_enum = enum
-        @detected_value = resolve(enum)
+        keep(enum, self.class.resolve(operator, enum))
         !@detected_value.nil?
       end
 
@@ -45,16 +69,10 @@ module Enumpath
 
       # The value kept by {#detect?} if it was for this enumerable (used once), otherwise a fresh resolution
       def detected_value(enum)
-        return resolve(enum) unless @detected && @detected_enum.equal?(enum)
+        return self.class.resolve(operator, enum) unless @detected && @detected_enum.equal?(enum)
 
         value = @detected_value
         @detected = @detected_enum = @detected_value = nil
-        value
-      end
-
-      def resolve(enum)
-        value = Enumpath::Resolver::Simple.resolve(operator, enum)
-        value = Enumpath::Resolver::Property.resolve(operator, enum) if value.nil?
         value
       end
     end
