@@ -15,7 +15,8 @@ module Enumpath
         [name, Kernel.instance_method(name)]
       end.to_h.freeze
 
-      # Ruby's own library directory. Methods defined in files under it belong to Ruby's standard library.
+      # Ruby's standard library directory (`RbConfig::CONFIG['rubylibdir']`). Installed gems, including default and
+      # bundled gems such as Logger or CSV, live elsewhere and are not covered by it.
       RUBY_LIBRARY_DIR = File.join(RbConfig::CONFIG['rubylibdir'], '')
 
       module_function
@@ -39,15 +40,17 @@ module Enumpath
         nil
       end
 
-      # Whether a method is application code: written in Ruby (it has a source location, so it is not implemented in
-      # C) and not part of Ruby itself (not in Ruby's prelude, `<internal:...>`, nor in Ruby's own library directory).
-      # attr_readers and methods made with `define_method` or `class_eval` count as application code.
+      # Whether `:readers` may call a method: it is written in Ruby (it has a source location, so it is not
+      # implemented in C), it is not one of Ruby's built-in methods (`<internal:...>`), and it is not in the Ruby
+      # standard library directory ({RUBY_LIBRARY_DIR}). Methods from installed gems pass this check, including
+      # default and bundled gems such as Logger and CSV, and so do attr_readers and methods made with
+      # `define_method` or `class_eval`.
       #
       # @param method [Method, nil]
       # @return [true, false]
       def application_method?(method)
         location = method&.source_location
-        return false if location.nil?
+        return false if location.nil? || location.empty?
 
         file = location.first.to_s
         !file.start_with?('<internal:') && !file.start_with?(RUBY_LIBRARY_DIR)

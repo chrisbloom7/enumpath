@@ -390,13 +390,13 @@ When a path segment is not an index, key, or struct or `Data` member, Enumpath c
 value | what resolves | read-only?
 --- | --- | ---
 `:safe` (default) | allowlisted read-only methods on core data, `attr_reader`s on plain objects | yes
-`:readers` | `:safe`, plus public no-argument methods written in Ruby by your application or its gems, and ActiveModel-style `attributes` | no
+`:readers` | `:safe`, plus public no-argument methods written in Ruby, including installed gems (Ruby's built-in and standard library methods excluded), and ActiveModel-style `attributes` | no
 `:none` | nothing; only indexes, keys and members | yes
 `:all` | any public method that expects no arguments (the behavior before this option existed) | no
 a callable | whatever the callable allows | up to you
 
 - `:safe` (the default): read-only access. On core data (arrays, hashes, strings, symbols, numbers, structs, `Data` objects, `nil`, `true`, `false`) Enumpath calls a fixed allowlist of non-mutating methods such as `length`, `size`, `count`, `first`, `last`, `min`, `max`, `sum`, `keys`, `values`, `to_a`, `to_h`, `to_s`, `empty?`, `zero?`, `upcase` or `strip`, and only when the receiver's class does not override them. On plain Ruby objects it reads instance variables that have a public reader of the same name (`attr_reader`s); the instance variable is read directly, so the method itself never runs. Names ending in `!` or `=` are never called, and neither is any method that requires arguments.
-- `:readers`: everything `:safe` allows, plus, on objects that are not core data, any public method that expects no arguments and is written in Ruby by your application or its gems (so computed readers like `full_name`, `attr_reader`s and methods made with `define_method` work), and the keys of an ActiveModel-style `attributes` Hash (so ActiveRecord columns like `email` work). `:readers` only runs methods written in Ruby, and never Ruby's own: methods implemented in C (core classes, standard library extensions such as `StringIO`, and C-extension gems) and methods of Ruby's standard library (such as `Set`) are never called, so objects of C-extension classes need a callable or `:all`. Core data is treated exactly like `:safe`. **This is not read-only**: it runs your application's code, so a public method like `archive` or `cancel` will run if a path names it. As a safety net it refuses `destroy`, `delete`, `save`, `update`, `reload`, `touch`, `delete_all`, `destroy_all` and `toggle`, but that list is not a guarantee. Only use `:readers` with paths you trust not to name such methods.
+- `:readers`: everything `:safe` allows, plus, on objects that are not core data, any public method that expects no arguments and is written in Ruby, except Ruby's built-in methods, methods in the Ruby standard library directory, and a short denylist of persistence verbs (`destroy`, `delete`, `save`, `update`, `reload`, `touch`, `delete_all`, `destroy_all`, `toggle`). It also reads the keys of an ActiveModel-style `attributes` Hash. So computed readers like `full_name`, `attr_reader`s and ActiveRecord columns like `email` work. Methods implemented in C (core classes, `StringIO`, C-extension gems) are never called; for objects of C-extension classes use a callable or `:all`. Core data is treated exactly like `:safe`. **This is not read-only.** It includes methods from installed gems, including default and bundled gems such as Logger and CSV, and ActiveModel or ActiveRecord: for example `Logger#close` would run, and so would a model method like `archive` or `cancel`. The denylist is a safety net, not a guarantee. Use `:readers` for data you trust or objects you built; for untrusted paths use `:safe` or a callable.
 - `:none`: never call methods.
 - `:all`: call any public method that expects no arguments. This is how Enumpath behaved before this option existed, and it lets a path run methods such as `clear`, `pop`, `sort!` or `destroy`. Only use it with paths you trust.
 - a callable, such as a lambda: called with the object and the method name (a String). The method is called only if it returns true. The callable has full control: none of the checks above are applied, so call `Enumpath::Resolver::Property.safe?(object, name)` or `.reader?(object, name)` from it if you want to keep them and allow more.
@@ -407,12 +407,13 @@ Enumpath.apply('food.pop', party) # => [] and party is unchanged
 Enumpath.apply('food.length', party) # => [2]
 Enumpath.apply('food.length', party, property_resolver: :none) # => []
 
-# ActiveRecord models: computed readers and columns
+# ActiveRecord models you trust: computed readers and columns
 Enumpath.apply('[?(@.published)].title', Post.all.to_a, property_resolver: :readers)
 
-# Keep the safe defaults and allow one extra method
+# Recommended for objects you do not control: keep the safe defaults and allow specific methods per class
+ALLOWED = { 'Invoice' => %w[total due_on], 'Customer' => %w[name email] }.freeze
 policy = lambda do |object, name|
-  Enumpath::Resolver::Property.safe?(object, name) || (object.is_a?(Invoice) && name == 'total')
+  Enumpath::Resolver::Property.safe?(object, name) || ALLOWED.fetch(object.class.name, []).include?(name)
 end
 Enumpath.apply('invoices.*.total', account, property_resolver: policy)
 ```

@@ -8,8 +8,8 @@ module Enumpath
     # {Enumpath.apply}:
     #
     # - `:safe` (the default): read-only access only. See {.safe?}.
-    # - `:readers`: `:safe`, plus the public methods your own classes define and ActiveModel-style `attributes`. See
-    #   {.reader?}. This runs application code and is not read-only.
+    # - `:readers`: `:safe`, plus public methods written in Ruby (including those of installed gems) and
+    #   ActiveModel-style `attributes`. See {.reader?}. This runs application and gem code and is not read-only.
     # - `:none`: never call methods. Indexes, keys and Struct or Data members still resolve through
     #   {Resolver::Simple}.
     # - `:all`: call any public method that expects no arguments. This was the behavior of version 0.1 and lets a
@@ -151,14 +151,14 @@ module Enumpath
         #   their reader methods are defined; or
         # - {.safe?} allows it.
         #
-        # `:readers` only runs methods written in Ruby, and never Ruby's own: methods implemented in C (core classes,
-        # standard library C extensions such as StringIO, and C-extension gems) and methods in Ruby's own library
-        # directory (such as Set on older Rubies) are never called. Objects of C-extension classes need a callable
-        # policy or `:all`.
+        # In short, `:readers` runs any public method that expects no arguments and is written in Ruby, except Ruby's
+        # built-in methods, methods in the Ruby standard library directory, and {READERS_DENYLIST}. Methods
+        # implemented in C (core classes, StringIO, C-extension gems) are never called; objects of C-extension classes
+        # need a callable policy or `:all`. Methods from installed gems are called, including default and bundled gems
+        # such as Logger and CSV, and ActiveModel or ActiveRecord: for example `Logger#close` would run.
         #
-        # This calls methods of your application's classes and is therefore not read-only: a method like
-        # `archive` or `cancel` that is public and expects no arguments will run. {READERS_DENYLIST} is a safety net
-        # for the most common persistence verbs only.
+        # So `:readers` is not read-only. Use it for data you trust or objects you built. For untrusted paths use
+        # `:safe`, or a callable that builds on {.safe?} with a per-class allowlist.
         #
         # @param object [Object] the object to read from
         # @param name [String] the property name
