@@ -6,13 +6,13 @@
 <title>
   File: README
   
-    &mdash; Documentation by YARD 0.9.36
+    &mdash; Documentation by YARD 0.9.45
   
 </title>
 
-  <link rel="stylesheet" href="css/style.css" type="text/css" />
+  <link rel="stylesheet" href="css/style.css" type="text/css">
 
-  <link rel="stylesheet" href="css/common.css" type="text/css" />
+  <link rel="stylesheet" href="css/common.css" type="text/css">
 
 <script type="text/javascript">
   pathId = "README";
@@ -27,6 +27,8 @@
 
   </head>
   <body>
+    <div id="main_progress" aria-hidden="true"></div>
+
     <div class="nav_wrap">
       <iframe id="nav" src="file_list.html?1"></iframe>
       <div id="resizer"></div>
@@ -67,7 +69,7 @@
 
 <p>Paths are safe by default: a path can read your data but cannot call mutating or destructive methods such as <code>clear</code> or <code>destroy</code>. See <a href="#property_resolver"><code>:property_resolver</code></a> to allow more. See <a href="#object-traversal">Object traversal</a> for examples, and <a href="#alternatives">Alternatives</a> for when another gem is the better choice.</p>
 
-<p>Only accept paths from sources you trust. The default resolver stops a path from calling methods that change your data, but a hostile path can still be expensive to evaluate: a regular expression in a filter can take exponential time to match (see <a href="#known-limitations">Known limitations</a>).</p>
+<p>Only accept paths from sources you trust. The default resolver stops a path from calling methods that change your data, but a hostile path can still be expensive to evaluate: on Ruby 3.1 and earlier a regular expression in a filter can take exponential time to match (see <a href="#regexp_timeout"><code>:regexp_timeout</code></a> and <a href="#known-limitations">Known limitations</a>).</p>
 
 <p>Enumpath path expressions look like this:</p>
 
@@ -620,6 +622,18 @@ pets.cats.-1
 
 <p>To decide whether an object has a method, Enumpath asks Ruby (<code>respond_to?</code> and <code>method</code>), which calls the object&#39;s <code>respond_to_missing?</code> if it defines one. So even under <code>:safe</code>, a path can run a little of your application&#39;s code that way.</p>
 
+<h3 id="regexp_timeout">:regexp_timeout</h3>
+
+<p>A regular expression in a <a href="#filter-expression-operator">filter expression</a> comes from the path, and some patterns take exponential time to match even a short string. A pattern with a backreference such as <code>/^(a*)*\1$/</code> does so on every Ruby version, and a pattern such as <code>/^(a+)+$/</code> does on Ruby 3.1 and earlier. The <code>:regexp_timeout</code> option is the most seconds one match may take. The default is 1 second; pass <code>nil</code> for no limit.</p>
+
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_posts'>posts</span> <span class='op'>=</span> <span class='lbracket'>[</span><span class='lbrace'>{</span> <span class='label'>title:</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>aaaaaaaaaaaaaaaaaaaaaaaaaaaa!</span><span class='tstring_end'>&quot;</span></span> <span class='rbrace'>}</span><span class='rbracket'>]</span>
+<span class='const'><span class='object_link'><a href="Enumpath.html" title="Enumpath (module)">Enumpath</a></span></span><span class='period'>.</span><span class='id identifier rubyid_apply'><span class='object_link'><a href="Enumpath.html#apply-class_method" title="Enumpath.apply (method)">apply</a></span></span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>[?(@.title =~ /^(a*)*\\1$/)]</span><span class='tstring_end'>&quot;</span></span><span class='comma'>,</span> <span class='id identifier rubyid_posts'>posts</span><span class='comma'>,</span> <span class='label'>regexp_timeout:</span> <span class='float'>0.1</span><span class='rparen'>)</span> <span class='comment'># =&gt; [], after 0.1 seconds
+</span></code></pre>
+
+<p>A match that runs out of time does not match, and neither does any regular expression after it in the same call, so a path that hits the limit costs at most one limit in total, however much data it is applied to. The rest of the expression is still evaluated, so <code>@.title =~ /.../ || @.draft == true</code> can still match through the second half. An invalid value (not <code>nil</code> or a positive number) raises an <code>ArgumentError</code>.</p>
+
+<p>This needs Ruby 3.2 or later, which added the <code>timeout</code> argument to <code>Regexp.new</code>. On older Rubies the option is accepted and ignored, and a hostile pattern can still hang the process, so only accept paths from sources you trust. The option applies to a single call; a chained <code>results.apply(...)</code> uses the default limit unless you pass the option again.</p>
+
 <h3 id="verbose">:verbose</h3>
 
 <p>Seeing how your path expression is being applied to an enumerable can be helpful in understanding the path expression syntax. Enumpath has a built-in logger to assist with this. It can be enabled by simply passing <code>verbose: true</code> as an option on <code>Enumpath.apply</code>. By default this will log debugging information to STDOUT, however you can provide your own logger.</p>
@@ -698,7 +712,7 @@ Enumpath: Child operator detected
 <li>A negative slice step such as <code>[::-1]</code> matches nothing (<a href="https://github.com/chrisbloom7/enumpath/issues/44">issue 44</a>).</li>
 <li>Malformed paths are not rejected: <code>a[</code> is read as <code>a</code> (<a href="https://github.com/chrisbloom7/enumpath/issues/45">issue 45</a>).</li>
 <li>Recursive descent raises <code>SystemStackError</code> on data nested a few thousand levels deep (<a href="https://github.com/chrisbloom7/enumpath/issues/46">issue 46</a>).</li>
-<li>A regular expression in a filter can take exponential time to match, so only accept paths you trust (<a href="https://github.com/chrisbloom7/enumpath/issues/60">issue 60</a>).</li>
+<li>On Ruby 3.1 and earlier a regular expression in a filter can take exponential time to match, so only accept paths you trust. Ruby 3.2 and later stop it with <a href="#regexp_timeout"><code>:regexp_timeout</code></a> (<a href="https://github.com/chrisbloom7/enumpath/issues/60">issue 60</a>).</li>
 </ul>
 
 <h2 id="alternatives">Alternatives</h2>
@@ -800,9 +814,9 @@ Enumpath: Child operator detected
 </div></div>
 
       <div id="footer">
-  Generated on Thu Nov 19 02:06:25 2026 by
+  Generated on Thu Nov 19 13:42:45 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
-  0.9.36 (ruby-3.4.7).
+  0.9.45 (ruby-3.4.7).
 </div>
 
     </div>
