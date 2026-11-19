@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Array paths (an array of path segments, as the README describes) now work instead of raising a `TypeError`. Their segments are converted to strings.
+- A path that is neither a String nor an Array raises an `ArgumentError` instead of an error from the path cache.
+- README corrections: the property resolver is described in the Deviations section, a "Known limitations" section lists the open parser issues, and a few wrong examples and typos are fixed.
+
 ### Added
 
 - A `property_resolver:` option on `Enumpath.apply` that controls which methods a path may call: `:safe` (the default), `:readers` (also any public no-argument method written in Ruby, including those of installed gems, and ActiveModel-style attributes; not read-only, for trusted data only), `:none`, `:all`, or a callable that receives the object and the method name.

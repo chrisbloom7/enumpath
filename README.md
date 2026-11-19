@@ -207,7 +207,7 @@ The operator accepts a mixed bag of argument combinations. For instance, these a
 
 Syntax: `[child1,child2,...]`
 
-The union operator combines the results of two or more child operators. There is no limit to the number of child operators you can specify in a single union. Each child operator is separated by a comma (`,`). White space is stripped from around each child operator. Child operators can optionally be wrapped in single quotes. Bracket notation is not supporter in this context.
+The union operator combines the results of two or more child operators. There is no limit to the number of child operators you can specify in a single union. Each child operator is separated by a comma (`,`). White space is stripped from around each child operator. Child operators can optionally be wrapped in single quotes. Bracket notation is not supported in this context.
 
 The following are all valid union operators:
 
@@ -227,7 +227,7 @@ The following are all valid filter expressions:
 - `[?(isbn)]`: equivalent to the previous example
 - `[?(@.price == 8)]`: any member whose `price` value is equal to 8
 - `[?(@.price == 8 || @.price == 10)]`: members with a `price` of 8 _or_ 10
-- `[?(@.price > 2 && @.price < 10)]`: members with a `price` greater than 8 _and_ less than 10
+- `[?(@.price > 2 && @.price < 10)]`: members with a `price` greater than 2 _and_ less than 10
 - `[?(@.name =~ /bob/i || @.name == 'Mark')]`: any member whose `name` matches the regex `/bob/i` or equals `'Mark'`
 
 > Regular expression operands are safely parsed using the `to_regexp` gem
@@ -236,9 +236,9 @@ The following are all valid filter expressions:
 
 Syntax: `[(expression)]`
 
-A subscript expression is made up of a singe expression that consists of a child operator (`@.child` or `child`; the leading `@.` is optional), plus an optional pair of arithmetic operator and operand. The arithmetic operator can be any one of `+`, `-`, `**`, `*`, `/`, or `%`. The operand can be a string (`'some string'`), symbol (`:some_symbol`), or numeric value (`10` or `1.0`). The expression is evaluated and the result becomes the subscript. If an operator and operand are not included in an expression then the value located at the child operator is used as the subscript. If the subscript represents a valid child path for the enumerable, the value of that member will be passed along for further processing of the path.
+A subscript expression is made up of a single expression that consists of a child operator (`@.child` or `child`; the leading `@.` is optional), plus an optional pair of arithmetic operator and operand. The arithmetic operator can be any one of `+`, `-`, `**`, `*`, `/`, or `%`. The operand can be a string (`'some string'`), symbol (`:some_symbol`), or numeric value (`10` or `1.0`). The expression is evaluated and the result becomes the subscript. If an operator and operand are not included in an expression then the value located at the child operator is used as the subscript. If the subscript represents a valid child path for the enumerable, the value of that member will be passed along for further processing of the path.
 
-The following are all valid filter expressions:
+The following are all valid subscript expressions:
 
 - `[(@.length - 1)]`: the subscript becomes the length of the current enumerable, minus 1
 - `[(length / 2)]`: the subscript becomes the index at half the length of the enumerable
@@ -533,7 +533,7 @@ You can also control verbose mode via `Enumpath.verbose = true` and `Enumpath.ve
 
 ## Path normalization
 
-When you give a string path to Enumpath it will automatically normalize it to an array of path segments. You can also pass it an array of path segments to avoid the normalization, for instance if the normalization process is having trouble parsing your path, or you happen to have a pre-normalized path already. For example the path `['pets']..[?(@.age > 10)].name` is represented in normalized form as `['pets', '..', '?(@.age > 10)', 'name']`. For the most part you should stick with string paths and let Enumpath normalize on its own.
+When you give a string path to Enumpath it will automatically normalize it to an array of path segments. You can also pass it an array of path segments to avoid the normalization, for instance if the normalization process is having trouble parsing your path, or you happen to have a pre-normalized path already. For example the path `['pets']..[?(@.age > 10)].name` is represented in normalized form as `['pets', '..', '?(@.age > 10)', 'name']`. The segments of an array path are converted to strings and the array is used as given, without normalizing or caching it. A path that is neither a String nor an Array raises an `ArgumentError`. For the most part you should stick with string paths and let Enumpath normalize on its own.
 
 ### Normalized path caching
 
@@ -550,8 +550,20 @@ To save a little bit of time on consecutive calls Enumpath caches the normalized
     Enumpath.apply('$..book[-1]', store_info)
     ```
 
-3. The original implementations of JSONPath allowed unchecked evaluation of filter and subscript expressions. Enumpath limits those expressions to a reasonable subset of operations as detailed in the [Operator Reference](#operator-reference) section and uses `public_send` rather than `eval` to resolve expressions as necessary.
+3. The original implementations of JSONPath allowed unchecked evaluation of filter and subscript expressions. Enumpath limits those expressions to a reasonable subset of operations as detailed in the [Operator Reference](#operator-reference) section. It never uses `eval`: the comparison and arithmetic operators are called by name from a fixed list, and a path can only call methods on your data as the [`:property_resolver`](#property_resolver) option allows (read-only by default).
 4. The original JSONPath spec did not include support for using logical operators to chain expressions in filter expression operators. This addition was inspired by [Gergely Brautigam's][replace-eval-with-object-send-and-a-parser] work on [joshbuddy/jsonpath][jsonpath-gh]
+
+## Known limitations
+
+These are tracked as issues, and contributions are welcome.
+
+- A quoted bracket child cannot contain a dot: `['a.b']` matches nothing ([issue 41](https://github.com/chrisbloom7/enumpath/issues/41)).
+- `&&` and `||` inside a quoted string in a filter expression split the expression ([issue 42](https://github.com/chrisbloom7/enumpath/issues/42)).
+- A key whose value is `nil` returns the same empty result as a missing key ([issue 43](https://github.com/chrisbloom7/enumpath/issues/43)).
+- A negative slice step such as `[::-1]` matches nothing ([issue 44](https://github.com/chrisbloom7/enumpath/issues/44)).
+- Malformed paths are not rejected: `a[` is read as `a` ([issue 45](https://github.com/chrisbloom7/enumpath/issues/45)).
+- Recursive descent raises `SystemStackError` on data nested a few thousand levels deep ([issue 46](https://github.com/chrisbloom7/enumpath/issues/46)).
+- Subscript arithmetic with `*` and `**` can use a lot of CPU or memory, so only accept paths you trust ([issue 52](https://github.com/chrisbloom7/enumpath/issues/52)).
 
 ## Alternatives
 
