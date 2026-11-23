@@ -54,7 +54,10 @@ module Enumpath
       end
 
       def slice_step(step)
-        step.empty? ? 1 : step.to_i
+        value = step.empty? ? 1 : step.to_i
+        raise ArgumentError, 'negative slice steps are not supported' if value.negative?
+
+        value
       end
     end
   end

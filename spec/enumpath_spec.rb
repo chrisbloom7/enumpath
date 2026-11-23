@@ -98,6 +98,11 @@ RSpec.describe Enumpath do
       expect(Enumpath::Resolver::Property.current_policy).to eq(:safe)
     end
 
+    it 'raises ArgumentError for a negative slice step' do
+      expect { Enumpath.apply('$[::-1]', [1, 2, 3]) }
+        .to raise_error(ArgumentError, 'negative slice steps are not supported')
+    end
+
     it 'raises ArgumentError for an invalid :property_resolver option' do
       expect { Enumpath.apply(path, enum, property_resolver: :bogus) }.to raise_error(ArgumentError, /:bogus/)
     end
