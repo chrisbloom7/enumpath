@@ -73,6 +73,16 @@ RSpec.describe Enumpath::Operator::Slice do
   end
 
   describe '#apply' do
+    context 'when the step is negative' do
+      it 'raises an ArgumentError instead of silently selecting nothing' do
+        ['::-1', '8:1:-2', '::-100'].each do |slice|
+          operator = described_class.new(slice)
+          expect { operator.apply([], [1, 2, 3], []) {} }
+            .to raise_error(ArgumentError, 'negative slice steps are not supported')
+        end
+      end
+    end
+
     let(:remaining_path) { [] }
     let(:enum) { %w[1 2 3 4 5 6 7 8 9 10] }
     let(:resolved_path) { ['numbers'] }
