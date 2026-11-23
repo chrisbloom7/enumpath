@@ -195,6 +195,8 @@ Syntax: `[start:end:step]`, `[start:]`, `[start:end]`, `[start::step]`, `[:end]`
 
 The slice operator selects a range of elements like Ruby's _`start...end`_ literal, excluding the end value, and then selects each _step_ items. The _start_, _end_, and _step_ arguments default to `0`, `Enumerable#length`, and `1` respectively. The remaining path expression segments are passed to each member whose index is included by the slice operator.
 
+Negative steps, such as `[::-1]`, are not supported and raise `ArgumentError`. Reverse iteration is not implemented.
+
 The operator accepts a mixed bag of argument combinations. For instance, these are all valid slice operators:
 
 - `[1:8]`: passes through the members of the enumerable at indices 1 – 7
@@ -586,7 +588,6 @@ These are tracked as issues, and contributions are welcome.
 - A quoted bracket child cannot contain a dot: `['a.b']` matches nothing ([issue 41](https://github.com/chrisbloom7/enumpath/issues/41)).
 - `&&` and `||` inside a quoted string in a filter expression split the expression ([issue 42](https://github.com/chrisbloom7/enumpath/issues/42)).
 - A key whose value is `nil` returns the same empty result as a missing key ([issue 43](https://github.com/chrisbloom7/enumpath/issues/43)).
-- A negative slice step such as `[::-1]` matches nothing ([issue 44](https://github.com/chrisbloom7/enumpath/issues/44)).
 - Malformed paths are not rejected: `a[` is read as `a` ([issue 45](https://github.com/chrisbloom7/enumpath/issues/45)).
 - Recursive descent raises `SystemStackError` on data nested a few thousand levels deep ([issue 46](https://github.com/chrisbloom7/enumpath/issues/46)).
 - On Ruby 3.1 and earlier a regular expression in a filter can take exponential time to match, so only accept paths you trust. Ruby 3.2 and later stop it with [`:regexp_timeout`](#regexp_timeout) ([issue 60](https://github.com/chrisbloom7/enumpath/issues/60)).
